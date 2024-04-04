@@ -1,4 +1,4 @@
-package progistar.rna.data;
+package progistar.scan.data;
 
 /**
  * Annotation Block <br>

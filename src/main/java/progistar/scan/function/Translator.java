@@ -1,6 +1,6 @@
-package progistar.rna.function;
+package progistar.scan.function;
 
-import progistar.rna.data.Codon;
+import progistar.scan.data.Codon;
 
 public class Translator {
 	

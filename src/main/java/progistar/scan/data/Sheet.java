@@ -1,4 +1,4 @@
-package progistar.rna.data;
+package progistar.scan.data;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -1,11 +1,11 @@
-package progistar.rna.data;
+package progistar.scan.data;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 
-import progistar.rna.function.ENSTMapper;
-import progistar.rna.function.IndexConvertor;
+import progistar.scan.function.ENSTMapper;
+import progistar.scan.function.IndexConvertor;
 
 public class GenomicAnnotation {
 	

@@ -1,4 +1,4 @@
-package progistar.rna.run;
+package progistar.scan.run;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,8 +12,8 @@ import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
 import htsjdk.samtools.util.Locatable;
-import progistar.rna.data.Constants;
-import progistar.rna.data.Record;
+import progistar.scan.data.Constants;
+import progistar.scan.data.Record;
 
 public class Worker extends Thread {
 

@@ -1,4 +1,4 @@
-package progistar.rna.data;
+package progistar.scan.data;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -6,7 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import progistar.rna.function.Translator;
+import progistar.scan.function.Translator;
 
 public class ParseRecord {
 

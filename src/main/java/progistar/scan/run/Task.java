@@ -1,9 +1,9 @@
-package progistar.rna.run;
+package progistar.scan.run;
 
 import java.util.ArrayList;
 
-import progistar.rna.data.FileInfo;
-import progistar.rna.data.Record;
+import progistar.scan.data.FileInfo;
+import progistar.scan.data.Record;
 
 public class Task {
 

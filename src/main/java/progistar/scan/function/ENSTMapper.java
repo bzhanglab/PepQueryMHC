@@ -1,8 +1,8 @@
-package progistar.rna.function;
+package progistar.scan.function;
 
 import java.util.Hashtable;
 
-import progistar.rna.data.Constants;
+import progistar.scan.data.Constants;
 
 public class ENSTMapper {
 

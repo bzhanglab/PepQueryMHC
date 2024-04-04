@@ -1,4 +1,4 @@
-package progistar.rna.data;
+package progistar.scan.data;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import progistar.rna.run.Task;
+import progistar.scan.run.Task;
 
 public class Table {
 

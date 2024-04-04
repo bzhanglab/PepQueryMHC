@@ -1,4 +1,4 @@
-package progistar.rna.run;
+package progistar.scan.run;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,10 +12,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import progistar.rna.data.Constants;
-import progistar.rna.data.ParseRecord;
-import progistar.rna.data.Sheet;
-import progistar.rna.data.Table;
+import progistar.scan.data.Constants;
+import progistar.scan.data.ParseRecord;
+import progistar.scan.data.Sheet;
+import progistar.scan.data.Table;
 
 public class Scan {
 

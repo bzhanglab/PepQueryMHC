@@ -1,4 +1,4 @@
-package progistar.rna.function;
+package progistar.scan.function;
 
 import java.util.Hashtable;
 

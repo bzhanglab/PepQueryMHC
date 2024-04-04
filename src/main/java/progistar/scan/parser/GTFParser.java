@@ -1,15 +1,15 @@
-package progistar.rna.parser;
+package progistar.scan.parser;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-import progistar.rna.data.ABlock;
-import progistar.rna.data.Constants;
-import progistar.rna.data.GenomicAnnotation;
-import progistar.rna.data.TBlock;
-import progistar.rna.function.IndexConvertor;
+import progistar.scan.data.ABlock;
+import progistar.scan.data.Constants;
+import progistar.scan.data.GenomicAnnotation;
+import progistar.scan.data.TBlock;
+import progistar.scan.function.IndexConvertor;
 
 public class GTFParser {
 
