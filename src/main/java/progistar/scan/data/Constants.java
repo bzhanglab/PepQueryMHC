@@ -3,7 +3,13 @@ package progistar.scan.data;
 public class Constants {
 
 	public static final String MODE_TARGET = "target";
-	public static final String MODE_SCAN = "scan";
+	public static final String MODE_FULL = "full";
+	
+	public static final String SEQUENCE_PEPTIDE = "peptide";
+	public static final String SEQUENCE_NUCLEOTIDE = "nucleotide";
+	
+	public static final int	TYPE_MAPPED_TASK	=	1;
+	public static final int	TYPE_UNMAPPED_TASK	=	2;
 	
 	public static final byte EXON = 30;
 	public static final byte CDS = 100;

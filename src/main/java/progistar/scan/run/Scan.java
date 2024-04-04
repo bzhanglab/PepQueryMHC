@@ -3,6 +3,7 @@ package progistar.scan.run;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -12,9 +13,9 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import progistar.scan.data.BAMSRecord;
 import progistar.scan.data.Constants;
 import progistar.scan.data.ParseRecord;
-import progistar.scan.data.Sheet;
 import progistar.scan.data.Table;
 
 public class Scan {
@@ -23,25 +24,24 @@ public class Scan {
 	public static String sheetFilePath   = null;
 	public static String outputFilePath	   = null;
 	public static String mode	=	Constants.MODE_TARGET;
-	public static int threadNum = 8;
+	public static String sequence	=	Constants.SEQUENCE_PEPTIDE;
+
+	public static int threadNum = 1;
+	public static int chunkSize = 1000;
 	
 	
 	public static void main(String[] args) throws IOException {
 		long startTime = System.currentTimeMillis();
 		parseOptions(args);
 		
-		Sheet sheet = new Sheet(new File(sheetFilePath));
+		ArrayList<BAMSRecord> records = ParseRecord.parse(new File(inputFilePath));
 		
-		ArrayList<Task> tasks = new ArrayList<Task>();
+		LinkedList<Task> tasks = Task.divideTasks(records, chunkSize);
 		Worker[] workers = new Worker[threadNum];
 		
 		int workerIdx = 1;
-		for(int i=0; i<sheet.fileInfos.size(); i++) {
-			
-			System.out.println("Ready "+sheet.fileInfos.get(i).file.getName());
-			Task task = new Task(ParseRecord.parse(new File(inputFilePath)), sheet.fileInfos.get(i));
-			tasks.add(task);
-			
+		while(!tasks.isEmpty()) {
+			Task task = tasks.pollFirst();;
 			boolean isAssigned = false;
 			
 			while(!isAssigned) {
@@ -116,11 +116,11 @@ public class Scan {
 						+ " \"target-mode\" requires .bai in advance.")
 				.build();
 		
-		Option optionSheet = Option.builder("s")
-				.longOpt("sheet").argName("tsv")
+		Option optionSequence = Option.builder("s")
+				.longOpt("sequence").argName("peptide/nucleotide")
 				.hasArg()
 				.required(true)
-				.desc("Sample information file.")
+				.desc("sequence type")
 				.build();
 		
 		Option optionThread = Option.builder("@")
@@ -133,8 +133,8 @@ public class Scan {
 		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
-		.addOption(optionSheet)
 		.addOption(optionMode)
+		.addOption(optionSequence)
 		.addOption(optionThread);
 		
 		CommandLineParser parser = new DefaultParser();
@@ -152,12 +152,22 @@ public class Scan {
 		    	outputFilePath = cmd.getOptionValue("o");
 		    }
 		    
-		    if(cmd.hasOption("s")) {
-		    	sheetFilePath = cmd.getOptionValue("s");
-		    }
-		    
 		    if(cmd.hasOption("m")) {
 		    	mode = cmd.getOptionValue("m");
+		    	
+		    	if( !(mode.equalsIgnoreCase(Constants.MODE_FULL) || 
+		    	   mode.equalsIgnoreCase(Constants.MODE_TARGET)) ) {
+		    		isFail = true;
+		    	}
+		    }
+		    
+		    if(cmd.hasOption("s")) {
+		    	sequence = cmd.getOptionValue("s");
+		    	
+		    	if( !(sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE) || 
+		    			sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) ) {
+		    		isFail = true;
+		    	}
 		    }
 		    
 		    if(cmd.hasOption("@")) {
