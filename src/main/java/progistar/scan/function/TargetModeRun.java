@@ -1,13 +1,13 @@
 package progistar.scan.function;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 
 import org.ahocorasick.trie.Emit;
 import org.ahocorasick.trie.Trie;
 
+import htsjdk.samtools.BAMRecord;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
@@ -18,9 +18,7 @@ import progistar.scan.run.Scan;
 import progistar.scan.run.Task;
 
 public class TargetModeRun {
-
 	
-
 	public static void runTargetMode (Task task) {
 		if(task.type == Constants.TYPE_MAPPED_TASK) {
 			countMappedReads(task);
@@ -29,47 +27,23 @@ public class TargetModeRun {
 		}
 	}
 
-
-	/**
-	 * If mode is all, than it uses all records.
-	 * On the other hand, it uses only records with unmapped reads.
-	 * 
-	 * 
-	 * @param records
-	 * @param mode
-	 * @return
-	 */
-	private static Trie getTrie (ArrayList<BAMSRecord> records) {
-		ArrayList<String> sequences = new ArrayList<String>();
-		Hashtable<String, String> rmDups = new Hashtable<String, String>();
-		
-		
-		for(BAMSRecord record : records) {
-			if(rmDups.get(record.sequence) == null) {
-				sequences.add(record.sequence);
-				rmDups.put(record.sequence, "");
-			}
-		}
-		
-		if(sequences.size() == 0) {
-			return null;
-		} else {
-			return Trie.builder().addKeywords(sequences).build();
-		}
-	}
-	
-
 	private static void countUnmappedReads(Task task) {
 		long startTime = System.currentTimeMillis();
-		try (SamReader samReader = SamReaderFactory.makeDefault().open(new File(Scan.inputFilePath))) {
+		// to prevent racing
+		File file = new File(Scan.bamFile.getAbsolutePath());
+		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			// for unmapped reads
-			Trie trie = getTrie(task.records);
+			Trie trie = BAMSRecord.getTrie(task.records);
 			
 			Hashtable<String, Integer> totalCounts = new Hashtable<String, Integer>();
-			
 			SAMRecordIterator iterator = samReader.queryUnmapped();
 			while (iterator.hasNext()) {
                 SAMRecord samRecord = iterator.next();
+                
+                if(Scan.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
+                	continue;
+                }
+                
                 // Process each SAM record
                 String frSequence = samRecord.getReadString();
                 String rcSequence = Translator.getReverseComplement(frSequence);
@@ -103,8 +77,8 @@ public class TargetModeRun {
             		if(cnt == null) {
             			cnt = 0;
             		}
-            		totalCounts.put(peptide, cnt+1)
-;            	});
+            		totalCounts.put(peptide, cnt+1);
+            	});
             	
             }
             iterator.close();
@@ -123,29 +97,30 @@ public class TargetModeRun {
 			System.exit(1);
 		}
 		long endTime = System.currentTimeMillis();
-		System.out.println((endTime-startTime)/1000+" sec");
+		System.out.println(task.taskIdx+" "+(endTime-startTime)/1000+" sec");
 	}
 	
 	
 	private static void countMappedReads (Task task) {
 		long startTime = System.currentTimeMillis();
-		try (SamReader samReader = SamReaderFactory.makeDefault().open(new File(Scan.inputFilePath))) {
+		// to prevent racing
+		File file = new File(Scan.bamFile.getAbsolutePath());
+		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			double size = task.records.size();
-			
 			for(int i=0; i<size; i++) {
 
 				BAMSRecord record = task.records.get(i);
 				Trie trie = Trie.builder().addKeyword(record.sequence).build();
 				
 				SAMRecordIterator iterator = samReader.queryOverlapping(record.chr, record.start, record.end);
-				int leastCount = find(iterator, record, trie);
+				int leastCount = find(iterator, record, trie, true);
 	            
 	            //
 	            // in case of soft-clip, it can be zero because of unstable record range.
 	            //////////////////////////////////// START SFOT-CLIP /////////////////////
 	            if(leastCount == 0) {
 	            	iterator = samReader.queryOverlapping(record.chr, record.start-100, record.end+100);
-	            	find(iterator, record, trie);
+	            	find(iterator, record, trie, false);
 	            }
 	            ////////////////////////////////////// END SFOT-CLIP /////////////////////
 			}
@@ -155,16 +130,29 @@ public class TargetModeRun {
 			System.exit(1);
 		}
 		long endTime = System.currentTimeMillis();
-		System.out.println((endTime-startTime)/1000+" sec");
+		System.out.println(task.taskIdx+" "+(endTime-startTime)/1000+" sec");
 	}
 	
-	private static int find (SAMRecordIterator iterator, BAMSRecord record, Trie trie) {
+	private static int find (SAMRecordIterator iterator, BAMSRecord record, Trie trie, boolean included) {
 		int leastCount = 0;
 		while (iterator.hasNext()) {
             SAMRecord samRecord = iterator.next();
+            
+            if(Scan.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
+            	continue;
+            }
             // Process each SAM record
-            if(samRecord.getStart() <= record.start && samRecord.getEnd() >= record.end) {
-                String sequence = samRecord.getReadString();
+            boolean isIncluded = false;
+            if(included) {
+            	if(samRecord.getStart() <= record.start && samRecord.getEnd() >= record.end) {
+            		isIncluded = true;
+            	}
+            } else {
+            	isIncluded = true;
+            }
+            
+            if(isIncluded) {
+            	String sequence = samRecord.getReadString();
                 boolean isFound = false;
                 if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE)) {
                 	if(trie.parseText(sequence).size() > 0) {
@@ -188,7 +176,9 @@ public class TargetModeRun {
                 	record.readCnt++;
                 	leastCount++;
                 }
-           }
+            }
+            
+            
             
         }
         iterator.close();

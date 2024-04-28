@@ -1,9 +1,12 @@
 package progistar.scan.run;
 
+import java.util.concurrent.Callable;
+
 import progistar.scan.data.Constants;
+import progistar.scan.function.ScanModeRun;
 import progistar.scan.function.TargetModeRun;
 
-public class Worker extends Thread {
+public class Worker implements Callable<String> {
 
 	private Task task;
 	private int workerID = -1;
@@ -14,12 +17,14 @@ public class Worker extends Thread {
 		this.workerID = workerID;
 	}
 	
-	public void run() {
+	public String call() {
 		System.out.println(task.getTaskInfo()+" by "+this.workerID);
-		if(Scan.mode.equalsIgnoreCase(Constants.MODE_FULL)) {
-			
+		if(Scan.mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
+			ScanModeRun.runScanMode(task);
 		} else if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
 			TargetModeRun.runTargetMode(task);
 		}
+		
+		return task.getTaskInfo();
 	}
 }

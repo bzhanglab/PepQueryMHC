@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -16,66 +20,62 @@ import org.apache.commons.cli.ParseException;
 import progistar.scan.data.BAMSRecord;
 import progistar.scan.data.Constants;
 import progistar.scan.data.ParseRecord;
-import progistar.scan.data.Table;
 
 public class Scan {
 
-	public static String inputFilePath = null;
-	public static String sheetFilePath   = null;
-	public static String outputFilePath	   = null;
+	//-i test/benchmark/test.tsv -b test/benchmark/test.bam -m scan -s nucleotide -o test/benchmark/test.scan -@ 1
+	//-i test/benchmark/test.tsv -b test/benchmark/C3N-02145.T.Aligned.sortedByCoord.out.bam -m scan -s nucleotide -o test/benchmark/test.scan -@ 4
+	//-i test/benchmark/target_test.tsv -b test/benchmark/C3N-02145.T.Aligned.sortedByCoord.out.bam -m target -s peptide -o test/benchmark/target_test.scan -@ 4
+	//-i test/benchmark/C3N_02145_T_nonreference.tsv -b test/benchmark/C3N-02145.T.Aligned.sortedByCoord.out.bam -m scan -s peptide -o test/benchmark/C3N_02145_T_nonreference.scan -@ 4
+	
+	//-i test/benchmark/C3N_02145_T_nonreference.tsv -b test/benchmark/C3N-02145.T.Aligned.sortedByCoord.out.bam -m target -s peptide -o test/benchmark/C3N_02145_T_nonreference.scan -@ 4
+	
+	
+	
+	public static File inputFile = null;
+	public static File bamFile = null;
+	public static File outputFile	   = null;
 	public static String mode	=	Constants.MODE_TARGET;
 	public static String sequence	=	Constants.SEQUENCE_PEPTIDE;
+	public static String count	=	Constants.COUNT_ALL;
 
-	public static int threadNum = 1;
-	public static int chunkSize = 1000;
+	public static int threadNum = 4;
+	public static int chunkSize = 100;
+	public static String unmmapedMarker = null;
 	
-	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, InterruptedException {
 		long startTime = System.currentTimeMillis();
+		printDescription(args);
 		parseOptions(args);
 		
-		ArrayList<BAMSRecord> records = ParseRecord.parse(new File(inputFilePath));
+		ArrayList<BAMSRecord> records = ParseRecord.parse(inputFile);
 		
-		LinkedList<Task> tasks = Task.divideTasks(records, chunkSize);
-		Worker[] workers = new Worker[threadNum];
-		
-		int workerIdx = 1;
-		while(!tasks.isEmpty()) {
-			Task task = tasks.pollFirst();;
-			boolean isAssigned = false;
+		ArrayList<Task> tasks = null;
+		if(mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+			tasks = Task.divideTasks(records, chunkSize);
+		} else if(mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
+			tasks = Task.getFullTask(records);
 			
-			while(!isAssigned) {
-				for(int j=0; j<workers.length; j++) {
-					if(workers[j] == null || !workers[j].isAlive()) {
-						workers[j] = new Worker(workerIdx++, task);
-						workers[j].start();
-						isAssigned = true;
-						break;
-					}
-				}
-				
-				Thread.yield();
-			}
 		}
 		
-		boolean isProcessing = true;
-		while(isProcessing) {
-			isProcessing = false;
-			for(int i=0; i<workers.length; i++) {
-				if(workers[i] != null)
-					isProcessing |= workers[i].isAlive();
-			}
-			Thread.yield();
+		ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
+		List<Worker> callableExList = new ArrayList<>();
+		int workerIdx = 1;
+		for(int i=0; i<tasks.size(); i++) {
+			Task task = tasks.get(i);
+			callableExList.add(new Worker(workerIdx++, task));
 		}
 		
+		executorService.invokeAll(callableExList);
+		executorService.shutdown();
 		
 		System.out.println("Done all tasks!");
-		Table table = new Table();
-
-		for(Task task : tasks) {
-			table.addStat(task);
+		
+		if(mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+			ParseRecord.writeRecords(records, outputFile);
+		} else if(mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
+			ParseRecord.writeRecords(records, outputFile, tasks);
 		}
-		table.write(new File(outputFilePath), tasks.get(0).records);
 		
 		long endTime = System.currentTimeMillis();
 		System.out.println("Total Elapsed Time: "+(endTime-startTime)/1000+" sec");
@@ -89,6 +89,7 @@ public class Scan {
 	 * @param args
 	 */
 	public static void parseOptions (String[] args) {
+		
 		CommandLine cmd = null;
 		Options options = new Options();
 		
@@ -98,6 +99,13 @@ public class Scan {
 				.hasArg()
 				.required(true)
 				.desc("input path")
+				.build();
+		
+		Option optionBam = Option.builder("b")
+				.longOpt("input").argName("bam/sam")
+				.hasArg()
+				.required(true)
+				.desc("bam or sam file")
 				.build();
 		
 		Option optionOutput = Option.builder("o")
@@ -130,12 +138,21 @@ public class Scan {
 				.desc("the number of threads")
 				.build();
 		
+		Option optionPrimary = Option.builder("c")
+				.longOpt("count").argName("primary/all")
+				.hasArg()
+				.required(false)
+				.desc("count only primary or all reads")
+				.build();
+		
 		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
 		.addOption(optionMode)
 		.addOption(optionSequence)
-		.addOption(optionThread);
+		.addOption(optionBam)
+		.addOption(optionThread)
+		.addOption(optionPrimary);
 		
 		CommandLineParser parser = new DefaultParser();
 	    HelpFormatter helper = new HelpFormatter();
@@ -145,17 +162,21 @@ public class Scan {
 		    cmd = parser.parse(options, args);
 		    
 		    if(cmd.hasOption("i")) {
-		    	inputFilePath = cmd.getOptionValue("i");
+		    	inputFile = new File(cmd.getOptionValue("i"));
+		    }
+		    
+		    if(cmd.hasOption("b")) {
+		    	bamFile = new File(cmd.getOptionValue("b"));
 		    }
 		    
 		    if(cmd.hasOption("o")) {
-		    	outputFilePath = cmd.getOptionValue("o");
+		    	outputFile = new File(cmd.getOptionValue("o"));
 		    }
 		    
 		    if(cmd.hasOption("m")) {
 		    	mode = cmd.getOptionValue("m");
 		    	
-		    	if( !(mode.equalsIgnoreCase(Constants.MODE_FULL) || 
+		    	if( !(mode.equalsIgnoreCase(Constants.MODE_SCAN) || 
 		    	   mode.equalsIgnoreCase(Constants.MODE_TARGET)) ) {
 		    		isFail = true;
 		    	}
@@ -173,6 +194,17 @@ public class Scan {
 		    if(cmd.hasOption("@")) {
 		    	threadNum = Integer.parseInt(cmd.getOptionValue("@"));
 		    }
+		    
+		    if(cmd.hasOption("c")) {
+		    	count = cmd.getOptionValue("c");
+		    	
+		    	if(count.equalsIgnoreCase(Constants.COUNT_PRIMARY)) {
+		    		count = Constants.COUNT_PRIMARY;
+		    	} else {
+		    		count = Constants.COUNT_ALL;
+		    	}
+		    }
+		    
 		} catch (ParseException e) {
 			System.out.println(e.getMessage());
 			isFail = true;
@@ -182,10 +214,28 @@ public class Scan {
 		    helper.printHelp("Usage:", options);
 		    System.exit(0);
 		} else {
+			System.out.println("Input file name: "+inputFile.getName());
+			System.out.println("BAM/SAM file name: "+bamFile.getName());
+			System.out.println("Output file name: "+outputFile.getName());
+			System.out.println("Type: "+sequence);
 			System.out.println("Mode: "+mode);
+			System.out.println("Count: "+count);
 			System.out.println("Threads: "+threadNum);
 		}
-		
+		System.out.println();
+	}
+	
+	public static void printDescription (String[] args) {
+		System.out.println(Constants.NAME+" "+Constants.VERSION+" (running date: " + java.time.LocalDate.now()+")");
+		StringBuilder optionStr = new StringBuilder();
+		optionStr.append("command line: ");
+		for(int i=0; i<args.length; i++) {
+			if(i != 0) {
+				optionStr.append(" ");
+			}
+			optionStr.append(args[i]);
+		}
+		System.out.println(optionStr.toString());
 		System.out.println();
 	}
 }

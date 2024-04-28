@@ -1,15 +1,21 @@
 package progistar.scan.data;
 
 public class Constants {
-
+	public static final String NAME = "BAMScanner";
+	public static final String VERSION = "v0.0.1a";
+	
 	public static final String MODE_TARGET = "target";
-	public static final String MODE_FULL = "full";
+	public static final String MODE_SCAN = "scan";
 	
 	public static final String SEQUENCE_PEPTIDE = "peptide";
 	public static final String SEQUENCE_NUCLEOTIDE = "nucleotide";
 	
+	public static final String COUNT_ALL= "all";
+	public static final String COUNT_PRIMARY = "primary";
+	
 	public static final int	TYPE_MAPPED_TASK	=	1;
 	public static final int	TYPE_UNMAPPED_TASK	=	2;
+	public static final int TYPE_DISCOVERY_TASK	=	3;
 	
 	public static final byte EXON = 30;
 	public static final byte CDS = 100;
@@ -43,4 +49,9 @@ public class Constants {
 	// Alternative Splicing Character
 	public static final char MARK_AS			=	'A'; // for alternative splicing form
 	public static final char MARK_CA			=	'C'; // for canonical form
+	
+	public static final byte SNP			=	0;
+	public static final byte INS			=	1;
+	public static final byte DEL			=	2;
+	public static final byte CLP			=	3;
 }
