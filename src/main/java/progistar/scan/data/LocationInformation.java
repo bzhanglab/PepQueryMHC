@@ -106,6 +106,8 @@ public class LocationInformation {
 			}
 			
 			for(int i=0; i<mutations.size(); i++) {
+				// lower to upper
+				mutations.get(i).refSeq = mutations.get(i).refSeq.toUpperCase();
 				if(mutation.length() != 0) {
 					mutation += "|";
 				}

@@ -211,7 +211,7 @@ public class ScanModeRun {
 					}
 					
 					if(seqPos >= startPos && seqPos < endPos) {
-						if(startGenomicPosition == -1) startGenomicPosition = gPos;
+						if(startGenomicPosition == -1 && operation != 'I') startGenomicPosition = gPos;
 						endGenomicPosition = gPos;
 						
 						if(operation == 'D' ) {
