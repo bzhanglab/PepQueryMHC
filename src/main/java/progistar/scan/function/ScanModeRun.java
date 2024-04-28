@@ -320,7 +320,7 @@ public class ScanModeRun {
 						mPos++;
 						
 						if(mPos == pos) {
-							refSequence.insert(j, md.substring(1).toLowerCase());
+							refSequence.insert(j+1, md.substring(1).toLowerCase());
 							break;
 						}
 					}
