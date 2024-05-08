@@ -28,23 +28,22 @@ public class ScanModeRun {
 	public static void runScanMode (Task task) {
 		if(task.type == Constants.TYPE_DISCOVERY_TASK) {
 			System.out.println(task.chrName+":"+task.start+"-"+task.end);
-			countReads(task);
+			scanReads(task);
 		}
 	}
 	
-	private static void countReads (Task task) {
+	private static void scanReads (Task task) {
 		long startTime = System.currentTimeMillis();
 		// to prevent racing
 		File file = new File(Scan.bamFile.getAbsolutePath());
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
-			Trie trie = BAMSRecord.getTrie(task.records);
 			SAMRecordIterator iterator = null;
 			if(Scan.unmmapedMarker != null && task.chrName.equalsIgnoreCase(Scan.unmmapedMarker)) {
 				iterator = samReader.queryUnmapped();
 			} else {
 				iterator = samReader.query(task.chrName, task.start, task.end, false);
 			}
-			find(iterator, trie, task);
+			find(iterator, Task.allTrie, task);
 		} catch(Exception e) {
 			e.printStackTrace();
 			System.exit(1);

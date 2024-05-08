@@ -49,7 +49,7 @@ public class Scan {
 		parseOptions(args);
 		
 		ArrayList<BAMSRecord> records = ParseRecord.parse(inputFile);
-		
+		chunkSize = (records.size() / (10 * threadNum) ) +1;
 		ArrayList<Task> tasks = null;
 		if(mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
 			tasks = Task.divideTasks(records, chunkSize);
@@ -144,7 +144,6 @@ public class Scan {
 				.required(false)
 				.desc("count only primary or all reads")
 				.build();
-		
 		
 		options.addOption(optionInput)
 		.addOption(optionOutput)

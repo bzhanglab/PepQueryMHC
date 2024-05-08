@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.ahocorasick.trie.Trie;
+
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SAMSequenceRecord;
@@ -20,6 +22,7 @@ public class Task {
 	public ArrayList<BAMSRecord> records = new ArrayList<BAMSRecord>();
 	
 	// only available for FullMode.
+	public static Trie allTrie = null;
 	public LocTable locTable = new LocTable();
 	public String chrName;
 	public int start;
@@ -79,6 +82,10 @@ public class Task {
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		
 		File file = new File(Scan.bamFile.getAbsolutePath());
+		// build global trie
+		System.out.println("Build Trie");
+		Task.allTrie = BAMSRecord.getTrie(records);
+		System.out.println("Complete building Trie");
 		
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			System.out.println(samReader.getFileHeader().getSequenceDictionary().getSequences().get(0).getSequenceLength());
@@ -145,11 +152,13 @@ public class Task {
 		System.out.println("Mapped records: "+mappedSize);
 		System.out.println("=> "+(mappedSize/chunkSize+1) +" tasks");
 		System.out.println("Unmapped records: "+unmappedSize);
-		System.out.println("=> "+(unmappedSize/chunkSize+1) +" tasks");
+		//System.out.println("=> "+(unmappedSize/chunkSize+1) +" tasks");
+		System.out.println("=> "+(1) +" tasks");
 		
 		// generate unmapped tasks
 		int sIdx = 0;
 		while(sIdx < unmappedSize) {
+			/*
 			int eIdx = sIdx + chunkSize > unmappedSize ? unmappedSize : sIdx + chunkSize;
 			Task task = new Task(Constants.TYPE_UNMAPPED_TASK);
 			for(int i=sIdx; i<eIdx; i++) {
@@ -157,7 +166,12 @@ public class Task {
 			}
 			tasks.add(task);
 			task.taskIdx = tasks.size();
-			sIdx = eIdx;
+			sIdx = eIdx;*/
+			Task task = new Task(Constants.TYPE_UNMAPPED_TASK);
+			task.records = unmappedRecords;
+			tasks.add(task);
+			task.taskIdx = tasks.size();
+			sIdx = unmappedSize;
 		}
 		
 		// generate mapped tasks

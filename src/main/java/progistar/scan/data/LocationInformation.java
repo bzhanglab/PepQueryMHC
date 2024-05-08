@@ -14,6 +14,7 @@ public class LocationInformation {
 	public String refNucleotide;
 	public String obsPeptide;
 	public String refPeptide;
+	public long readCount = 1;
 	public char strand;
 	
 	
@@ -22,7 +23,7 @@ public class LocationInformation {
 	}
 	
 	public String getRes () {
-		return location+"\t"+mutation+"\t"+strand+"\t"+obsNucleotide+"\t"+obsPeptide+"\t"+refNucleotide;
+		return location+"\t"+mutation+"\t"+strand+"\t"+obsNucleotide+"\t"+obsPeptide+"\t"+refNucleotide+"\t"+readCount;
 	}
 	
 	public void calMetaInfo () {

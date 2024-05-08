@@ -8,6 +8,7 @@ import org.ahocorasick.trie.Trie;
 public class BAMSRecord {
 
 	public static String header = null;
+	public static String fileName = null;
 	
 	public ArrayList<String> records = new ArrayList<String>();
 	public String sequence;

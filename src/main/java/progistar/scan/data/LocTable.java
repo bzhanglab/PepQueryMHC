@@ -13,27 +13,24 @@ public class LocTable {
 			table.put(lInfo.inputSequence, gTable);
 		}
 		
-		if(gTable.get(lInfo.getKey()) == null) {
+		LocationInformation slInfo = gTable.get(lInfo.getKey());
+		if(slInfo == null) {
 			gTable.put(lInfo.getKey(), lInfo);
 			return true;
+		} else {
+			slInfo.readCount += lInfo.readCount;
 		}
 		
 		return false;
 	}
 	
-	public ArrayList<String> getLocations (String inputSequence) {
-		ArrayList<String> locations = new ArrayList<String>();
-		String na = "Not found";
-		
+	public ArrayList<LocationInformation> getLocations (String inputSequence) {
+		ArrayList<LocationInformation> locations = new ArrayList<LocationInformation>();
 		Hashtable<String, LocationInformation> gTable = table.get(inputSequence);
 		if(gTable != null) {
 			gTable.forEach((key, info)->{
-				locations.add(info.getRes());
+				locations.add(info);
 			});
-		}
-		
-		if(locations.size() == 0) {
-			locations.add(na);
 		}
 		
 		return locations;
