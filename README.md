@@ -1,1 +1,1 @@
-# BAMScanner
+# BamScan
