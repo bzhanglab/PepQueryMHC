@@ -5,6 +5,8 @@ import java.util.Hashtable;
 
 import org.ahocorasick.trie.Trie;
 
+import progistar.scan.run.Scan;
+
 public class BAMSRecord {
 
 	public static String header = null;
@@ -42,9 +44,14 @@ public class BAMSRecord {
 		
 		
 		for(BAMSRecord record : records) {
-			if(rmDups.get(record.sequence) == null) {
-				sequences.add(record.sequence);
-				rmDups.put(record.sequence, "");
+			String sequence = record.sequence;
+			if(Scan.isILEqual) {
+				sequence = sequence.replace("I", "L");
+			}
+			
+			if(rmDups.get(sequence) == null) {
+				sequences.add(sequence);
+				rmDups.put(sequence, "");
 			}
 		}
 		

@@ -207,6 +207,12 @@ public class ParseRecord {
 		for(int i=0; i<records.size(); i++) {
 			BAMSRecord record = records.get(i);
 			String sequence = record.sequence;
+			
+			// IL equal mode
+			if(Scan.isILEqual) {
+				sequence = sequence.replace("I", "L");
+			}
+			
 			for(int j=0; j<record.records.size(); j++) {
 				ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
 				if(locations.size() == 0) {

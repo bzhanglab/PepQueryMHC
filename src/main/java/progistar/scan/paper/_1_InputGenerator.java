@@ -1,4 +1,4 @@
-package progistar.scan.iedb;
+package progistar.scan.paper;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;

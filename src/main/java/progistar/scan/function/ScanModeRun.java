@@ -102,6 +102,11 @@ public class ScanModeRun {
             	} else if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
             		for(int fr=0; fr<3; fr++) {
             			String peptide = Translator.translation(sequence, fr);
+            			// if it is il equal mode?
+            			if(Scan.isILEqual) {
+            				peptide = peptide.replace("I", "L");
+            			}
+            			
             			Collection<Emit> emits = trie.parseText(peptide);
             			
             			for(Emit emit : emits) {

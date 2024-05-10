@@ -38,6 +38,7 @@ public class Scan {
 	public static String mode	=	Constants.MODE_TARGET;
 	public static String sequence	=	Constants.SEQUENCE_PEPTIDE;
 	public static String count	=	Constants.COUNT_ALL;
+	public static boolean isILEqual = false;
 
 	public static int threadNum = 4;
 	public static int chunkSize = 100;
@@ -145,13 +146,20 @@ public class Scan {
 				.desc("count only primary or all reads")
 				.build();
 		
+		Option optionIL = Option.builder("e")
+				.longOpt("equal").argName("turn on")
+				.required(false)
+				.desc("consider that I is equivalent to L (only avaiable in scan mode)")
+				.build();
+		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
 		.addOption(optionMode)
 		.addOption(optionSequence)
 		.addOption(optionBam)
 		.addOption(optionThread)
-		.addOption(optionPrimary);
+		.addOption(optionPrimary)
+		.addOption(optionIL);
 		
 		CommandLineParser parser = new DefaultParser();
 	    HelpFormatter helper = new HelpFormatter();
@@ -190,6 +198,10 @@ public class Scan {
 		    	}
 		    }
 		    
+		    if(cmd.hasOption("e")) {
+		    	isILEqual = true;
+		    }
+		    
 		    if(cmd.hasOption("@")) {
 		    	threadNum = Integer.parseInt(cmd.getOptionValue("@"));
 		    }
@@ -220,6 +232,14 @@ public class Scan {
 			System.out.println("Mode: "+mode);
 			System.out.println("Count: "+count);
 			System.out.println("Threads: "+threadNum);
+			if(isILEqual) {
+				if(mode.equalsIgnoreCase(Constants.MODE_SCAN) && sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
+					System.out.println("I and L are equivalent!");
+				} else {
+					System.out.println("This is target mode or nucleotide input. IL option is ignored.");
+					isILEqual = false;
+				}
+			}
 		}
 		System.out.println();
 	}
