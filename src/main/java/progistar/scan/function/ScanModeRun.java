@@ -137,6 +137,13 @@ public class ScanModeRun {
 	 * @return
 	 */
 	private static LocationInformation getMatchedLocation (SAMRecord samRecord, Emit emit, int frame, char strand) {
+		boolean isMD = true;
+		Object mdTag = samRecord.getAttribute(SAMTag.MD);
+		
+		if(mdTag == null) {
+			isMD = false;
+		}
+		
 		LocationInformation lInfo = new LocationInformation();
 		lInfo.strand = strand;
 		
@@ -203,7 +210,9 @@ public class ScanModeRun {
 				for(int i=0; i<markerSize; i++) {
 					if(operation == 'D') {
 						// do not consume sequence position
-						refPos ++;
+						if(isMD) {
+							refPos++;
+						}
 						gPos++;
 					} else if (operation == 'I') {
 						seqPos ++;
@@ -214,21 +223,30 @@ public class ScanModeRun {
 						refPos ++;
 					}
 					
-					if(seqPos >= startPos && seqPos < endPos) {
-						if(startGenomicPosition == -1 && operation != 'I') startGenomicPosition = gPos;
-						endGenomicPosition = gPos;
-						
-						if(operation == 'D' ) {
-							obsSequenceGivenRegion.append("-");
-							refSequenceGivenRegion.append(reference.charAt(refPos));
-						} else if (operation == 'I') {
-							obsSequenceGivenRegion.append(nucleotide.charAt(seqPos));
-							refSequenceGivenRegion.append(reference.charAt(refPos));
-						} else {
-							obsSequenceGivenRegion.append(nucleotide.charAt(seqPos));
-							refSequenceGivenRegion.append(reference.charAt(refPos));
+					try {
+						if(seqPos >= startPos && seqPos < endPos) {
+							if(startGenomicPosition == -1 && operation != 'I') startGenomicPosition = gPos;
+							endGenomicPosition = gPos;
+							
+							if(operation == 'D' ) {
+								obsSequenceGivenRegion.append("-");
+								refSequenceGivenRegion.append(reference.charAt(refPos));
+							} else if (operation == 'I') {
+								obsSequenceGivenRegion.append(nucleotide.charAt(seqPos));
+								refSequenceGivenRegion.append(reference.charAt(refPos));
+							} else {
+								obsSequenceGivenRegion.append(nucleotide.charAt(seqPos));
+								refSequenceGivenRegion.append(reference.charAt(refPos));
+							}
 						}
+					}catch(Exception e) {
+						e.printStackTrace();
+						System.out.println(emit.getKeyword());
+						System.out.println(samRecord.getSAMString());
+						
+						System.exit(-1);
 					}
+					
 				}
 			} else {
 				System.out.println(operation);
