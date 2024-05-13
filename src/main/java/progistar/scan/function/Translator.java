@@ -11,6 +11,12 @@ public class Translator {
 		for(int pos=frame; pos<length; pos++) {
 			
 			char nt = nucleotides.charAt(pos);
+			
+			// skip deletion
+			if(nt == '-') {
+				continue;
+			}
+			
 			codon.append(nt);
 			if(codon.length() == 3) {
 				String codonStr = codon.toString();

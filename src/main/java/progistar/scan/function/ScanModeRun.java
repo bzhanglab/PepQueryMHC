@@ -225,12 +225,18 @@ public class ScanModeRun {
 					
 					try {
 						if(seqPos >= startPos && seqPos < endPos) {
-							if(startGenomicPosition == -1 && operation != 'I') startGenomicPosition = gPos;
+							if(startGenomicPosition == -1 && operation != 'I') {
+								startGenomicPosition = gPos;
+							}
 							endGenomicPosition = gPos;
 							
 							if(operation == 'D' ) {
 								obsSequenceGivenRegion.append("-");
-								refSequenceGivenRegion.append(reference.charAt(refPos));
+								if(isMD) {
+									refSequenceGivenRegion.append(reference.charAt(refPos));
+								} else {
+									refSequenceGivenRegion.append("-");
+								}
 							} else if (operation == 'I') {
 								obsSequenceGivenRegion.append(nucleotide.charAt(seqPos));
 								refSequenceGivenRegion.append(reference.charAt(refPos));
