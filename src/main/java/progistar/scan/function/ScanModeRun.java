@@ -68,6 +68,14 @@ public class ScanModeRun {
             		isPass = true;
             	}
             }
+            // if the task is for mapped reads
+            // only reads with below that genomic start are retrieved
+            if(Scan.unmmapedMarker == null) {
+            	if( !(samRecord.getAlignmentStart() >= task.start && 
+            			samRecord.getAlignmentStart() < task.end) ) {
+            		isPass = true;
+            	}
+            }
             
             if(Scan.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
             	isPass = true;

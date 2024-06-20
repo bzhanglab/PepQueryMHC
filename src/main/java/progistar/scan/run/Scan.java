@@ -37,7 +37,7 @@ public class Scan {
 	public static File outputFile	   = null;
 	public static String mode	=	Constants.MODE_TARGET;
 	public static String sequence	=	Constants.SEQUENCE_PEPTIDE;
-	public static String count	=	Constants.COUNT_ALL;
+	public static String count	=	Constants.COUNT_PRIMARY;
 	public static boolean isILEqual = false;
 
 	public static int threadNum = 4;
