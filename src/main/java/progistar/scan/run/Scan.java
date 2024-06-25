@@ -102,7 +102,7 @@ public class Scan {
 				.build();
 		
 		Option optionBam = Option.builder("b")
-				.longOpt("input").argName("bam/sam")
+				.longOpt("bam").argName("bam/sam")
 				.hasArg()
 				.required(true)
 				.desc("bam or sam file")
@@ -118,7 +118,7 @@ public class Scan {
 		Option optionMode = Option.builder("m")
 				.longOpt("mode").argName("scan/target")
 				.hasArg()
-				.required(true)
+				.required(false)
 				.desc("\"scan-mode\" counts all reads matching a given sequence by traversing all reads and annotates their genomic information. "
 						+ "\n\"target-mode\" counts all reads matching a given sequence in a given genomic region."
 						+ " \"target-mode\" requires .bai in advance.")
@@ -127,7 +127,7 @@ public class Scan {
 		Option optionSequence = Option.builder("s")
 				.longOpt("sequence").argName("peptide/nucleotide")
 				.hasArg()
-				.required(true)
+				.required(false)
 				.desc("sequence type")
 				.build();
 		

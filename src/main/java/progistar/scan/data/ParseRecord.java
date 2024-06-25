@@ -43,10 +43,10 @@ public class ParseRecord {
 		
 		for(int i=0; i<headerSplit.length; i++) {
 			if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE) && 
-					headerSplit[i].equalsIgnoreCase("nucleotide")) {
+					headerSplit[i].equalsIgnoreCase("sequence")) {
 				obsSeqIdx = i;
 			} else if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE) && 
-					headerSplit[i].equalsIgnoreCase("peptide")) {
+					headerSplit[i].equalsIgnoreCase("sequence")) {
 				obsSeqIdx = i;
 			} else if(headerSplit[i].equalsIgnoreCase("location")) {
 				genomicLociIdx = i;
@@ -195,9 +195,9 @@ public class ParseRecord {
 		}
 		
 		// write header
-		BW.append(BAMSRecord.header+"\tLocation\tMutations\tStrand\tObsSequence\tObsPeptide\tRefSequence\tReadCount");
+		BW.append(BAMSRecord.header+"\tLocation\tMutations\tStrand\tObsNucleotide\tObsPeptide\tRefNucleotide\tReadCount");
 		BW.newLine();
-		BWGenomicTuple.append("Peptide\tLocation\tStrand\tReadCount");
+		BWGenomicTuple.append("Sequence\tLocation\tStrand\tReadCount");
 		BWGenomicTuple.newLine();
 		
 		BWNotFound.append(BAMSRecord.header+"\tLocation");
