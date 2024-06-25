@@ -146,7 +146,7 @@ public class Scan {
 				.build();
 		
 		Option optionIL = Option.builder("e")
-				.longOpt("equal").argName("turn on")
+				.longOpt("equal").argName("")
 				.required(false)
 				.desc("consider that I is equivalent to L (only avaiable in scan mode)")
 				.build();

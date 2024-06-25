@@ -28,7 +28,6 @@ public class BAMSRecord {
 	}
 	
 
-
 	/**
 	 * If mode is all, than it uses all records.
 	 * On the other hand, it uses only records with unmapped reads.
@@ -41,7 +40,6 @@ public class BAMSRecord {
 	public static Trie getTrie (ArrayList<BAMSRecord> records) {
 		ArrayList<String> sequences = new ArrayList<String>();
 		Hashtable<String, String> rmDups = new Hashtable<String, String>();
-		
 		
 		for(BAMSRecord record : records) {
 			String sequence = record.sequence;

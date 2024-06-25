@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Hashtable;
 
 import progistar.scan.function.Translator;
@@ -75,7 +74,7 @@ public class ParseRecord {
 					}
 				}
 				
-				String chr = "*";
+				String chr = "*"; // unmapped read mark in bam
 				int start = -1;
 				int end = -1;
 				
@@ -206,8 +205,10 @@ public class ParseRecord {
 		BWPeptCount.newLine();
 		
 		// write records
+		// unique observed sequence.
 		Hashtable<String, Long> readCountsPeptLevel = new Hashtable<String, Long>();
 		Hashtable<String, Long> readCountsTupleLevel = new Hashtable<String, Long>();
+		Hashtable<String, Boolean> isUniqueCal = new Hashtable<String, Boolean>();
 		
 		for(int i=0; i<records.size(); i++) {
 			BAMSRecord record = records.get(i);
@@ -218,38 +219,47 @@ public class ParseRecord {
 				sequence = sequence.replace("I", "L");
 			}
 			
+			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
+			
+			if(isUniqueCal.get(sequence) == null) {
+				for(LocationInformation location : locations) {
+					long readCount = location.readCount;
+					// it must be calculated once!
+					// peptide level count
+					Long sumReads = readCountsPeptLevel.get(location.obsPeptide);
+					if(sumReads == null) {
+						sumReads = 0L;
+					}
+					sumReads += readCount;
+					readCountsPeptLevel.put(location.obsPeptide, sumReads);
+					
+					// tuple level count
+					String tupleKey = location.obsPeptide+"\t"+location.location+"\t"+location.strand;
+					sumReads = readCountsTupleLevel.get(tupleKey);
+					if(sumReads == null) {
+						sumReads = 0L;
+					}
+					sumReads += readCount;
+					readCountsTupleLevel.put(tupleKey, sumReads);
+				}
+				isUniqueCal.put(sequence, true);
+			}
+			
+			// if there are duplicated records, then this size > 1
+			// if there is no duplication, then this size = 1
 			for(int j=0; j<record.records.size(); j++) {
-				ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
 				if(locations.size() == 0) {
 					BWNotFound.append(record.records.get(j)).append("\tNot found");
 					BWNotFound.newLine();
 				} else {
 					for(LocationInformation location : locations) {
-						long readCount = location.readCount;
-						
-						// peptide level count
-						Long sumReads = readCountsPeptLevel.get(location.obsPeptide);
-						if(sumReads == null) {
-							sumReads = 0L;
-						}
-						sumReads += readCount;
-						readCountsPeptLevel.put(location.obsPeptide, sumReads);
-						
-						// tuple level count
-						String tupleKey = location.obsPeptide+"\t"+location.location+"\t"+location.strand;
-						sumReads = readCountsTupleLevel.get(tupleKey);
-						if(sumReads == null) {
-							sumReads = 0L;
-						}
-						sumReads += readCount;
-						readCountsTupleLevel.put(tupleKey, sumReads);
-						
 						// full information (including genomic sequence)
 						BW.append(record.records.get(j)).append("\t"+location.getRes());
 						BW.newLine();
 					}
 				}
 			}
+			
 		}
 		BWNotFound.close();
 		BW.close();

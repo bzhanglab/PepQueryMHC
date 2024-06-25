@@ -17,7 +17,6 @@ public class LocationInformation {
 	public long readCount = 1;
 	public char strand;
 	
-	
 	public String getKey () {
 		return location+"\t"+strand+"\t"+obsNucleotide+"\t"+refNucleotide;
 	}
