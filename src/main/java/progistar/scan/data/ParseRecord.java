@@ -202,7 +202,7 @@ public class ParseRecord {
 		
 		BWNotFound.append(BAMSRecord.header+"\tLocation");
 		BWNotFound.newLine();
-		BWPeptCount.append("Peptide\tReadCount");
+		BWPeptCount.append("Sequence\tReadCount");
 		BWPeptCount.newLine();
 		
 		// write records
