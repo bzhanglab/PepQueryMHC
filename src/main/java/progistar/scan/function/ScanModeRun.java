@@ -50,7 +50,7 @@ public class ScanModeRun {
 		}
 		
 		long endTime = System.currentTimeMillis();
-		System.out.println(task.taskIdx+" "+(endTime-startTime)/1000+" sec");
+		System.out.println("Task"+task.taskIdx+" "+(endTime-startTime)/1000+" sec");
 	}
 	
 	

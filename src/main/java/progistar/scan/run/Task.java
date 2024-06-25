@@ -91,7 +91,7 @@ public class Task {
 			System.out.println(samReader.getFileHeader().getSequenceDictionary().getSequences().get(0).getSequenceLength());
 			List<SAMSequenceRecord> chromosomes = samReader.getFileHeader().getSequenceDictionary().getSequences();
 			for(SAMSequenceRecord chromosome : chromosomes) {
-				System.out.println(chromosome.getSAMString());
+				// System.out.println(chromosome.getSAMString());
 				String chrName = chromosome.getSequenceName();
 				int start = chromosome.getStart();
 				int end = chromosome.getEnd();
@@ -110,7 +110,7 @@ public class Task {
 				size ++;
 			}
 			if(Scan.unmmapedMarker != null) {
-				System.out.println("@SQ\t"+Scan.unmmapedMarker+"\tLN:"+size);
+				// System.out.println("@SQ\t"+Scan.unmmapedMarker+"\tLN:"+size);
 				tasks.addAll(getChromosomeLevelTasks(records, Scan.unmmapedMarker, 1, size));
 			}
 			

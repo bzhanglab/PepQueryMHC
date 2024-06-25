@@ -1,8 +1,8 @@
 package progistar.scan.data;
 
 public class Constants {
-	public static final String NAME = "BAMScanner";
-	public static final String VERSION = "v0.0.1a";
+	public static final String NAME = "BamScan";
+	public static final String VERSION = "v1.0.0a";
 	
 	public static final String MODE_TARGET = "target";
 	public static final String MODE_SCAN = "scan";

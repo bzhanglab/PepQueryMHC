@@ -56,7 +56,6 @@ public class Scan {
 			tasks = Task.divideTasks(records, chunkSize);
 		} else if(mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
 			tasks = Task.getFullTask(records);
-			
 		}
 		
 		ExecutorService executorService = Executors.newFixedThreadPool(threadNum);

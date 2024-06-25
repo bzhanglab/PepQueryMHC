@@ -180,8 +180,9 @@ public class ParseRecord {
 	 */
 	public static void writeRecords (ArrayList<BAMSRecord> records, File file, ArrayList<Task> tasks) throws IOException {
 		BufferedWriter BW = new BufferedWriter(new FileWriter(file));
-		BufferedWriter BWNotFound = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".not_found"));
-		BufferedWriter BWLog = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".pept_count"));
+		BufferedWriter BWGenomicTuple = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".gloc.tsv"));
+		BufferedWriter BWNotFound = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".not_found.tsv"));
+		BufferedWriter BWPeptCount = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".pept_count.tsv"));
 		LocTable locTable = new LocTable();
 		
 		// union information
@@ -196,13 +197,17 @@ public class ParseRecord {
 		// write header
 		BW.append(BAMSRecord.header+"\tLocation\tMutations\tStrand\tObsSequence\tObsPeptide\tRefSequence\tReadCount");
 		BW.newLine();
+		BWGenomicTuple.append("Peptide\tLocation\tStrand\tReadCount");
+		BWGenomicTuple.newLine();
+		
 		BWNotFound.append(BAMSRecord.header+"\tLocation");
 		BWNotFound.newLine();
-		BWLog.append("Sequence\tRead");
-		BWLog.newLine();
+		BWPeptCount.append("Peptide\tReadCount");
+		BWPeptCount.newLine();
 		
 		// write records
-		Hashtable<String, Long> readCounts = new Hashtable<String, Long>();
+		Hashtable<String, Long> readCountsPeptLevel = new Hashtable<String, Long>();
+		Hashtable<String, Long> readCountsTupleLevel = new Hashtable<String, Long>();
 		
 		for(int i=0; i<records.size(); i++) {
 			BAMSRecord record = records.get(i);
@@ -221,13 +226,25 @@ public class ParseRecord {
 				} else {
 					for(LocationInformation location : locations) {
 						long readCount = location.readCount;
-						Long sumReads = readCounts.get(sequence);
+						
+						// peptide level count
+						Long sumReads = readCountsPeptLevel.get(location.obsPeptide);
 						if(sumReads == null) {
 							sumReads = 0L;
 						}
 						sumReads += readCount;
-						readCounts.put(sequence, sumReads);
+						readCountsPeptLevel.put(location.obsPeptide, sumReads);
 						
+						// tuple level count
+						String tupleKey = location.obsPeptide+"\t"+location.location+"\t"+location.strand;
+						sumReads = readCountsTupleLevel.get(tupleKey);
+						if(sumReads == null) {
+							sumReads = 0L;
+						}
+						sumReads += readCount;
+						readCountsTupleLevel.put(tupleKey, sumReads);
+						
+						// full information (including genomic sequence)
 						BW.append(record.records.get(j)).append("\t"+location.getRes());
 						BW.newLine();
 					}
@@ -237,15 +254,25 @@ public class ParseRecord {
 		BWNotFound.close();
 		BW.close();
 		
-		readCounts.forEach((sequence, reads)->{
+		readCountsPeptLevel.forEach((sequence, reads)->{
 			try {
-				BWLog.append(sequence+"\t"+reads);
-				BWLog.newLine();
+				BWPeptCount.append(sequence+"\t"+reads);
+				BWPeptCount.newLine();
 			}catch(IOException ioe) {
 				
 			}
  		});
 		
-		BWLog.close();
+		BWPeptCount.close();
+		
+		readCountsTupleLevel.forEach((tupleKey, reads)->{
+			try {
+				BWGenomicTuple.append(tupleKey+"\t"+reads);
+				BWGenomicTuple.newLine();
+			}catch(IOException ioe) {
+				
+			}
+ 		});
+		BWGenomicTuple.close();
 	}
 }
