@@ -149,24 +149,45 @@ public class ParseRecord {
 	 */
 	public static void writeRecords (ArrayList<BAMSRecord> records, File file) throws IOException {
 		BufferedWriter BW = new BufferedWriter(new FileWriter(file));
+		BufferedWriter BWPeptCount = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".pept_count.tsv"));
 		
 		// write header
 		BW.append(BAMSRecord.header+"\t"+BAMSRecord.fileName);
 		BW.newLine();
+		BWPeptCount.append("Sequence\tReadCount");
+		BWPeptCount.newLine();
 		
+		Hashtable<String, Long> readCountsPeptLevel = new Hashtable<String, Long>();
 		// write records
 		for(int i=0; i<records.size(); i++) {
 			BAMSRecord record = records.get(i);
 			
-			int readCnt = record.readCnt;
+			long readCnt = record.readCnt;
 			for(int j=0; j<record.records.size(); j++) {
 				// heavy version:
 				BW.append(record.records.get(j)).append("\t"+readCnt);
 				BW.newLine();
 			}
+			
+			Long sumReads = readCountsPeptLevel.get(record.sequence);
+			if(sumReads == null) {
+				sumReads = 0L;
+			}
+			sumReads += readCnt;
+			readCountsPeptLevel.put(record.sequence, sumReads);
 		}
 		
+		readCountsPeptLevel.forEach((sequence, reads)->{
+			try {
+				BWPeptCount.append(sequence+"\t"+reads);
+				BWPeptCount.newLine();
+			}catch(IOException ioe) {
+				
+			}
+ 		});
+		
 		BW.close();
+		BWPeptCount.close();
 	}
 	
 	/**
@@ -221,6 +242,8 @@ public class ParseRecord {
 			
 			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
 			
+			// if we process with I=L option, 
+			// then redundant peptides can be appeared and counted multiple times
 			if(isUniqueCal.get(sequence) == null) {
 				for(LocationInformation location : locations) {
 					long readCount = location.readCount;

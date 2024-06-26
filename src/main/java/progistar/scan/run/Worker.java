@@ -18,7 +18,7 @@ public class Worker implements Callable<String> {
 	}
 	
 	public String call() {
-		System.out.println(task.getTaskInfo()+" by "+this.workerID);
+		System.out.println(task.getTaskInfo());
 		if(Scan.mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
 			ScanModeRun.runScanMode(task);
 		} else if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
