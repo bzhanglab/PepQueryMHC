@@ -171,6 +171,7 @@ public class Scan {
 		
 		Option optionLibSize = Option.builder("l")
 				.longOpt("lib_size").argName("int")
+				.hasArg()
 				.required(false)
 				.desc("library size to calculate RPHM value." +
 						"\nif this option is not used, then it estimates the library size automatically. This estimation takes additional time for target mode.")

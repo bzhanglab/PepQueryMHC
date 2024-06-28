@@ -1,6 +1,7 @@
 package progistar.scan.function;
 
 import progistar.scan.data.Codon;
+import progistar.scan.data.Constants;
 
 public class Translator {
 	
@@ -13,7 +14,7 @@ public class Translator {
 			char nt = nucleotides.charAt(pos);
 			
 			// skip deletion
-			if(nt == '-') {
+			if(nt == Constants.NULL.charAt(0)) {
 				continue;
 			}
 			

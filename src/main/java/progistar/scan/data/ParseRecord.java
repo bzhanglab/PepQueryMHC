@@ -79,7 +79,7 @@ public class ParseRecord {
 				int start = -1;
 				int end = -1;
 				
-				if(!genomicLoci.equalsIgnoreCase("-")) {
+				if(!genomicLoci.equalsIgnoreCase(Constants.NULL)) {
 					String[] gLoc = genomicLoci.split("\\|");
 					for(String gLocus : gLoc) {
 						chr = gLocus.split("\\:")[0];

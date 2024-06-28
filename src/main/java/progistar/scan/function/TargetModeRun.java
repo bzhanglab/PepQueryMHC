@@ -12,6 +12,7 @@ import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
 import progistar.scan.data.Constants;
+import progistar.scan.data.LocationInformation;
 import progistar.scan.data.SequenceRecord;
 import progistar.scan.run.Scan;
 import progistar.scan.run.Task;
@@ -136,47 +137,49 @@ public class TargetModeRun {
 	
 	private static int find (SAMRecordIterator iterator, SequenceRecord record, Trie trie, boolean included) {
 		int leastCount = 0;
+		char strand = record.strand.charAt(0);
 		while (iterator.hasNext()) {
             SAMRecord samRecord = iterator.next();
             
             if(Scan.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
             	continue;
             }
-            // Process each SAM record
-            boolean isIncluded = false;
-            if(included) {
-            	if(samRecord.getStart() <= record.start && samRecord.getEnd() >= record.end) {
-            		isIncluded = true;
+            
+        	String sequence = samRecord.getReadString();
+            boolean isFound = false;
+            if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE)) {
+            	Collection<Emit> emits = trie.parseText(sequence);
+        		
+        		for(Emit emit : emits) {
+    				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, 0, strand);
+    				matchedLocation.inputSequence = emit.getKeyword();
+    				if(record.location.equalsIgnoreCase(matchedLocation.location)) {
+    					isFound = true;
+    					break;
+    				}
+    			}
+            } else if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
+            	if(record.strand.equalsIgnoreCase("-")) {
+            		sequence = Translator.getReverseComplement(sequence);
             	}
-            } else {
-            	isIncluded = true;
+            	
+            	for(int fr=0; fr<3; fr++) {
+            		String peptide = Translator.translation(sequence, fr);
+            		Collection<Emit> emits = trie.parseText(peptide);
+            		
+            		for(Emit emit : emits) {
+        				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, fr, strand);
+        				if(record.location.equalsIgnoreCase(matchedLocation.location)) {
+        					isFound = true;
+        					break;
+        				}
+        			}
+            	}
             }
             
-            if(isIncluded) {
-            	String sequence = samRecord.getReadString();
-                boolean isFound = false;
-                if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE)) {
-                	if(trie.parseText(sequence).size() > 0) {
-                		isFound = true;
-                	}
-                } else if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
-                	if(record.strand.equalsIgnoreCase("-")) {
-                		sequence = Translator.getReverseComplement(sequence);
-                	}
-                	
-                	for(int fr=0; fr<3; fr++) {
-                		String peptide = Translator.translation(sequence, fr);
-                		if(trie.parseText(peptide).size() > 0) {
-	                		isFound = true;
-	                		break;
-	                	}
-                	}
-                }
-                
-                if(isFound) {
-                	record.readCnt++;
-                	leastCount++;
-                }
+            if(isFound) {
+            	record.readCnt++;
+            	leastCount++;
             }
             
             
@@ -224,6 +227,8 @@ public class TargetModeRun {
             		isPass = true;
             	}
             	
+            } else {
+            	isPass = true;
             }
             
             if(isPass) {
