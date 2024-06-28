@@ -7,11 +7,12 @@ import org.ahocorasick.trie.Trie;
 
 import progistar.scan.run.Scan;
 
-public class BAMSRecord {
+public class SequenceRecord {
 
 	public static String header = null;
 	public static String fileName = null;
 	
+	// save duplicated records (based on key)
 	public ArrayList<String> records = new ArrayList<String>();
 	public String sequence;
 	public String strand;
@@ -37,11 +38,11 @@ public class BAMSRecord {
 	 * @param mode
 	 * @return
 	 */
-	public static Trie getTrie (ArrayList<BAMSRecord> records) {
+	public static Trie getTrie (ArrayList<SequenceRecord> records) {
 		ArrayList<String> sequences = new ArrayList<String>();
 		Hashtable<String, String> rmDups = new Hashtable<String, String>();
 		
-		for(BAMSRecord record : records) {
+		for(SequenceRecord record : records) {
 			String sequence = record.sequence;
 			if(Scan.isILEqual) {
 				sequence = sequence.replace("I", "L");

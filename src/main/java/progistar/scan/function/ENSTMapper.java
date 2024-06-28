@@ -25,7 +25,7 @@ public class ENSTMapper {
 		String ensg = ENSTtoENSG.get(enstID);
 		
 		if(ensg == null) {
-			ensg = Constants.ID_NULL;
+			ensg = Constants.NULL;
 		}
 		
 		return ensg;
@@ -42,7 +42,7 @@ public class ENSTMapper {
 		String geneName = ENSTtoGENENAME.get(enstID);
 		
 		if(geneName == null) {
-			geneName = Constants.ID_NULL;
+			geneName = Constants.NULL;
 		}
 		
 		return geneName;

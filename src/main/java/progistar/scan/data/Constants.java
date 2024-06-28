@@ -13,14 +13,19 @@ public class Constants {
 	public static final String COUNT_ALL= "all";
 	public static final String COUNT_PRIMARY = "primary";
 	
-	public static final int	TYPE_MAPPED_TASK	=	1;
-	public static final int	TYPE_UNMAPPED_TASK	=	2;
-	public static final int TYPE_DISCOVERY_TASK	=	3;
+	public static final int	TYPE_TARGET_MODE_MAPPED_TASK	=	1;
+	public static final int	TYPE_TARGET_MODE_UNMAPPED_TASK	=	2;
+	public static final int TYPE_TARGET_MODE_LIBRARY_ESTIMATION_TASK = 3;
+	public static final int TYPE_SCAN_MODE_TASK	=	4;
+	
+	//
+	public static final int MAPPED_READS		=	1;
+	public static final int UNMAPPED_READS		=	-1;
 	
 	public static final byte EXON = 30;
 	public static final byte CDS = 100;
 	
-	public static final String ID_NULL				=	"-";
+	public static final String NULL				=	".";
 	public static final byte NON_CODING_TRANSCRIPT	=	0;
 	public static final byte CODING_TRANSCRIPT		=	1;
 	

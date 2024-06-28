@@ -11,15 +11,17 @@ import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SAMSequenceRecord;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
-import progistar.scan.data.BAMSRecord;
+import progistar.scan.data.SequenceRecord;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LocTable;
 
 public class Task {
 
 	public int taskIdx = -1;
-	public int type = Constants.TYPE_MAPPED_TASK;
-	public ArrayList<BAMSRecord> records = new ArrayList<BAMSRecord>();
+	public int type = Constants.TYPE_TARGET_MODE_MAPPED_TASK;
+	public int readType = Constants.MAPPED_READS;
+	public double processedReads = 0;
+	public ArrayList<SequenceRecord> records = new ArrayList<SequenceRecord>();
 	
 	// only available for FullMode.
 	public static Trie allTrie = null;
@@ -29,13 +31,15 @@ public class Task {
 	public int end;
 	
 	public String getTaskInfo () {
-		String typeStr = "*mapped";
-		if(type == Constants.TYPE_UNMAPPED_TASK) {
-			typeStr = "*unmapped";
-		}else if(type == Constants.TYPE_DISCOVERY_TASK) {
-			typeStr = "discovery";
+		String typeStr = "target mode (mapped)";
+		if(type == Constants.TYPE_TARGET_MODE_UNMAPPED_TASK) {
+			typeStr = "target mode (unmapped)";
+		} else if(type == Constants.TYPE_SCAN_MODE_TASK) {
+			typeStr = "scan mode";
+		} else if(type == Constants.TYPE_TARGET_MODE_LIBRARY_ESTIMATION_TASK) {
+			typeStr = "target mode (libary estimation)";
 		}
-		return "Task"+taskIdx+" has "+records.size()+" "+typeStr+" records";
+		return typeStr+": Task"+taskIdx+" has "+records.size();
 	}
 	
 	public Task(int type) {
@@ -43,17 +47,18 @@ public class Task {
 	}
 	
 	
-	private static ArrayList<Task> getChromosomeLevelTasks (ArrayList<BAMSRecord> records, String chrName, int start, int end) {
+	private static ArrayList<Task> getChromosomeLevelTasks (ArrayList<SequenceRecord> records, String chrName, int start, int end) {
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		
+		int divider = Scan.threadNum * Scan.chunkSize;
 		int size = end - start + 1;
-		int interval = size / Scan.threadNum + 1;
+		int interval = Math.max( (size / divider) + 1, 100000);
 		
 		int startInterval = 1;
 		int endInterval = 1;
 		
 		boolean isEndOfLength = false;
-		for(int i=0; i<Scan.threadNum; i++) {
+		while(true) {
 			endInterval = startInterval + interval - 1;
 			
 			if(endInterval >= end) {
@@ -61,7 +66,13 @@ public class Task {
 				isEndOfLength = true;
 			}
 			
-			Task task = new Task(Constants.TYPE_DISCOVERY_TASK);
+			Task task = new Task(Constants.TYPE_SCAN_MODE_TASK);
+			// if the chrName equals to Constans.NULL => it is belonged to an unmapped read group
+			if(chrName.equalsIgnoreCase(Constants.NULL)) {
+				task.readType = Constants.UNMAPPED_READS;
+			} else {
+				task.readType = Constants.MAPPED_READS;
+			}
 			task.records = records;
 			task.chrName = chrName;
 			task.start = startInterval;
@@ -78,13 +89,13 @@ public class Task {
 		return tasks;
 	}
 	
-	public static ArrayList<Task> getFullTask (ArrayList<BAMSRecord> records) {
+	public static ArrayList<Task> getScanModeTasks (ArrayList<SequenceRecord> records) {
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		
 		File file = new File(Scan.bamFile.getAbsolutePath());
 		// build global trie
 		System.out.println("Build Trie");
-		Task.allTrie = BAMSRecord.getTrie(records);
+		Task.allTrie = SequenceRecord.getTrie(records);
 		System.out.println("Complete building Trie");
 		
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
@@ -111,7 +122,7 @@ public class Task {
 			}
 			if(Scan.unmmapedMarker != null) {
 				// System.out.println("@SQ\t"+Scan.unmmapedMarker+"\tLN:"+size);
-				tasks.addAll(getChromosomeLevelTasks(records, Scan.unmmapedMarker, 1, size));
+				tasks.addAll(getChromosomeLevelTasks(records, Constants.NULL, 1, size));
 			}
 			
 			// assign idx
@@ -129,15 +140,15 @@ public class Task {
 		return tasks;
 	}
 	
-	public static ArrayList<Task> divideTasks (ArrayList<BAMSRecord> records, int chunkSize) {
+	public static ArrayList<Task> getTargetModeTasks (ArrayList<SequenceRecord> records, int chunkSize) {
 		System.out.println("Prepare tasks with chunk size = "+chunkSize);
 		
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		
-		ArrayList<BAMSRecord> mappedRecords = new ArrayList<BAMSRecord>();
-		ArrayList<BAMSRecord> unmappedRecords = new ArrayList<BAMSRecord>();
+		ArrayList<SequenceRecord> mappedRecords = new ArrayList<SequenceRecord>();
+		ArrayList<SequenceRecord> unmappedRecords = new ArrayList<SequenceRecord>();
 		records.forEach(BAMSRecord -> {
-			if(BAMSRecord.chr.equalsIgnoreCase("*")) {
+			if(BAMSRecord.chr.equalsIgnoreCase(Constants.NULL)) {
 				// unmapped classes
 				unmappedRecords.add(BAMSRecord);
 			} else {
@@ -167,7 +178,8 @@ public class Task {
 			tasks.add(task);
 			task.taskIdx = tasks.size();
 			sIdx = eIdx;*/
-			Task task = new Task(Constants.TYPE_UNMAPPED_TASK);
+			Task task = new Task(Constants.TYPE_TARGET_MODE_UNMAPPED_TASK);
+			task.readType = Constants.UNMAPPED_READS;
 			task.records = unmappedRecords;
 			tasks.add(task);
 			task.taskIdx = tasks.size();
@@ -178,7 +190,9 @@ public class Task {
 		sIdx = 0;
 		while(sIdx < mappedSize) {
 			int eIdx = sIdx + chunkSize > mappedSize ? mappedSize : sIdx + chunkSize;
-			Task task = new Task(Constants.TYPE_MAPPED_TASK);
+			Task task = new Task(Constants.TYPE_TARGET_MODE_MAPPED_TASK);
+			task.readType = Constants.MAPPED_READS;
+			
 			for(int i=sIdx; i<eIdx; i++) {
 				task.records.add(mappedRecords.get(i));
 			}
@@ -190,6 +204,35 @@ public class Task {
 		System.out.println("Task list");
 		for(Task task : tasks) {
 			System.out.println(task.getTaskInfo());
+		}
+		
+		return tasks;
+	}
+	
+	public static ArrayList<Task> getLibSizeTask (ArrayList<SequenceRecord> records) {
+		ArrayList<Task> tasks = new ArrayList<Task>();
+		
+		File file = new File(Scan.bamFile.getAbsolutePath());
+		Task.allTrie = null;
+		
+		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
+			System.out.println(samReader.getFileHeader().getSequenceDictionary().getSequences().get(0).getSequenceLength());
+			List<SAMSequenceRecord> chromosomes = samReader.getFileHeader().getSequenceDictionary().getSequences();
+			for(SAMSequenceRecord chromosome : chromosomes) {
+				// System.out.println(chromosome.getSAMString());
+				String chrName = chromosome.getSequenceName();
+				int start = chromosome.getStart();
+				int end = chromosome.getEnd();
+				tasks.addAll(getChromosomeLevelTasks(records, chrName, start, end));
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		// all tasks should be lib count.
+		for(Task task : tasks) {
+			task.type = Constants.TYPE_TARGET_MODE_LIBRARY_ESTIMATION_TASK;
 		}
 		
 		return tasks;

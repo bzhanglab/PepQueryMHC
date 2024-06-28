@@ -14,7 +14,7 @@ import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SAMTag;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
-import progistar.scan.data.BAMSRecord;
+import progistar.scan.data.SequenceRecord;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LocationInformation;
 import progistar.scan.run.Scan;
@@ -26,7 +26,7 @@ public class ScanModeRun {
 	
 	
 	public static void runScanMode (Task task) {
-		if(task.type == Constants.TYPE_DISCOVERY_TASK) {
+		if(task.type == Constants.TYPE_SCAN_MODE_TASK) {
 			System.out.println(task.chrName+":"+task.start+"-"+task.end);
 			scanReads(task);
 		}
@@ -38,10 +38,10 @@ public class ScanModeRun {
 		File file = new File(Scan.bamFile.getAbsolutePath());
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			SAMRecordIterator iterator = null;
-			if(Scan.unmmapedMarker != null && task.chrName.equalsIgnoreCase(Scan.unmmapedMarker)) {
-				iterator = samReader.queryUnmapped();
-			} else {
+			if(task.readType == Constants.MAPPED_READS) {
 				iterator = samReader.query(task.chrName, task.start, task.end, false);
+			} else {
+				iterator = samReader.queryUnmapped();
 			}
 			find(iterator, Task.allTrie, task);
 		} catch(Exception e) {
@@ -60,29 +60,36 @@ public class ScanModeRun {
             SAMRecord samRecord = iterator.next();
             count ++;
             
-            // if the task is for unmapped reads
-            // only process reads given range
             boolean isPass = false;
-            if(Scan.unmmapedMarker != null && task.chrName.equalsIgnoreCase(Scan.unmmapedMarker)) {
-            	if(count < task.start || count > task.end) {
-            		isPass = true;
-            	}
-            }
             // if the task is for mapped reads
             // only reads with below that genomic start are retrieved
-            if(Scan.unmmapedMarker == null) {
+            if(task.readType == Constants.MAPPED_READS) {
             	if( !(samRecord.getAlignmentStart() >= task.start && 
             			samRecord.getAlignmentStart() < task.end) ) {
             		isPass = true;
             	}
+            	
+            	if(Scan.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
+            		isPass = true;
+            	}
             }
-            
-            if(Scan.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
-            	isPass = true;
+            // if the task is for unmapped reads
+            // only process reads given range
+            else {
+            	if(count < task.start || count > task.end) {
+            		isPass = true;
+            	}
             }
+
             
             if(isPass) {
             	continue;
+            }
+            
+            // increase processed reads if and only if
+            // a read is primary and mapped to a genomic region.
+            if(!samRecord.isSecondaryAlignment() && task.readType == Constants.MAPPED_READS) {
+            	task.processedReads++;
             }
             
             // Process each SAM record
@@ -137,7 +144,7 @@ public class ScanModeRun {
 	/**
 	 * 
 	 * Return genomic location of a given sequence.<br>
-	 * If there is no available position in the SAMRecord, return "*".
+	 * If there is no available position in the SAMRecord, return ".".
 	 * 
 	 * @param samRecord
 	 * @param emit
@@ -180,7 +187,7 @@ public class ScanModeRun {
 		String cigarStr = samRecord.getCigarString();
 		// unmapped reads
 		if(cigarStr.equalsIgnoreCase("*")) {
-			lInfo.location = "-";
+			lInfo.location = Constants.NULL;
 			lInfo.obsNucleotide = nucleotide.substring(startPos, endPos);
 			lInfo.refNucleotide = reference.substring(startPos, endPos);
 			return lInfo;
@@ -239,11 +246,11 @@ public class ScanModeRun {
 							endGenomicPosition = gPos;
 							
 							if(operation == 'D' ) {
-								obsSequenceGivenRegion.append("-");
+								obsSequenceGivenRegion.append(".");
 								if(isMD) {
 									refSequenceGivenRegion.append(reference.charAt(refPos));
 								} else {
-									refSequenceGivenRegion.append("-");
+									refSequenceGivenRegion.append(".");
 								}
 							} else if (operation == 'I') {
 								obsSequenceGivenRegion.append(nucleotide.charAt(seqPos));
@@ -313,7 +320,7 @@ public class ScanModeRun {
 			} else if(operation == 'I') {
 				for(int i=0; i<markerSize; i++) {
 					pos++;
-					refSequence.setCharAt(pos, '-');
+					refSequence.setCharAt(pos, '.');
 				}
 			} else if(operation == 'M') {
 				pos += markerSize;
@@ -338,7 +345,7 @@ public class ScanModeRun {
 					
 					int mPos = 0;
 					for(int j=0; j<refSequence.length(); j++) {
-						if(refSequence.charAt(j) != '*' && refSequence.charAt(j) != '-') {
+						if(refSequence.charAt(j) != '*' && refSequence.charAt(j) != '.') {
 							mPos++;
 							
 							if(mPos == pos) {
@@ -352,7 +359,7 @@ public class ScanModeRun {
 			else if(sign == '^') {
 				int mPos = 0;
 				for(int j=0; j<refSequence.length(); j++) {
-					if(refSequence.charAt(j) != '*' && refSequence.charAt(j) != '-') {
+					if(refSequence.charAt(j) != '*' && refSequence.charAt(j) != '.') {
 						mPos++;
 						
 						if(mPos == pos) {

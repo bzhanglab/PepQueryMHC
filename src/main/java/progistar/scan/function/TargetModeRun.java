@@ -7,23 +7,24 @@ import java.util.Hashtable;
 import org.ahocorasick.trie.Emit;
 import org.ahocorasick.trie.Trie;
 
-import htsjdk.samtools.BAMRecord;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
-import progistar.scan.data.BAMSRecord;
 import progistar.scan.data.Constants;
+import progistar.scan.data.SequenceRecord;
 import progistar.scan.run.Scan;
 import progistar.scan.run.Task;
 
 public class TargetModeRun {
 	
 	public static void runTargetMode (Task task) {
-		if(task.type == Constants.TYPE_MAPPED_TASK) {
+		if(task.type == Constants.TYPE_TARGET_MODE_MAPPED_TASK) {
 			countMappedReads(task);
-		} else if(task.type == Constants.TYPE_UNMAPPED_TASK) {
+		} else if(task.type == Constants.TYPE_TARGET_MODE_UNMAPPED_TASK) {
 			countUnmappedReads(task);
+		} else if(task.type == Constants.TYPE_TARGET_MODE_LIBRARY_ESTIMATION_TASK) {
+			estimateLibSize(task);
 		}
 	}
 
@@ -33,7 +34,7 @@ public class TargetModeRun {
 		File file = new File(Scan.bamFile.getAbsolutePath());
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			// for unmapped reads
-			Trie trie = BAMSRecord.getTrie(task.records);
+			Trie trie = SequenceRecord.getTrie(task.records);
 			
 			Hashtable<String, Integer> totalCounts = new Hashtable<String, Integer>();
 			SAMRecordIterator iterator = samReader.queryUnmapped();
@@ -109,7 +110,7 @@ public class TargetModeRun {
 			double size = task.records.size();
 			for(int i=0; i<size; i++) {
 
-				BAMSRecord record = task.records.get(i);
+				SequenceRecord record = task.records.get(i);
 				Trie trie = Trie.builder().addKeyword(record.sequence).build();
 				
 				SAMRecordIterator iterator = samReader.queryOverlapping(record.chr, record.start, record.end);
@@ -133,7 +134,7 @@ public class TargetModeRun {
 		System.out.println(task.taskIdx+" "+(endTime-startTime)/1000+" sec");
 	}
 	
-	private static int find (SAMRecordIterator iterator, BAMSRecord record, Trie trie, boolean included) {
+	private static int find (SAMRecordIterator iterator, SequenceRecord record, Trie trie, boolean included) {
 		int leastCount = 0;
 		while (iterator.hasNext()) {
             SAMRecord samRecord = iterator.next();
@@ -184,5 +185,54 @@ public class TargetModeRun {
         iterator.close();
         
         return leastCount;
+	}
+	
+	private static void estimateLibSize (Task task) {
+		long startTime = System.currentTimeMillis();
+		// to prevent racing
+		File file = new File(Scan.bamFile.getAbsolutePath());
+		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
+			SAMRecordIterator iterator = null;
+			if(task.readType == Constants.MAPPED_READS) {
+				iterator = samReader.query(task.chrName, task.start, task.end, false);
+				estimate(iterator, task);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		long endTime = System.currentTimeMillis();
+		System.out.println("Task"+task.taskIdx+" "+(endTime-startTime)/1000+" sec");
+	}
+	
+
+	private static void estimate (SAMRecordIterator iterator, Task task) {
+		while (iterator.hasNext()) {
+            SAMRecord samRecord = iterator.next();
+            boolean isPass = false;
+
+            // if the task is for mapped reads
+            // only reads with below that genomic start are retrieved
+            if(task.readType == Constants.MAPPED_READS) {
+            	if( !(samRecord.getAlignmentStart() >= task.start && 
+            			samRecord.getAlignmentStart() < task.end) ) {
+            		isPass = true;
+            	}
+            	
+            	if(samRecord.isSecondaryAlignment()) {
+            		isPass = true;
+            	}
+            	
+            }
+            
+            if(isPass) {
+            	continue;
+            }
+            
+            task.processedReads++;
+            
+        }
+        iterator.close();
 	}
 }

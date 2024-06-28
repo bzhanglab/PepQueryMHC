@@ -9,12 +9,10 @@ import progistar.scan.function.TargetModeRun;
 public class Worker implements Callable<String> {
 
 	private Task task;
-	private int workerID = -1;
 	
-	public Worker (int workerID, Task task) {
+	public Worker (Task task) {
 		super();
 		this.task = task;
-		this.workerID = workerID;
 	}
 	
 	public String call() {

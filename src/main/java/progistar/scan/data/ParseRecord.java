@@ -26,16 +26,16 @@ public class ParseRecord {
 	 * @return
 	 * @throws IOException
 	 */
-	public static ArrayList<BAMSRecord> parse (File file) throws IOException {
-		ArrayList<BAMSRecord> records = new ArrayList<BAMSRecord>();
+	public static ArrayList<SequenceRecord> parse (File file) throws IOException {
+		ArrayList<SequenceRecord> records = new ArrayList<SequenceRecord>();
 		BufferedReader BR = new BufferedReader(new FileReader(file));
-		Hashtable<String, BAMSRecord> indxedRecords = new Hashtable<String, BAMSRecord>();
+		Hashtable<String, SequenceRecord> indxedRecords = new Hashtable<String, SequenceRecord>();
 		String line = null;
 		
-		BAMSRecord.header = BR.readLine();
-		BAMSRecord.fileName = Scan.bamFile.getName();
+		SequenceRecord.header = BR.readLine();
+		SequenceRecord.fileName = Scan.bamFile.getName();
 		
-		String[] headerSplit = BAMSRecord.header.split("\t");
+		String[] headerSplit = SequenceRecord.header.split("\t");
 		int obsSeqIdx = -1;
 		int genomicLociIdx = -1;
 		int strandIdx = -1;
@@ -62,7 +62,7 @@ public class ParseRecord {
 				String genomicLoci = fields[genomicLociIdx];
 				String strand = fields[strandIdx];
 				
-				BAMSRecord record = new BAMSRecord();
+				SequenceRecord record = new SequenceRecord();
 				record.sequence = sequence;
 				record.strand = strand;
 				record.location = genomicLoci;
@@ -74,7 +74,7 @@ public class ParseRecord {
 					}
 				}
 				
-				String chr = "*"; // unmapped read mark in bam
+				String chr = Constants.NULL;
 				int start = -1;
 				int end = -1;
 				
@@ -105,7 +105,7 @@ public class ParseRecord {
 				
 				String key = record.getKey();
 				
-				BAMSRecord indexedRecord = indxedRecords.get(key);
+				SequenceRecord indexedRecord = indxedRecords.get(key);
 				if(indexedRecord == null) {
 					indexedRecord = record;
 					indxedRecords.put(key, indexedRecord);
@@ -118,14 +118,14 @@ public class ParseRecord {
 				String[] fields = line.split("\t");
 				String sequence = fields[obsSeqIdx];
 				
-				BAMSRecord record = new BAMSRecord();
+				SequenceRecord record = new SequenceRecord();
 				record.sequence = sequence;
-				record.strand = "*";
-				record.location = "-";
+				record.strand = Constants.NULL;
+				record.location = Constants.NULL;
 				
 				String key = record.getKey();
 				
-				BAMSRecord indexedRecord = indxedRecords.get(key);
+				SequenceRecord indexedRecord = indxedRecords.get(key);
 				if(indexedRecord == null) {
 					indexedRecord = record;
 					indxedRecords.put(key, indexedRecord);
@@ -147,12 +147,14 @@ public class ParseRecord {
 	 * @param file
 	 * @throws IOException
 	 */
-	public static void writeRecords (ArrayList<BAMSRecord> records, File file) throws IOException {
+	public static void writeRecords (ArrayList<SequenceRecord> records, File file) throws IOException {
+		writeLibSize(file);
+		
 		BufferedWriter BW = new BufferedWriter(new FileWriter(file));
 		BufferedWriter BWPeptCount = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".pept_count.tsv"));
 		
 		// write header
-		BW.append(BAMSRecord.header+"\t"+BAMSRecord.fileName);
+		BW.append(SequenceRecord.header+"\t"+SequenceRecord.fileName);
 		BW.newLine();
 		BWPeptCount.append("Sequence\tReadCount");
 		BWPeptCount.newLine();
@@ -160,11 +162,10 @@ public class ParseRecord {
 		Hashtable<String, Long> readCountsPeptLevel = new Hashtable<String, Long>();
 		// write records
 		for(int i=0; i<records.size(); i++) {
-			BAMSRecord record = records.get(i);
+			SequenceRecord record = records.get(i);
 			
 			long readCnt = record.readCnt;
 			for(int j=0; j<record.records.size(); j++) {
-				// heavy version:
 				BW.append(record.records.get(j)).append("\t"+readCnt);
 				BW.newLine();
 			}
@@ -198,7 +199,9 @@ public class ParseRecord {
 	 * @param tasks
 	 * @throws IOException
 	 */
-	public static void writeRecords (ArrayList<BAMSRecord> records, File file, ArrayList<Task> tasks) throws IOException {
+	public static void writeRecords (ArrayList<SequenceRecord> records, File file, ArrayList<Task> tasks) throws IOException {
+		writeLibSize(file);
+		
 		BufferedWriter BW = new BufferedWriter(new FileWriter(file));
 		BufferedWriter BWGenomicTuple = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".gloc.tsv"));
 		BufferedWriter BWNotFound = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".not_found.tsv"));
@@ -215,14 +218,14 @@ public class ParseRecord {
 		}
 		
 		// write header
-		BW.append(BAMSRecord.header+"\tLocation\tMutations\tStrand\tObsNucleotide\tObsPeptide\tRefNucleotide\tReadCount");
+		BW.append(SequenceRecord.header+"\tLocation\tMutations\tStrand\tObsNucleotide\tObsPeptide\tRefNucleotide\tReadCount");
 		BW.newLine();
-		BWGenomicTuple.append("Sequence\tLocation\tStrand\tReadCount");
+		BWGenomicTuple.append("ObsPeptide\tLocation\tStrand\tReadCount");
 		BWGenomicTuple.newLine();
 		
-		BWNotFound.append(BAMSRecord.header+"\tLocation");
+		BWNotFound.append(SequenceRecord.header+"\tLocation");
 		BWNotFound.newLine();
-		BWPeptCount.append("Sequence\tReadCount");
+		BWPeptCount.append("ObsPeptide\tReadCount");
 		BWPeptCount.newLine();
 		
 		// write records
@@ -232,7 +235,7 @@ public class ParseRecord {
 		Hashtable<String, Boolean> isUniqueCal = new Hashtable<String, Boolean>();
 		
 		for(int i=0; i<records.size(); i++) {
-			BAMSRecord record = records.get(i);
+			SequenceRecord record = records.get(i);
 			String sequence = record.sequence;
 			
 			// IL equal mode
@@ -307,5 +310,11 @@ public class ParseRecord {
 			}
  		});
 		BWGenomicTuple.close();
+	}
+	
+	private static void writeLibSize (File file) throws IOException {
+		BufferedWriter BW = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".libsize"));
+		BW.append(Scan.libSize+"");
+		BW.close();
 	}
 }

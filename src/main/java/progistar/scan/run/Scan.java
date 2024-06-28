@@ -17,7 +17,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import progistar.scan.data.BAMSRecord;
+import progistar.scan.data.SequenceRecord;
+import progistar.scan.data.Codon;
 import progistar.scan.data.Constants;
 import progistar.scan.data.ParseRecord;
 
@@ -38,6 +39,7 @@ public class Scan {
 	public static String mode	=	Constants.MODE_TARGET;
 	public static String sequence	=	Constants.SEQUENCE_PEPTIDE;
 	public static String count	=	Constants.COUNT_PRIMARY;
+	public static double libSize = 0;
 	public static boolean isILEqual = false;
 
 	public static int threadNum = 4;
@@ -48,28 +50,45 @@ public class Scan {
 		long startTime = System.currentTimeMillis();
 		printDescription(args);
 		parseOptions(args);
+		Codon.mapping();
 		
-		ArrayList<BAMSRecord> records = ParseRecord.parse(inputFile);
-		chunkSize = (records.size() / (10 * threadNum) ) +1;
-		ArrayList<Task> tasks = null;
+		ArrayList<SequenceRecord> records = ParseRecord.parse(inputFile);
+		
+		//// Prepare tasks
+		ArrayList<Task> tasks = new ArrayList<Task>();
 		if(mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
-			tasks = Task.divideTasks(records, chunkSize);
+			// estimate library size
+			if(libSize == 0) {
+				tasks.addAll(Task.getLibSizeTask(records));
+			}
+			// target mode
+			chunkSize = (records.size() / (10 * threadNum) ) +1;
+			tasks.addAll(Task.getTargetModeTasks(records, chunkSize));
 		} else if(mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
-			tasks = Task.getFullTask(records);
+			tasks.addAll(Task.getScanModeTasks(records));
 		}
+		////
 		
+		//// Enroll tasks on a thread pool
 		ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
 		List<Worker> callableExList = new ArrayList<>();
-		int workerIdx = 1;
 		for(int i=0; i<tasks.size(); i++) {
 			Task task = tasks.get(i);
-			callableExList.add(new Worker(workerIdx++, task));
+			callableExList.add(new Worker(task));
 		}
 		
 		executorService.invokeAll(callableExList);
 		executorService.shutdown();
+		//// End of tasks
 		
 		System.out.println("Done all tasks!");
+		
+		// calculate library size
+		if(libSize == 0) {
+			for(Task task : tasks) {
+				libSize += task.processedReads;
+			}
+		}
 		
 		if(mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
 			ParseRecord.writeRecords(records, outputFile);
@@ -151,6 +170,13 @@ public class Scan {
 				.desc("consider that I is equivalent to L (only avaiable in scan mode)")
 				.build();
 		
+		Option optionLibSize = Option.builder("l")
+				.longOpt("lib_size").argName("int")
+				.required(false)
+				.desc("library size to calculate RPHM value." +
+						"\nif this option is not used, then it estimates the library size automatically. This estimation takes additional time for target mode.")
+				.build();
+		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
 		.addOption(optionMode)
@@ -158,7 +184,8 @@ public class Scan {
 		.addOption(optionBam)
 		.addOption(optionThread)
 		.addOption(optionPrimary)
-		.addOption(optionIL);
+		.addOption(optionIL)
+		.addOption(optionLibSize);
 		
 		CommandLineParser parser = new DefaultParser();
 	    HelpFormatter helper = new HelpFormatter();
@@ -213,6 +240,10 @@ public class Scan {
 		    	} else {
 		    		count = Constants.COUNT_ALL;
 		    	}
+		    }
+		    
+		    if(cmd.hasOption("l")) {
+		    	libSize = Double.parseDouble(cmd.getOptionValue("l"));
 		    }
 		    
 		} catch (ParseException e) {
