@@ -183,9 +183,19 @@ public class LocationInformation {
 		String cigarStr = samRecord.getCigarString();
 		// unmapped reads
 		if(cigarStr.equalsIgnoreCase("*")) {
+			// 
 			lInfo.location = Constants.NULL;
+			lInfo.strand = Constants.NULL.charAt(0);
 			lInfo.obsNucleotide = nucleotide.substring(startPos, endPos);
 			lInfo.refNucleotide = reference.substring(startPos, endPos);
+			
+			if(strand == '-') {
+				StringBuilder reverse = new StringBuilder(lInfo.obsNucleotide).reverse();
+				lInfo.obsNucleotide = reverse.toString();
+				
+				reverse = new StringBuilder(lInfo.refNucleotide).reverse();
+				lInfo.refNucleotide = reverse.toString();
+			}
 			return lInfo;
 		}
 		
