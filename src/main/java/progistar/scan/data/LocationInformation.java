@@ -45,6 +45,10 @@ public class LocationInformation {
 		} else if(strand == '-') {
 			this.obsPeptide = Translator.translation(Translator.getReverseComplement(this.obsNucleotide), 0);
 		}
+		// if a strand is not defined, it should save forward strand nucleotide
+		else if(strand == Constants.NULL.charAt(0)) {
+			this.obsPeptide = Translator.translation(this.obsNucleotide, 0);
+		}
 	}
 	
 	public void calMutation () {
@@ -190,12 +194,10 @@ public class LocationInformation {
 			lInfo.refNucleotide = reference.substring(startPos, endPos);
 			
 			if(strand == '-') {
-				StringBuilder reverse = new StringBuilder(lInfo.obsNucleotide).reverse();
-				lInfo.obsNucleotide = reverse.toString();
-				
-				reverse = new StringBuilder(lInfo.refNucleotide).reverse();
-				lInfo.refNucleotide = reverse.toString();
+				lInfo.obsNucleotide = Translator.getReverseComplement(lInfo.obsNucleotide);
+				lInfo.refNucleotide = Translator.getReverseComplement(lInfo.refNucleotide);
 			}
+			
 			return lInfo;
 		}
 		

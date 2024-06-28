@@ -9,6 +9,8 @@ import java.util.regex.Pattern;
 import org.ahocorasick.trie.Emit;
 import org.ahocorasick.trie.Trie;
 
+import com.sun.tools.javac.main.Option;
+
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SAMTag;
