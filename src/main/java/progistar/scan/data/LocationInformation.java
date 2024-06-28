@@ -48,8 +48,8 @@ public class LocationInformation {
 			
 			try {
 				// unmapped location
-				if(location.equalsIgnoreCase("-")) {
-					this.mutation = "-";
+				if(location.equalsIgnoreCase(Constants.NULL)) {
+					this.mutation = Constants.NULL;
 				} else {
 					String chr = location.split("\\:")[0];
 					String[] fields = location.split("\\:")[1].split("\\-");
@@ -69,13 +69,13 @@ public class LocationInformation {
 								mutation.type = Constants.CLP;
 							} 
 							// insertion
-							else if(this.refNucleotide.charAt(mPos) == '-') {
+							else if(this.refNucleotide.charAt(mPos) == '.') {
 								j--;
 								mutation.genomicPosition = j;
 								mutation.type = Constants.INS;
 							}
 							// deletion
-							else if(this.obsNucleotide.charAt(mPos) == '-') {
+							else if(this.obsNucleotide.charAt(mPos) == '.') {
 								mutation.type = Constants.DEL;
 							}
 							// snp
@@ -96,7 +96,7 @@ public class LocationInformation {
 		}
 		
 		if(mutations.size() == 0) {
-			this.mutation = "-";
+			this.mutation = Constants.NULL;
 		} else {
 			this.mutation = "";
 			for(int i=0; i<mutations.size()-1; i++) {
