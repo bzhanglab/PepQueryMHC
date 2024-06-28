@@ -3,11 +3,9 @@ package progistar.scan.run;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -17,10 +15,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import progistar.scan.data.SequenceRecord;
 import progistar.scan.data.Codon;
 import progistar.scan.data.Constants;
 import progistar.scan.data.ParseRecord;
+import progistar.scan.data.SequenceRecord;
 
 public class Scan {
 
@@ -47,6 +45,7 @@ public class Scan {
 	public static String unmmapedMarker = null;
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
+		
 		long startTime = System.currentTimeMillis();
 		printDescription(args);
 		parseOptions(args);

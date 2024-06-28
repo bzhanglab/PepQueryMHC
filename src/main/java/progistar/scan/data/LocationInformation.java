@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 import progistar.scan.function.Translator;
+import progistar.scan.function.Utils;
+import progistar.scan.run.Scan;
 
 public class LocationInformation {
 	public String inputSequence;
@@ -22,7 +24,7 @@ public class LocationInformation {
 	}
 	
 	public String getRes () {
-		return location+"\t"+mutation+"\t"+strand+"\t"+obsNucleotide+"\t"+obsPeptide+"\t"+refNucleotide+"\t"+readCount;
+		return location+"\t"+mutation+"\t"+strand+"\t"+obsNucleotide+"\t"+obsPeptide+"\t"+refNucleotide+"\t"+readCount+"\t"+Utils.getRPHM((double)readCount);
 	}
 	
 	public void calMetaInfo () {

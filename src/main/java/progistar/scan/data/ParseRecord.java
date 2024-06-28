@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 
 import progistar.scan.function.Translator;
+import progistar.scan.function.Utils;
 import progistar.scan.run.Scan;
 import progistar.scan.run.Task;
 
@@ -154,9 +155,9 @@ public class ParseRecord {
 		BufferedWriter BWPeptCount = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".pept_count.tsv"));
 		
 		// write header
-		BW.append(SequenceRecord.header+"\t"+SequenceRecord.fileName);
+		BW.append(SequenceRecord.header+"\tReadCount\tRPHM");
 		BW.newLine();
-		BWPeptCount.append("Sequence\tReadCount");
+		BWPeptCount.append("Sequence\tReadCount\tRPHM");
 		BWPeptCount.newLine();
 		
 		Hashtable<String, Long> readCountsPeptLevel = new Hashtable<String, Long>();
@@ -166,7 +167,7 @@ public class ParseRecord {
 			
 			long readCnt = record.readCnt;
 			for(int j=0; j<record.records.size(); j++) {
-				BW.append(record.records.get(j)).append("\t"+readCnt);
+				BW.append(record.records.get(j)).append("\t"+readCnt+"\t"+Utils.getRPHM((double)readCnt));
 				BW.newLine();
 			}
 			
@@ -180,7 +181,7 @@ public class ParseRecord {
 		
 		readCountsPeptLevel.forEach((sequence, reads)->{
 			try {
-				BWPeptCount.append(sequence+"\t"+reads);
+				BWPeptCount.append(sequence+"\t"+reads+"\t"+Utils.getRPHM((double)reads));
 				BWPeptCount.newLine();
 			}catch(IOException ioe) {
 				
@@ -218,14 +219,14 @@ public class ParseRecord {
 		}
 		
 		// write header
-		BW.append(SequenceRecord.header+"\tLocation\tMutations\tStrand\tObsNucleotide\tObsPeptide\tRefNucleotide\tReadCount");
+		BW.append(SequenceRecord.header+"\tLocation\tMutations\tStrand\tObsNucleotide\tObsPeptide\tRefNucleotide\tReadCount\tRPHM");
 		BW.newLine();
-		BWGenomicTuple.append("ObsPeptide\tLocation\tStrand\tReadCount");
+		BWGenomicTuple.append("ObsPeptide\tLocation\tStrand\tReadCount\tPRHM");
 		BWGenomicTuple.newLine();
 		
 		BWNotFound.append(SequenceRecord.header+"\tLocation");
 		BWNotFound.newLine();
-		BWPeptCount.append("ObsPeptide\tReadCount");
+		BWPeptCount.append("ObsPeptide\tReadCount\tRPHM");
 		BWPeptCount.newLine();
 		
 		// write records
@@ -292,7 +293,7 @@ public class ParseRecord {
 		
 		readCountsPeptLevel.forEach((sequence, reads)->{
 			try {
-				BWPeptCount.append(sequence+"\t"+reads);
+				BWPeptCount.append(sequence+"\t"+reads+"\t"+Utils.getRPHM((double)reads));
 				BWPeptCount.newLine();
 			}catch(IOException ioe) {
 				
@@ -303,7 +304,7 @@ public class ParseRecord {
 		
 		readCountsTupleLevel.forEach((tupleKey, reads)->{
 			try {
-				BWGenomicTuple.append(tupleKey+"\t"+reads);
+				BWGenomicTuple.append(tupleKey+"\t"+reads+"\t"+Utils.getRPHM((double)reads));
 				BWGenomicTuple.newLine();
 			}catch(IOException ioe) {
 				
