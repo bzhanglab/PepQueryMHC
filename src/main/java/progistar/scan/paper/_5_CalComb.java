@@ -5,7 +5,7 @@ import java.util.Hashtable;
 
 public class _5_CalComb {
 
-	public static Hashtable<Character, Double> loadTable() {
+	public static Hashtable<Character, Double> loadTable(boolean isILEqual) {
 		Hashtable<Character, Double> table = new Hashtable<Character, Double>();
 		
 		table.put('F', 2.);
@@ -29,6 +29,14 @@ public class _5_CalComb {
 		table.put('R', 6.);
 		table.put('G', 4.);
 		
+		// for I = L
+		if(isILEqual) {
+			double sum = table.get('I') +table.get('L');
+			table.put('L', sum);
+			table.put('I', sum);
+		}
+		
+		
 		return table;
 	}
 	
@@ -44,7 +52,7 @@ public class _5_CalComb {
 	}
 	
 	public static void main(String[] args) throws IOException {
-		Hashtable<Character, Double> table = loadTable();
+		Hashtable<Character, Double> table = loadTable(false);
 		// check
 		double[] sum = new double[1];
 		table.forEach((AA, val)->{

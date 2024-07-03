@@ -1,22 +1,15 @@
 package progistar.scan.function;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.ahocorasick.trie.Emit;
 import org.ahocorasick.trie.Trie;
 
-import com.sun.tools.javac.main.Option;
-
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
-import htsjdk.samtools.SAMTag;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
-import progistar.scan.data.SequenceRecord;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LocationInformation;
 import progistar.scan.run.Scan;

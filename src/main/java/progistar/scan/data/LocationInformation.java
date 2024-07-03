@@ -1,7 +1,6 @@
 package progistar.scan.data;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

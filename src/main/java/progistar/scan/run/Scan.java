@@ -40,6 +40,7 @@ public class Scan {
 	public static double libSize = 0;
 	public static boolean isILEqual = false;
 
+	public static boolean isRandom = false;
 	public static int threadNum = 4;
 	public static int chunkSize = 100;
 	public static String unmmapedMarker = null;
@@ -166,7 +167,7 @@ public class Scan {
 		Option optionIL = Option.builder("e")
 				.longOpt("equal").argName("")
 				.required(false)
-				.desc("consider that I is equivalent to L (only avaiable in scan mode)")
+				.desc("consider that I is equivalent to L (only available in scan mode).")
 				.build();
 		
 		Option optionLibSize = Option.builder("l")
@@ -177,6 +178,12 @@ public class Scan {
 						"\nif this option is not used, then it estimates the library size automatically. This estimation takes additional time for target mode.")
 				.build();
 		
+		Option optionRandomDist = Option.builder("r")
+				.longOpt("random").argName("")
+				.required(false)
+				.desc("generate and match reversed sequence to find a random distribution (only available in scan mode).")
+				.build();
+		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
 		.addOption(optionMode)
@@ -185,7 +192,8 @@ public class Scan {
 		.addOption(optionThread)
 		.addOption(optionPrimary)
 		.addOption(optionIL)
-		.addOption(optionLibSize);
+		.addOption(optionLibSize)
+		.addOption(optionRandomDist);
 		
 		CommandLineParser parser = new DefaultParser();
 	    HelpFormatter helper = new HelpFormatter();
@@ -228,6 +236,10 @@ public class Scan {
 		    	isILEqual = true;
 		    }
 		    
+		    if(cmd.hasOption("r")) {
+		    	isRandom = true;
+		    }
+		    
 		    if(cmd.hasOption("@")) {
 		    	threadNum = Integer.parseInt(cmd.getOptionValue("@"));
 		    }
@@ -268,6 +280,15 @@ public class Scan {
 				} else {
 					System.out.println("This is target mode or nucleotide input. IL option is ignored.");
 					isILEqual = false;
+				}
+			}
+			
+			if(isRandom) {
+				if(mode.equalsIgnoreCase(Constants.MODE_SCAN) && sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
+					System.out.println("Generate random sequences.");
+				} else {
+					System.out.println("This is target mode or nucleotide input. Generation of random distribution is ignored.");
+					isRandom = false;
 				}
 			}
 		}

@@ -21,6 +21,7 @@ public class SequenceRecord {
 	public int start = 0;
 	public int end = 0;
 	public String chr = null;
+	public boolean isRandom = false;
 	
 	public int readCnt = 0;
 	
@@ -44,10 +45,6 @@ public class SequenceRecord {
 		
 		for(SequenceRecord record : records) {
 			String sequence = record.sequence;
-			if(Scan.isILEqual) {
-				sequence = sequence.replace("I", "L");
-			}
-			
 			if(rmDups.get(sequence) == null) {
 				sequences.add(sequence);
 				rmDups.put(sequence, "");

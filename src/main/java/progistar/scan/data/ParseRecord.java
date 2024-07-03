@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import progistar.scan.function.Random;
 import progistar.scan.function.Translator;
 import progistar.scan.function.Utils;
 import progistar.scan.run.Scan;
@@ -30,7 +31,7 @@ public class ParseRecord {
 	public static ArrayList<SequenceRecord> parse (File file) throws IOException {
 		ArrayList<SequenceRecord> records = new ArrayList<SequenceRecord>();
 		BufferedReader BR = new BufferedReader(new FileReader(file));
-		Hashtable<String, SequenceRecord> indxedRecords = new Hashtable<String, SequenceRecord>();
+		Hashtable<String, SequenceRecord> indexedRecords = new Hashtable<String, SequenceRecord>();
 		String line = null;
 		
 		SequenceRecord.header = BR.readLine();
@@ -106,10 +107,10 @@ public class ParseRecord {
 				
 				String key = record.getKey();
 				
-				SequenceRecord indexedRecord = indxedRecords.get(key);
+				SequenceRecord indexedRecord = indexedRecords.get(key);
 				if(indexedRecord == null) {
 					indexedRecord = record;
-					indxedRecords.put(key, indexedRecord);
+					indexedRecords.put(key, indexedRecord);
 					records.add(indexedRecord);
 				}
 				indexedRecord.records.add(line);
@@ -120,19 +121,41 @@ public class ParseRecord {
 				String sequence = fields[obsSeqIdx];
 				
 				SequenceRecord record = new SequenceRecord();
-				record.sequence = sequence;
+				record.sequence = Scan.isILEqual ? sequence.replace("I", "L") : sequence;
 				record.strand = Constants.NULL;
 				record.location = Constants.NULL;
 				
 				String key = record.getKey();
 				
-				SequenceRecord indexedRecord = indxedRecords.get(key);
+				SequenceRecord indexedRecord = indexedRecords.get(key);
 				if(indexedRecord == null) {
 					indexedRecord = record;
-					indxedRecords.put(key, indexedRecord);
+					indexedRecords.put(key, indexedRecord);
 					records.add(indexedRecord);
 				}
 				indexedRecord.records.add(line);
+			}
+			
+			if(Scan.isRandom) {
+				indexedRecords.forEach((key, record)->{
+					SequenceRecord rRecord = new SequenceRecord();
+					rRecord.sequence = Random.getReverseSequence(record.sequence);
+					rRecord.strand = Constants.NULL;
+					rRecord.location = Constants.NULL;
+					rRecord.isRandom = true;
+					
+					if(indexedRecords.get(rRecord.getKey()) == null) {
+						records.add(rRecord);
+					}
+				});
+				
+				int numOfRandomSequences = 0;
+				for(SequenceRecord record : records) {
+					if(record.isRandom) {
+						numOfRandomSequences ++;
+					}
+				}
+				System.out.println("The number of "+numOfRandomSequences+" random sequences were generated.");
 			}
 		}
 		
@@ -207,6 +230,7 @@ public class ParseRecord {
 		BufferedWriter BWGenomicTuple = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".gloc.tsv"));
 		BufferedWriter BWNotFound = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".not_found.tsv"));
 		BufferedWriter BWPeptCount = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".pept_count.tsv"));
+		
 		LocTable locTable = new LocTable();
 		
 		// union information
@@ -229,30 +253,41 @@ public class ParseRecord {
 		BWPeptCount.append("ObsPeptide\tReadCount\tRPHM");
 		BWPeptCount.newLine();
 		
+		
 		// write records
 		// unique observed sequence.
 		Hashtable<String, Long> readCountsPeptLevel = new Hashtable<String, Long>();
+		Hashtable<String, Long> readCountsRandomPeptLevel = new Hashtable<String, Long>();
 		Hashtable<String, Long> readCountsTupleLevel = new Hashtable<String, Long>();
 		Hashtable<String, Boolean> isUniqueCal = new Hashtable<String, Boolean>();
 		
 		for(int i=0; i<records.size(); i++) {
 			SequenceRecord record = records.get(i);
 			String sequence = record.sequence;
-			
-			// IL equal mode
-			if(Scan.isILEqual) {
-				sequence = sequence.replace("I", "L");
-			}
-			
 			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
 			
-			// if we process with I=L option, 
-			// then redundant peptides can be appeared and counted multiple times
-			if(isUniqueCal.get(sequence) == null) {
-				for(LocationInformation location : locations) {
-					long readCount = location.readCount;
-					// it must be calculated once!
-					// peptide level count
+			// the records must be an unique items!
+			if(isUniqueCal.get(sequence) != null) {
+				System.err.println("Severe: the records is not unique!");
+			}
+			isUniqueCal.put(sequence, true);
+			
+			for(LocationInformation location : locations) {
+				long readCount = location.readCount;
+				// it must be calculated once!
+				// peptide level count
+				
+				// random count
+				if(record.isRandom) {
+					Long sumReads = readCountsRandomPeptLevel.get(location.obsPeptide);
+					if(sumReads == null) {
+						sumReads = 0L;
+					}
+					sumReads += readCount;
+					readCountsRandomPeptLevel.put(location.obsPeptide, sumReads);
+				} 
+				// non-random count
+				else {
 					Long sumReads = readCountsPeptLevel.get(location.obsPeptide);
 					if(sumReads == null) {
 						sumReads = 0L;
@@ -269,20 +304,26 @@ public class ParseRecord {
 					sumReads += readCount;
 					readCountsTupleLevel.put(tupleKey, sumReads);
 				}
-				isUniqueCal.put(sequence, true);
 			}
+			
+			
 			
 			// if there are duplicated records, then this size > 1
 			// if there is no duplication, then this size = 1
-			for(int j=0; j<record.records.size(); j++) {
-				if(locations.size() == 0) {
-					BWNotFound.append(record.records.get(j)).append("\tNot found");
-					BWNotFound.newLine();
-				} else {
-					for(LocationInformation location : locations) {
-						// full information (including genomic sequence)
-						BW.append(record.records.get(j)).append("\t"+location.getRes());
-						BW.newLine();
+			
+			// pass random sequence
+			// random sequences are only written in the peptide count.
+			if(!record.isRandom) {
+				for(int j=0; j<record.records.size(); j++) {
+					if(locations.size() == 0) {
+						BWNotFound.append(record.records.get(j)).append("\tNot found");
+						BWNotFound.newLine();
+					} else {
+						for(LocationInformation location : locations) {
+							// full information (including genomic sequence)
+							BW.append(record.records.get(j)).append("\t"+location.getRes());
+							BW.newLine();
+						}
 					}
 				}
 			}
@@ -311,6 +352,26 @@ public class ParseRecord {
 			}
  		});
 		BWGenomicTuple.close();
+		
+		
+		
+		// if calculate random distribution is on :
+		if(Scan.isRandom) {
+			BufferedWriter BWRandomPeptCount = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".pept_count.random.tsv"));
+			BWRandomPeptCount.append("rObsPeptide\tReadCount\tRPHM");
+			BWRandomPeptCount.newLine();
+			readCountsRandomPeptLevel.forEach((sequence, reads)->{
+				try {
+					BWRandomPeptCount.append(sequence+"\t"+reads+"\t"+Utils.getRPHM((double)reads));
+					BWRandomPeptCount.newLine();
+				}catch(IOException ioe) {
+					
+				}
+	 		});
+			
+			BWRandomPeptCount.close();
+			
+		}
 	}
 	
 	private static void writeLibSize (File file) throws IOException {
