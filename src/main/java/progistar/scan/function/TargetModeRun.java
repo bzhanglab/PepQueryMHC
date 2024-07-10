@@ -90,7 +90,6 @@ public class TargetModeRun {
             	if(cnt == null) {
             		cnt = 0;
             	}
-            	
             	record.readCnt += cnt;
             });
             
@@ -99,7 +98,10 @@ public class TargetModeRun {
 			System.exit(1);
 		}
 		long endTime = System.currentTimeMillis();
-		System.out.println("Task"+task.taskIdx+" "+(endTime-startTime)/1000+" sec");
+		
+		if(Scan.verbose) {
+			System.out.println("Task"+task.taskIdx+" "+(endTime-startTime)/1000+" sec");
+		}
 	}
 	
 	
@@ -132,7 +134,10 @@ public class TargetModeRun {
 			System.exit(1);
 		}
 		long endTime = System.currentTimeMillis();
-		System.out.println(task.taskIdx+" "+(endTime-startTime)/1000+" sec");
+		
+		if(Scan.verbose) {
+			System.out.println(task.taskIdx+" "+(endTime-startTime)/1000+" sec");
+		}
 	}
 	
 	private static int find (SAMRecordIterator iterator, SequenceRecord record, Trie trie, boolean included) {
@@ -206,7 +211,10 @@ public class TargetModeRun {
 		}
 		
 		long endTime = System.currentTimeMillis();
-		System.out.println("Task"+task.taskIdx+" "+(endTime-startTime)/1000+" sec");
+		
+		if(Scan.verbose) {
+			System.out.println("Task"+task.taskIdx+" "+(endTime-startTime)/1000+" sec");
+		}
 	}
 	
 

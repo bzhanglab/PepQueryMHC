@@ -184,6 +184,7 @@ public class ParseRecord {
 		BWPeptCount.newLine();
 		
 		Hashtable<String, Long> readCountsPeptLevel = new Hashtable<String, Long>();
+		
 		// write records
 		for(int i=0; i<records.size(); i++) {
 			SequenceRecord record = records.get(i);
@@ -250,14 +251,18 @@ public class ParseRecord {
 		
 		BWNotFound.append(SequenceRecord.header+"\tLocation");
 		BWNotFound.newLine();
-		BWPeptCount.append("ObsPeptide\tReadCount\tRPHM");
+		BWPeptCount.append("ObsPeptide\tReadCount\tRPHM\tNumLocations");
 		BWPeptCount.newLine();
 		
 		
 		// write records
 		// unique observed sequence.
 		Hashtable<String, Long> readCountsPeptLevel = new Hashtable<String, Long>();
+		Hashtable<String, Integer> locationsPeptLevel = new Hashtable<String, Integer>();
+		
 		Hashtable<String, Long> readCountsRandomPeptLevel = new Hashtable<String, Long>();
+		Hashtable<String, Integer> locationsRandomPeptLevel = new Hashtable<String, Integer>();
+		
 		Hashtable<String, Long> readCountsTupleLevel = new Hashtable<String, Long>();
 		Hashtable<String, Boolean> isUniqueCal = new Hashtable<String, Boolean>();
 		
@@ -266,7 +271,7 @@ public class ParseRecord {
 			String sequence = record.sequence;
 			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
 			
-			// the records must be an unique items!
+			// the records must be an unique item!
 			if(isUniqueCal.get(sequence) != null) {
 				System.err.println("Severe: the records is not unique!");
 			}
@@ -285,6 +290,7 @@ public class ParseRecord {
 					}
 					sumReads += readCount;
 					readCountsRandomPeptLevel.put(location.obsPeptide, sumReads);
+					locationsRandomPeptLevel.put(location.obsPeptide, locations.size());
 				} 
 				// non-random count
 				else {
@@ -294,6 +300,7 @@ public class ParseRecord {
 					}
 					sumReads += readCount;
 					readCountsPeptLevel.put(location.obsPeptide, sumReads);
+					locationsPeptLevel.put(location.obsPeptide, locations.size());
 					
 					// tuple level count
 					String tupleKey = location.obsPeptide+"\t"+location.location+"\t"+location.strand;
@@ -334,7 +341,7 @@ public class ParseRecord {
 		
 		readCountsPeptLevel.forEach((sequence, reads)->{
 			try {
-				BWPeptCount.append(sequence+"\t"+reads+"\t"+Utils.getRPHM((double)reads));
+				BWPeptCount.append(sequence+"\t"+reads+"\t"+Utils.getRPHM((double)reads)+"\t"+locationsPeptLevel.get(sequence));
 				BWPeptCount.newLine();
 			}catch(IOException ioe) {
 				
@@ -358,11 +365,11 @@ public class ParseRecord {
 		// if calculate random distribution is on :
 		if(Scan.isRandom) {
 			BufferedWriter BWRandomPeptCount = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".pept_count.random.tsv"));
-			BWRandomPeptCount.append("rObsPeptide\tReadCount\tRPHM");
+			BWRandomPeptCount.append("rObsPeptide\tReadCount\tRPHM\tNumLocations");
 			BWRandomPeptCount.newLine();
 			readCountsRandomPeptLevel.forEach((sequence, reads)->{
 				try {
-					BWRandomPeptCount.append(sequence+"\t"+reads+"\t"+Utils.getRPHM((double)reads));
+					BWRandomPeptCount.append(sequence+"\t"+reads+"\t"+Utils.getRPHM((double)reads)+"\t"+locationsRandomPeptLevel.get(sequence));
 					BWRandomPeptCount.newLine();
 				}catch(IOException ioe) {
 					

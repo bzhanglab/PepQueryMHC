@@ -99,7 +99,7 @@ public class Task {
 		System.out.println("Complete building Trie");
 		
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
-			System.out.println(samReader.getFileHeader().getSequenceDictionary().getSequences().get(0).getSequenceLength());
+			//System.out.println(samReader.getFileHeader().getSequenceDictionary().getSequences().get(0).getSequenceLength());
 			List<SAMSequenceRecord> chromosomes = samReader.getFileHeader().getSequenceDictionary().getSequences();
 			for(SAMSequenceRecord chromosome : chromosomes) {
 				// System.out.println(chromosome.getSAMString());
@@ -164,7 +164,7 @@ public class Task {
 		System.out.println("=> "+(mappedSize/chunkSize+1) +" tasks");
 		System.out.println("Unmapped records: "+unmappedSize);
 		//System.out.println("=> "+(unmappedSize/chunkSize+1) +" tasks");
-		System.out.println("=> "+(1) +" tasks");
+		System.out.println("=> "+(1) +" task");
 		
 		// generate unmapped tasks
 		int sIdx = 0;

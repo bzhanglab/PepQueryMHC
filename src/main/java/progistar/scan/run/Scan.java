@@ -40,6 +40,7 @@ public class Scan {
 	public static double libSize = 0;
 	public static boolean isILEqual = false;
 
+	public static boolean verbose = false;
 	public static boolean isRandom = false;
 	public static int threadNum = 4;
 	public static int chunkSize = 100;
@@ -184,6 +185,12 @@ public class Scan {
 				.desc("generate and match reversed sequence to find a random distribution (only available in scan mode).")
 				.build();
 		
+		Option optionVerbose = Option.builder("v")
+				.longOpt("verbose").argName("")
+				.required(false)
+				.desc("print every messages being processed.")
+				.build();
+		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
 		.addOption(optionMode)
@@ -193,7 +200,8 @@ public class Scan {
 		.addOption(optionPrimary)
 		.addOption(optionIL)
 		.addOption(optionLibSize)
-		.addOption(optionRandomDist);
+		.addOption(optionRandomDist)
+		.addOption(optionVerbose);
 		
 		CommandLineParser parser = new DefaultParser();
 	    HelpFormatter helper = new HelpFormatter();
@@ -254,6 +262,10 @@ public class Scan {
 		    	}
 		    }
 		    
+		    if(cmd.hasOption("v")) {
+		    	verbose = true;
+		    }
+		    
 		    if(cmd.hasOption("l")) {
 		    	libSize = Double.parseDouble(cmd.getOptionValue("l"));
 		    }
@@ -274,6 +286,9 @@ public class Scan {
 			System.out.println("Mode: "+mode);
 			System.out.println("Count: "+count);
 			System.out.println("Threads: "+threadNum);
+			if(verbose) {
+				System.out.println("Verbose messages");
+			}
 			if(isILEqual) {
 				if(mode.equalsIgnoreCase(Constants.MODE_SCAN) && sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
 					System.out.println("I and L are equivalent!");

@@ -19,7 +19,9 @@ public class ScanModeRun {
 	
 	public static void runScanMode (Task task) {
 		if(task.type == Constants.TYPE_SCAN_MODE_TASK) {
-			System.out.println(task.chrName+":"+task.start+"-"+task.end);
+			if(Scan.verbose) {
+				System.out.println(task.chrName+":"+task.start+"-"+task.end);
+			}
 			scanReads(task);
 		}
 	}
@@ -42,7 +44,9 @@ public class ScanModeRun {
 		}
 		
 		long endTime = System.currentTimeMillis();
-		System.out.println("Task"+task.taskIdx+" "+(endTime-startTime)/1000+" sec");
+		if(Scan.verbose) {
+			System.out.println("Task"+task.taskIdx+" "+(endTime-startTime)/1000+" sec");
+		}
 	}
 	
 	
