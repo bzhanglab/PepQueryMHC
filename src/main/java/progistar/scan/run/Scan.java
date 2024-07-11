@@ -3,6 +3,7 @@ package progistar.scan.run;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -68,7 +69,9 @@ public class Scan {
 		} else if(mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
 			tasks.addAll(Task.getScanModeTasks(records));
 		}
-		////
+		//// sort tasks by descending order
+		// Priority: Library > Unmapped > Mapped
+		Collections.sort(tasks);
 		
 		//// Enroll tasks on a thread pool
 		ExecutorService executorService = Executors.newFixedThreadPool(threadNum);

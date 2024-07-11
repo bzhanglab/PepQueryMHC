@@ -11,11 +11,11 @@ import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SAMSequenceRecord;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
-import progistar.scan.data.SequenceRecord;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LocTable;
+import progistar.scan.data.SequenceRecord;
 
-public class Task {
+public class Task implements Comparable<Task> {
 
 	public int taskIdx = -1;
 	public int type = Constants.TYPE_TARGET_MODE_MAPPED_TASK;
@@ -241,5 +241,17 @@ public class Task {
 		}
 		
 		return tasks;
+	}
+
+	@Override
+	public int compareTo(Task o) {
+		// TODO Auto-generated method stub
+		if(this.type < o.type) {
+			return 1;
+		} else if(this.type > o.type) {
+			return -1;
+		}
+		
+		return 0;
 	}
 }
