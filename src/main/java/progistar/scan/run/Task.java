@@ -51,6 +51,11 @@ public class Task {
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		
 		int divider = Scan.threadNum * Scan.chunkSize;
+		// if unmapped reads?
+		// only number of threads will be partitioned
+		if(chrName.equalsIgnoreCase(Constants.NULL)) {
+			divider = Scan.threadNum;
+		}
 		int size = end - start + 1;
 		int interval = Math.max( (size / divider) + 1, 100000);
 		
