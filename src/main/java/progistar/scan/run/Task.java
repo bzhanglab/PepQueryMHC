@@ -250,6 +250,10 @@ public class Task implements Comparable<Task> {
 			return 1;
 		} else if(this.type > o.type) {
 			return -1;
+		} else if(this.readType < o.readType) {
+			return 1;
+		} else if(this.readType > o.readType) {
+			return -1;
 		}
 		
 		return 0;

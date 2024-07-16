@@ -23,7 +23,7 @@ public class SequenceRecord {
 	public String chr = null;
 	public boolean isRandom = false;
 	
-	public int readCnt = 0;
+	public Hashtable<String, Long> readCounts = new Hashtable<String, Long>();
 	
 	public String getKey () {
 		return (sequence+"_"+location+"_"+strand);

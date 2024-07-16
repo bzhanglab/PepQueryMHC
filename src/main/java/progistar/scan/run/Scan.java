@@ -16,6 +16,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import htsjdk.samtools.util.Log;
 import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Codon;
 import progistar.scan.data.Constants;
@@ -50,7 +51,10 @@ public class Scan {
 	public static int chunkSize = 100;
 	public static String unmmapedMarker = null;
 	
+	
 	public static void main(String[] args) throws IOException, InterruptedException {
+		Log.setGlobalLogLevel(Log.LogLevel.ERROR);
+		Log.setGlobalPrintStream(null);
 		
 		long startTime = System.currentTimeMillis();
 		printDescription(args);

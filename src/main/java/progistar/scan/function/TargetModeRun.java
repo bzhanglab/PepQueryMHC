@@ -11,6 +11,7 @@ import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
+import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LocationInformation;
 import progistar.scan.data.SequenceRecord;
@@ -37,7 +38,7 @@ public class TargetModeRun {
 			// for unmapped reads
 			Trie trie = SequenceRecord.getTrie(task.records);
 			
-			Hashtable<String, Integer> totalCounts = new Hashtable<String, Integer>();
+			Hashtable<String, Hashtable<String, Long>> totalCounts = new Hashtable<String, Hashtable<String, Long>>();
 			SAMRecordIterator iterator = samReader.queryUnmapped();
 			while (iterator.hasNext()) {
                 SAMRecord samRecord = iterator.next();
@@ -45,6 +46,8 @@ public class TargetModeRun {
                 if(Scan.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
                 	continue;
                 }
+                
+                String barcodeId = BarcodeTable.getBarcodeFromBam(samRecord);
                 
                 // Process each SAM record
                 String frSequence = samRecord.getReadString();
@@ -70,27 +73,32 @@ public class TargetModeRun {
                 
                 // save findings
             	for(Emit emit : emits) {
-            		findings.put(emit.getKeyword(), "");
+            		findings.put(emit.getKeyword(), barcodeId);
             	}
             	
             	// increase +1
-            	findings.forEach((peptide, nil)->{
-            		Integer cnt = totalCounts.get(peptide);
-            		if(cnt == null) {
-            			cnt = 0;
+            	findings.forEach((peptide, id)->{
+            		Hashtable<String, Long> counts = totalCounts.get(peptide);
+            		if(counts == null) {
+            			counts = new Hashtable<String, Long>();
+            			totalCounts.put(peptide, counts);
             		}
-            		totalCounts.put(peptide, cnt+1);
+            		
+            		Long val = counts.get(id);
+            		if(val == null) {
+            			val = 0L;
+            		}
+            		counts.put(id, val + 1);
             	});
             	
             }
             iterator.close();
             
             task.records.forEach(record -> {
-            	Integer cnt = totalCounts.get(record.sequence);
-            	if(cnt == null) {
-            		cnt = 0;
+            	Hashtable<String, Long> counts = totalCounts.get(record.sequence);
+            	if(counts != null) {
+            		record.readCounts = counts;
             	}
-            	record.readCnt += cnt;
             });
             
 		} catch(Exception e) {
@@ -140,11 +148,22 @@ public class TargetModeRun {
 		}
 	}
 	
+	/**
+	 * trie has a single sequence.
+	 * 
+	 * @param iterator
+	 * @param record
+	 * @param trie
+	 * @param included
+	 * @return
+	 */
 	private static int find (SAMRecordIterator iterator, SequenceRecord record, Trie trie, boolean included) {
 		int leastCount = 0;
 		char strand = record.strand.charAt(0);
 		while (iterator.hasNext()) {
             SAMRecord samRecord = iterator.next();
+            LocationInformation matchedLocation = null;
+            
             
             if(Scan.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
             	continue;
@@ -156,7 +175,7 @@ public class TargetModeRun {
             	Collection<Emit> emits = trie.parseText(sequence);
         		
         		for(Emit emit : emits) {
-    				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, 0, strand);
+    				matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, 0, strand);
     				matchedLocation.inputSequence = emit.getKeyword();
     				if(record.location.equalsIgnoreCase(matchedLocation.location)) {
     					isFound = true;
@@ -173,9 +192,10 @@ public class TargetModeRun {
             		Collection<Emit> emits = trie.parseText(peptide);
             		
             		for(Emit emit : emits) {
-        				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, fr, strand);
+        				matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, fr, strand);
         				if(record.location.equalsIgnoreCase(matchedLocation.location)) {
         					isFound = true;
+        					fr = 3;
         					break;
         				}
         			}
@@ -183,7 +203,13 @@ public class TargetModeRun {
             }
             
             if(isFound) {
-            	record.readCnt++;
+            	matchedLocation.readCounts.forEach((barcodeId, value)->{
+            		Long val = record.readCounts.get(barcodeId);
+            		if(val == null) {
+            			val = 0L;
+            		}
+            		record.readCounts.put(barcodeId, value + val);
+            	});
             	leastCount++;
             }
             

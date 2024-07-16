@@ -20,7 +20,7 @@ public class Constants {
 	
 	//
 	public static final int MAPPED_READS		=	1;
-	public static final int UNMAPPED_READS		=	-1;
+	public static final int UNMAPPED_READS		=	2;
 	
 	public static final byte EXON = 30;
 	public static final byte CDS = 100;
@@ -59,4 +59,8 @@ public class Constants {
 	public static final byte INS			=	1;
 	public static final byte DEL			=	2;
 	public static final byte CLP			=	3;
+	
+	public static final String DEFAULT_BARCODE_ID	=	"ReadCount";
+	public static final String NULL_BARCODE_ID	=	"Null";
+	public static final String OTHER_BARCODE_ID	=	"Others";
 }

@@ -1,6 +1,7 @@
 package progistar.scan.data;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -24,7 +25,7 @@ public class LocationInformation {
 	public String refNucleotide;
 	public String obsPeptide;
 	public String refPeptide;
-	public long readCount = 1;
+	public Hashtable<String, Long> readCounts = new Hashtable<String, Long>();
 	public char strand;
 	
 	public String getKey () {
@@ -32,7 +33,20 @@ public class LocationInformation {
 	}
 	
 	public String getRes () {
-		return location+"\t"+mutation+"\t"+strand+"\t"+obsNucleotide+"\t"+obsPeptide+"\t"+refNucleotide+"\t"+readCount+"\t"+Utils.getRPHM((double)readCount);
+		if(Scan.isSingleCellMode) {
+			StringBuilder str = new StringBuilder(location+"\t"+mutation+"\t"+strand+"\t"+obsNucleotide+"\t"+obsPeptide+"\t"+refNucleotide);
+			for(String barcodeId : BarcodeTable.barcodeIds) {
+				Long read = readCounts.get(barcodeId);
+				if(read == null) {
+					read = 0L;
+				}
+				str.append("\t").append(read);
+			}
+			return str.toString();
+		} else {
+			Long read = readCounts.get(Constants.DEFAULT_BARCODE_ID);
+			return location+"\t"+mutation+"\t"+strand+"\t"+obsNucleotide+"\t"+obsPeptide+"\t"+refNucleotide+"\t"+read+"\t"+Utils.getRPHM((double)read);
+		}
 	}
 	
 	public void calMetaInfo () {
@@ -153,6 +167,7 @@ public class LocationInformation {
 	public static LocationInformation getMatchedLocation (SAMRecord samRecord, Emit emit, int frame, char strand) {
 		boolean isMD = true;
 		Object mdTag = samRecord.getAttribute(SAMTag.MD);
+		String barcodeId = BarcodeTable.getBarcodeFromBam(samRecord);
 		
 		if(mdTag == null) {
 			isMD = false;
@@ -160,6 +175,7 @@ public class LocationInformation {
 		
 		LocationInformation lInfo = new LocationInformation();
 		lInfo.strand = strand;
+		lInfo.readCounts.put(barcodeId, 1L);
 		
 		String nucleotide = samRecord.getReadString();
 		String reference = getRefSequence(samRecord);

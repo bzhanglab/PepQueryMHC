@@ -18,7 +18,13 @@ public class LocTable {
 			gTable.put(lInfo.getKey(), lInfo);
 			return true;
 		} else {
-			slInfo.readCount += lInfo.readCount;
+			lInfo.readCounts.forEach((barcodeId, value)->{
+				Long val = slInfo.readCounts.get(barcodeId);
+				if(val == null) {
+					val = 0L;
+				}
+				slInfo.readCounts.put(barcodeId, (value + val));
+			});
 		}
 		
 		return false;
