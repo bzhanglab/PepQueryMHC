@@ -13,6 +13,7 @@ import java.util.Iterator;
 import progistar.scan.function.Random;
 import progistar.scan.function.Translator;
 import progistar.scan.function.Utils;
+import progistar.scan.function.Validation;
 import progistar.scan.run.Scan;
 import progistar.scan.run.Task;
 
@@ -64,6 +65,11 @@ public class ParseRecord {
 				String sequence = fields[obsSeqIdx];
 				String genomicLoci = fields[genomicLociIdx];
 				String strand = fields[strandIdx];
+				
+				// if the sequence is invalid
+				if(!Validation.checkValidSequence(sequence)) {
+					continue;
+				}
 				
 				SequenceRecord record = new SequenceRecord();
 				record.sequence = sequence;
@@ -120,6 +126,11 @@ public class ParseRecord {
 			while((line = BR.readLine()) != null) {
 				String[] fields = line.split("\t");
 				String sequence = fields[obsSeqIdx];
+				
+				// if the sequence is invalid
+				if(!Validation.checkValidSequence(sequence)) {
+					continue;
+				}
 				
 				SequenceRecord record = new SequenceRecord();
 				record.sequence = Scan.isILEqual ? sequence.replace("I", "L") : sequence;
@@ -216,6 +227,9 @@ public class ParseRecord {
 					}
 				} else {
 					Long read = readCounts.get(Constants.DEFAULT_BARCODE_ID);
+					if(read == null) {
+						read = 0L;
+					}
 					BW.append(record.records.get(j)).append("\t"+read+"\t"+Utils.getRPHM((double)read));
 				}
 				BW.newLine();

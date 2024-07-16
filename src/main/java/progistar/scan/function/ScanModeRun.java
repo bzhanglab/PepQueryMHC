@@ -10,6 +10,7 @@ import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
+import htsjdk.samtools.ValidationStringency;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LocationInformation;
 import progistar.scan.run.Scan;

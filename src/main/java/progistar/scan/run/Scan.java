@@ -16,6 +16,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import htsjdk.samtools.SamReaderFactory;
+import htsjdk.samtools.ValidationStringency;
 import htsjdk.samtools.util.Log;
 import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Codon;
@@ -53,9 +55,6 @@ public class Scan {
 	
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
-		Log.setGlobalLogLevel(Log.LogLevel.ERROR);
-		Log.setGlobalPrintStream(null);
-		
 		long startTime = System.currentTimeMillis();
 		printDescription(args);
 		parseOptions(args);

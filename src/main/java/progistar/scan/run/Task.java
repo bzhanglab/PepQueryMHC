@@ -11,6 +11,7 @@ import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SAMSequenceRecord;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
+import htsjdk.samtools.ValidationStringency;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LocTable;
 import progistar.scan.data.SequenceRecord;
@@ -102,7 +103,6 @@ public class Task implements Comparable<Task> {
 		System.out.println("Build Trie");
 		Task.allTrie = SequenceRecord.getTrie(records);
 		System.out.println("Complete building Trie");
-		
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			//System.out.println(samReader.getFileHeader().getSequenceDictionary().getSequences().get(0).getSequenceLength());
 			List<SAMSequenceRecord> chromosomes = samReader.getFileHeader().getSequenceDictionary().getSequences();
