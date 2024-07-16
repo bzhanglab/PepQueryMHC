@@ -16,6 +16,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Codon;
 import progistar.scan.data.Constants;
 import progistar.scan.data.ParseRecord;
@@ -35,12 +36,14 @@ public class Scan {
 	public static File inputFile = null;
 	public static File bamFile = null;
 	public static File outputFile	   = null;
+	public static File whitelistFile = null;
 	public static String mode	=	Constants.MODE_TARGET;
 	public static String sequence	=	Constants.SEQUENCE_PEPTIDE;
 	public static String count	=	Constants.COUNT_PRIMARY;
 	public static double libSize = 0;
+	
 	public static boolean isILEqual = false;
-
+	public static boolean isSingleCellMode = false;
 	public static boolean verbose = false;
 	public static boolean isRandom = false;
 	public static int threadNum = 4;
@@ -53,6 +56,10 @@ public class Scan {
 		printDescription(args);
 		parseOptions(args);
 		Codon.mapping();
+		// single cell barcode
+		if(isSingleCellMode) {
+			BarcodeTable.load();
+		}
 		
 		ArrayList<SequenceRecord> records = ParseRecord.parse(inputFile);
 		
@@ -194,6 +201,13 @@ public class Scan {
 				.desc("print every messages being processed.")
 				.build();
 		
+		Option optionWhiteList = Option.builder("w")
+				.longOpt("whitelist").argName("file path")
+				.hasArg()
+				.required(false)
+				.desc("cell barcode list (tsv)")
+				.build();
+		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
 		.addOption(optionMode)
@@ -204,7 +218,8 @@ public class Scan {
 		.addOption(optionIL)
 		.addOption(optionLibSize)
 		.addOption(optionRandomDist)
-		.addOption(optionVerbose);
+		.addOption(optionVerbose)
+		.addOption(optionWhiteList);
 		
 		CommandLineParser parser = new DefaultParser();
 	    HelpFormatter helper = new HelpFormatter();
@@ -273,6 +288,11 @@ public class Scan {
 		    	libSize = Double.parseDouble(cmd.getOptionValue("l"));
 		    }
 		    
+		    if(cmd.hasOption("w")) {
+		    	whitelistFile = new File(cmd.getOptionValue("w"));
+		    	isSingleCellMode = true;
+		    }
+		    
 		} catch (ParseException e) {
 			System.out.println(e.getMessage());
 			isFail = true;
@@ -285,6 +305,11 @@ public class Scan {
 			System.out.println("Input file name: "+inputFile.getName());
 			System.out.println("BAM/SAM file name: "+bamFile.getName());
 			System.out.println("Output file name: "+outputFile.getName());
+
+			if(whitelistFile != null) {
+				System.out.println("White-list file name: "+whitelistFile.getName() +" (single-cell mode)");
+				
+			}
 			System.out.println("Type: "+sequence);
 			System.out.println("Mode: "+mode);
 			System.out.println("Count: "+count);
@@ -309,6 +334,7 @@ public class Scan {
 					isRandom = false;
 				}
 			}
+			
 		}
 		System.out.println();
 	}
