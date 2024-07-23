@@ -320,7 +320,7 @@ public class ParseRecord {
 			
 		} else {
 			BW.append(SequenceRecord.header+"\tLocation\tMutations\tStrand\tObsNucleotide\tObsPeptide\tRefNucleotide\tReadCount\tRPHM");
-			BWGenomicTuple.append("ObsPeptide\tLocation\tStrand\tReadCount\tPRHM");
+			BWGenomicTuple.append("ObsPeptide\tLocation\tStrand\tReadCount\tRPHM");
 			BWPeptCount.append("ObsPeptide\tNumLocations\tReadCount\tRPHM");
 		}
 		BW.newLine();
