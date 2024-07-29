@@ -105,10 +105,12 @@ public class ScanModeRun {
             		
             		for(Emit emit : emits) {
         				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, 0, strandChar);
-        				matchedLocation.inputSequence = emit.getKeyword();
-        				
-        				if(task.locTable.putLocation(matchedLocation)) {
-        					matchedLocation.calMetaInfo();
+        				if(matchedLocation != null) {
+        					matchedLocation.inputSequence = emit.getKeyword();
+        					
+        					if(task.locTable.putLocation(matchedLocation)) {
+        						matchedLocation.calMetaInfo();
+        					}
         				}
         			}
             	} else if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
@@ -123,10 +125,12 @@ public class ScanModeRun {
             			
             			for(Emit emit : emits) {
             				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, fr, strandChar);
-            				matchedLocation.inputSequence = emit.getKeyword();
-            				
-            				if(task.locTable.putLocation(matchedLocation)) {
-            					matchedLocation.calMetaInfo();
+            				if(matchedLocation != null) {
+            					matchedLocation.inputSequence = emit.getKeyword();
+            					
+            					if(task.locTable.putLocation(matchedLocation)) {
+            						matchedLocation.calMetaInfo();
+            					}
             				}
             			}
             		}

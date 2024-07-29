@@ -3,6 +3,7 @@ package progistar.scan.function;
 import java.io.File;
 import java.util.Collection;
 import java.util.Hashtable;
+import java.util.LinkedList;
 
 import org.ahocorasick.trie.Emit;
 import org.ahocorasick.trie.Trie;
@@ -11,7 +12,6 @@ import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
-import htsjdk.samtools.ValidationStringency;
 import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LocationInformation;
@@ -54,23 +54,87 @@ public class TargetModeRun {
                 String frSequence = samRecord.getReadString();
                 String rcSequence = Translator.getReverseComplement(frSequence);
                 Hashtable<String, String> findings = new Hashtable<String, String>();
-                Collection<Emit> emits = null;
+                Collection<Emit> emits = new LinkedList<Emit>();
                 if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE)) {
-                	emits = trie.parseText(frSequence);
-                	emits.addAll(trie.parseText(rcSequence));
+                	
+                	// forward strand //
+            		Collection<Emit> tmpEmits = trie.parseText(frSequence);
+            		for(Emit emit : tmpEmits) {
+            			int startPos = emit.getStart();
+            			int endPos = emit.getEnd()+1;
+            			
+            			// if pass the quality control
+            			if(PhredQualityCheck.isPass(samRecord, startPos, endPos)) {
+            				emits.add(emit);
+            			}
+            		}
+            		/////////////////////
+            		
+            		// reverse strand //
+            		tmpEmits = trie.parseText(rcSequence);
+            		for(Emit emit : tmpEmits) {
+            			int startPos = emit.getStart();
+            			int endPos = emit.getEnd()+1;
+            			
+            			// reverse the position
+            			int len = samRecord.getReadString().length();
+            			int tmp = len - startPos;
+            			startPos = len - endPos;
+            			endPos = tmp;
+            			
+            			// if pass the quality control
+            			if(PhredQualityCheck.isPass(samRecord, startPos, endPos)) {
+            				emits.add(emit);
+            			}
+            		}
+            		///////////
                 } else if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
                 	for(int fr=0; fr<3; fr++) {
-                		String peptide = Translator.translation(frSequence, fr);
-                		if(emits == null) {
-                			emits = trie.parseText(peptide);
-                		} else {
-                			emits.addAll(trie.parseText(peptide));
-                		}
                 		
+                		// forward strand //
+                		String peptide = Translator.translation(frSequence, fr);
+                		Collection<Emit> tmpEmits = trie.parseText(peptide);
+                		for(Emit emit : tmpEmits) {
+                			int startPos = emit.getStart();
+                			int endPos = emit.getEnd()+1;
+                			
+                			// convert to nt position
+                			startPos = (startPos) * 3 + fr;
+                			endPos = (endPos) * 3 + fr;
+                			
+                			// if pass the quality control
+                			if(PhredQualityCheck.isPass(samRecord, startPos, endPos)) {
+                				emits.add(emit);
+                			}
+                		}
+                		/////////////////////
+                		
+                		// reverse strand //
                 		peptide = Translator.translation(rcSequence, fr);
-                		emits.addAll(trie.parseText(peptide));
+                		tmpEmits = trie.parseText(peptide);
+                		for(Emit emit : tmpEmits) {
+                			int startPos = emit.getStart();
+                			int endPos = emit.getEnd()+1;
+                			
+                			// convert to nt position
+                			startPos = (startPos) * 3 + fr;
+                			endPos = (endPos) * 3 + fr;
+                			
+                			// reverse the position
+                			int len = samRecord.getReadString().length();
+                			int tmp = len - startPos;
+                			startPos = len - endPos;
+                			endPos = tmp;
+                			
+                			// if pass the quality control
+                			if(PhredQualityCheck.isPass(samRecord, startPos, endPos)) {
+                				emits.add(emit);
+                			}
+                		}
+                		///////////
                 	}
                 }
+                
                 
                 // save findings
             	for(Emit emit : emits) {
@@ -177,10 +241,12 @@ public class TargetModeRun {
         		
         		for(Emit emit : emits) {
     				matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, 0, strand);
-    				matchedLocation.inputSequence = emit.getKeyword();
-    				if(record.location.equalsIgnoreCase(matchedLocation.location)) {
-    					isFound = true;
-    					break;
+    				if(matchedLocation != null) {
+    					matchedLocation.inputSequence = emit.getKeyword();
+    					if(record.location.equalsIgnoreCase(matchedLocation.location)) {
+    						isFound = true;
+    						break;
+    					}
     				}
     			}
             } else if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
@@ -194,10 +260,12 @@ public class TargetModeRun {
             		
             		for(Emit emit : emits) {
         				matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, fr, strand);
-        				if(record.location.equalsIgnoreCase(matchedLocation.location)) {
-        					isFound = true;
-        					fr = 3;
-        					break;
+        				if(matchedLocation != null) {
+        					if(record.location.equalsIgnoreCase(matchedLocation.location)) {
+        						isFound = true;
+        						fr = 3;
+        						break;
+        					}
         				}
         			}
             	}

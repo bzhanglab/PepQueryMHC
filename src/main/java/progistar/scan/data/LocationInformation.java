@@ -9,6 +9,7 @@ import org.ahocorasick.trie.Emit;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMTag;
+import progistar.scan.function.PhredQualityCheck;
 import progistar.scan.function.Translator;
 import progistar.scan.function.Utils;
 import progistar.scan.run.Scan;
@@ -157,7 +158,8 @@ public class LocationInformation {
 	/**
 	 * 
 	 * Return genomic location of a given sequence.<br>
-	 * If there is no available position in the SAMRecord, return ".".
+	 * If there is no available position in the SAMRecord, return ".". <br>
+	 * If the sequence contains low quality position-specific Phred score, than it return null.
 	 * 
 	 * @param samRecord
 	 * @param emit
@@ -197,6 +199,12 @@ public class LocationInformation {
 			int tmp = len - startPos;
 			startPos = len - endPos;
 			endPos = tmp;
+		}
+		
+		// check quality
+		boolean isPass = PhredQualityCheck.isPass(samRecord, startPos, endPos);
+		if(!isPass) {
+			return null;
 		}
 		
 		String cigarStr = samRecord.getCigarString();

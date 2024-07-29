@@ -51,6 +51,7 @@ public class Scan {
 	public static boolean isRandom = false;
 	public static int threadNum = 4;
 	public static int chunkSize = 100;
+	public static int phredThreshold = 20;
 	public static String unmmapedMarker = null;
 	
 	
@@ -211,6 +212,13 @@ public class Scan {
 				.desc("cell barcode list (tsv)")
 				.build();
 		
+		Option optionPhredThreshold = Option.builder("p")
+				.longOpt("phred").argName("int")
+				.hasArg()
+				.required(false)
+				.desc("discard reads below than a given Phred quality (default is 20).")
+				.build();
+		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
 		.addOption(optionMode)
@@ -222,7 +230,8 @@ public class Scan {
 		.addOption(optionLibSize)
 		.addOption(optionRandomDist)
 		.addOption(optionVerbose)
-		.addOption(optionWhiteList);
+		.addOption(optionWhiteList)
+		.addOption(optionPhredThreshold);
 		
 		CommandLineParser parser = new DefaultParser();
 	    HelpFormatter helper = new HelpFormatter();
@@ -296,6 +305,10 @@ public class Scan {
 		    	isSingleCellMode = true;
 		    }
 		    
+		    if(cmd.hasOption("p")) {
+		    	phredThreshold = Integer.parseInt(cmd.getOptionValue("p"));
+		    }
+		    
 		} catch (ParseException e) {
 			System.out.println(e.getMessage());
 			isFail = true;
@@ -316,6 +329,7 @@ public class Scan {
 			System.out.println("Type: "+sequence);
 			System.out.println("Mode: "+mode);
 			System.out.println("Count: "+count);
+			System.out.println("Phred: "+phredThreshold);
 			System.out.println("Threads: "+threadNum);
 			if(verbose) {
 				System.out.println("Verbose messages");
