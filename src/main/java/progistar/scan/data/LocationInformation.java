@@ -185,7 +185,6 @@ public class LocationInformation {
 		StringBuilder obsSequenceGivenRegion = new StringBuilder();
 		StringBuilder refSequenceGivenRegion = new StringBuilder();
 		
-		// [startPos, endPos] zero-based
 		int startPos = emit.getStart();
 		int endPos = emit.getEnd()+1;
 		
@@ -200,6 +199,8 @@ public class LocationInformation {
 			startPos = len - endPos;
 			endPos = tmp;
 		}
+		
+		// [startPos, endPos) zero-based
 		
 		// check quality
 		boolean isPass = PhredQualityCheck.isPass(samRecord, startPos, endPos);

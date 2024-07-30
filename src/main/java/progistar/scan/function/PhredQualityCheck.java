@@ -10,7 +10,7 @@ public class PhredQualityCheck {
 		boolean isPass = true;
 		String phredQuality = record.getBaseQualityString();
 		
-		for(int i=start; i<=end; i++) {
+		for(int i=start; i<end; i++) {
 			int score = (int)phredQuality.charAt(i);
 			score -= 33; // Phred33
 			
