@@ -24,6 +24,7 @@ import progistar.scan.data.Codon;
 import progistar.scan.data.Constants;
 import progistar.scan.data.ParseRecord;
 import progistar.scan.data.SequenceRecord;
+import progistar.scan.function.CheckMemory;
 
 public class Scan {
 
@@ -56,7 +57,11 @@ public class Scan {
 	
 	
 	public static void main(String[] args) throws IOException, InterruptedException {
+		// performance metrics //
 		long startTime = System.currentTimeMillis();
+		long peakMemory = CheckMemory.checkUsedMemoryMB();
+		/////////////////////////
+		
 		printDescription(args);
 		parseOptions(args);
 		Codon.mapping();
@@ -90,6 +95,9 @@ public class Scan {
 		for(int i=0; i<tasks.size(); i++) {
 			Task task = tasks.get(i);
 			callableExList.add(new Worker(task));
+			
+			// check peak memory
+			peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
 		}
 		
 		executorService.invokeAll(callableExList);
@@ -97,6 +105,8 @@ public class Scan {
 		//// End of tasks
 		
 		System.out.println("Done all tasks!");
+		// check peak memory
+		peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
 		
 		// calculate library size
 		if(libSize == 0) {
@@ -111,8 +121,11 @@ public class Scan {
 			ParseRecord.writeRecords(records, outputFile, tasks);
 		}
 		
+		// check peak memory
+		peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
 		long endTime = System.currentTimeMillis();
 		System.out.println("Total Elapsed Time: "+(endTime-startTime)/1000+" sec");
+		System.out.println("Estimated Peak Memory: "+peakMemory +" MB");
 	}
 	
 	
