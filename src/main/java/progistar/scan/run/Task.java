@@ -31,6 +31,10 @@ public class Task implements Comparable<Task> {
 	public int start;
 	public int end;
 	
+	// estimated memory usage
+	public long peakMemory = 0;
+	
+	
 	public String getTaskInfo () {
 		String typeStr = "target mode (mapped)";
 		if(type == Constants.TYPE_TARGET_MODE_UNMAPPED_TASK) {

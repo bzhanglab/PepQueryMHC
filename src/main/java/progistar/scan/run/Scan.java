@@ -95,10 +95,10 @@ public class Scan {
 		for(int i=0; i<tasks.size(); i++) {
 			Task task = tasks.get(i);
 			callableExList.add(new Worker(task));
-			
-			// check peak memory
-			peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
 		}
+		
+		// check peak memory
+		peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
 		
 		executorService.invokeAll(callableExList);
 		executorService.shutdown();
@@ -108,9 +108,11 @@ public class Scan {
 		// check peak memory
 		peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
 		
-		// calculate library size
-		if(libSize == 0) {
-			for(Task task : tasks) {
+		for(Task task : tasks) {
+			// update peak memory from the tasks.
+			peakMemory = Math.max(peakMemory, task.peakMemory);
+			// calculate library size
+			if(libSize == 0) {
 				libSize += task.processedReads;
 			}
 		}
@@ -123,6 +125,7 @@ public class Scan {
 		
 		// check peak memory
 		peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
+		
 		long endTime = System.currentTimeMillis();
 		System.out.println("Total Elapsed Time: "+(endTime-startTime)/1000+" sec");
 		System.out.println("Estimated Peak Memory: "+peakMemory +" MB");
