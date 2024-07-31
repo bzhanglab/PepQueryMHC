@@ -23,6 +23,7 @@ import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Codon;
 import progistar.scan.data.Constants;
 import progistar.scan.data.ParseRecord;
+import progistar.scan.data.Phred;
 import progistar.scan.data.SequenceRecord;
 import progistar.scan.function.CheckMemory;
 
@@ -52,7 +53,20 @@ public class Scan {
 	public static boolean isRandom = false;
 	public static int threadNum = 4;
 	public static int chunkSize = 100;
-	public static int phredThreshold = 20;
+	
+	// read quality control ///////////////////
+	/**
+	 * single base cutoff
+	 * @deprecated
+	 */
+	public static int singleBaseThreshold = 20;
+	
+	/**
+	 * ROI base cutoff
+	 */
+	public static double ROIErrorThreshold = 0.05;
+	///////////////////////////////////////////
+	
 	public static String unmmapedMarker = null;
 	
 	
@@ -65,6 +79,7 @@ public class Scan {
 		printDescription(args);
 		parseOptions(args);
 		Codon.mapping();
+		Phred.loadTable(); // load phred table
 		// single cell barcode
 		if(isSingleCellMode) {
 			BarcodeTable.load();
@@ -232,10 +247,10 @@ public class Scan {
 				.build();
 		
 		Option optionPhredThreshold = Option.builder("p")
-				.longOpt("phred").argName("int")
+				.longOpt("prob").argName("float")
 				.hasArg()
 				.required(false)
-				.desc("discard reads below than a given Phred quality (default is 20).")
+				.desc("ignore ROIs (region of interests) with greater than a given error probability (default is 0.05).")
 				.build();
 		
 		options.addOption(optionInput)
@@ -325,7 +340,7 @@ public class Scan {
 		    }
 		    
 		    if(cmd.hasOption("p")) {
-		    	phredThreshold = Integer.parseInt(cmd.getOptionValue("p"));
+		    	ROIErrorThreshold = Double.parseDouble(cmd.getOptionValue("p"));
 		    }
 		    
 		} catch (ParseException e) {
@@ -348,7 +363,7 @@ public class Scan {
 			System.out.println("Type: "+sequence);
 			System.out.println("Mode: "+mode);
 			System.out.println("Count: "+count);
-			System.out.println("Phred: "+phredThreshold);
+			System.out.println("ROI cutoff: "+ROIErrorThreshold);
 			System.out.println("Threads: "+threadNum);
 			if(verbose) {
 				System.out.println("Verbose messages");
