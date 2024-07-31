@@ -107,12 +107,15 @@ public class Scan {
 		System.out.println("Done all tasks!");
 		// check peak memory
 		peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
-		
+
+		// update peak memory from the tasks.
 		for(Task task : tasks) {
-			// update peak memory from the tasks.
 			peakMemory = Math.max(peakMemory, task.peakMemory);
-			// calculate library size
-			if(libSize == 0) {
+		}
+		
+		// calculate library size
+		if(libSize == 0) {
+			for(Task task : tasks) {
 				libSize += task.processedReads;
 			}
 		}
