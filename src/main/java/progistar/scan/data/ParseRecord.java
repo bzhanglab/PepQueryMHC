@@ -149,16 +149,23 @@ public class ParseRecord {
 			}
 			
 			if(Scan.isRandom) {
+				Hashtable<String, Boolean> randomSequenceHash = new Hashtable<String, Boolean>();
 				indexedRecords.forEach((key, record)->{
-					SequenceRecord rRecord = new SequenceRecord();
-					rRecord.sequence = Random.getReverseSequence(record.sequence);
-					rRecord.strand = Constants.NULL;
-					rRecord.location = Constants.NULL;
-					rRecord.isRandom = true;
+					ArrayList<String> randomSequences = Random.getRandomSequences(record.sequence);
 					
-					if(indexedRecords.get(rRecord.getKey()) == null) {
-						records.add(rRecord);
+					for(String randomSequence : randomSequences) {
+						SequenceRecord rRecord = new SequenceRecord();
+						rRecord.sequence = randomSequence;
+						rRecord.strand = Constants.NULL;
+						rRecord.location = Constants.NULL;
+						rRecord.isRandom = true;
+						
+						if(indexedRecords.get(rRecord.getKey()) == null && randomSequenceHash.get(rRecord.getKey()) == null) {
+							randomSequenceHash.put(rRecord.getKey(), true);
+							records.add(rRecord);
+						}
 					}
+					
 				});
 				
 				int numOfRandomSequences = 0;
