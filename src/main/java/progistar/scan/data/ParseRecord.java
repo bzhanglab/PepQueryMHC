@@ -148,41 +148,13 @@ public class ParseRecord {
 				}
 				indexedRecord.records.add(line);
 			}
-			
-			if(Scan.isRandom) {
-				Hashtable<String, Boolean> randomSequenceHash = new Hashtable<String, Boolean>();
-				indexedRecords.forEach((key, record)->{
-					ArrayList<String> randomSequences = Random.getRandomSequences(record.sequence);
-					
-					for(String randomSequence : randomSequences) {
-						SequenceRecord rRecord = new SequenceRecord();
-						rRecord.sequence = randomSequence;
-						rRecord.strand = Constants.NULL;
-						rRecord.location = Constants.NULL;
-						rRecord.isRandom = true;
-						
-						if(indexedRecords.get(rRecord.getKey()) == null && randomSequenceHash.get(rRecord.getKey()) == null) {
-							randomSequenceHash.put(rRecord.getKey(), true);
-							records.add(rRecord);
-						}
-					}
-				});
-				
-				int numOfRandomSequences = 0;
-				for(SequenceRecord record : records) {
-					if(record.isRandom) {
-						numOfRandomSequences ++;
-					}
-				}
-				System.out.println("The number of "+numOfRandomSequences+" random sequences were generated.");
-			}
-			
 		}
 		
 		// set longestLengthOfInputSequences
 		for(SequenceRecord record : records) {
 			Scan.longestSequenceLen = Math.max(record.sequence.length(), Scan.longestSequenceLen);
 		}
+		System.out.println("Records without duplication: "+records.size());
 		System.out.println("Longest length of input sequences: "+Scan.longestSequenceLen);
 		
 		
@@ -197,53 +169,32 @@ public class ParseRecord {
 	 * @param file
 	 * @throws IOException
 	 */
-	public static void writeRecords2 (ArrayList<SequenceRecord> records, File file, ArrayList<Task> tasks) throws IOException {
-		writeLibSize(file);
-		
-		BufferedWriter BW = new BufferedWriter(new FileWriter(file));
-		BufferedWriter BWGenomicTuple = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".gloc.tsv"));
-		BufferedWriter BWNotFound = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".not_found.tsv"));
-
-		LocTable locTable = new LocTable();
-		
-		// union information
-		for(Task task : tasks) {
-			task.locTable.table.forEach((sequence, lInfos) -> {
-				lInfos.forEach((key, lInfo)->{
-					locTable.putLocation(lInfo);
-				});
-			});
-		}
+	public static void writeMainOutput (ArrayList<SequenceRecord> records, String baseOutputPath, LocTable locTable) throws IOException {
+		writeLibSize(new File(baseOutputPath+".libsize.tsv"));
+		BufferedWriter BW = new BufferedWriter(new FileWriter(baseOutputPath+"."+Scan.mode+".tsv"));
+		BufferedWriter BWMiss = new BufferedWriter(new FileWriter(baseOutputPath+".miss.tsv"));
 		
 		// write header
+		BW.append(SequenceRecord.header +
+				"\t" + Constants.MATCHED_LOCATION +
+				"\t" + Constants.MATCHED_MUTATIONS +
+				"\t" + Constants.MATCHED_STRAND +
+				"\t" + Constants.MATCHED_PEPTIDE +
+				"\t" + Constants.MATCHED_NUCLEOTIDE +
+				"\t" + Constants.MATCHED_REFNUCLEOTIDE);
 		if(Scan.isSingleCellMode) {
-			BW.append(SequenceRecord.header+"\tLocation\tMutations\tStrand\tObsNucleotide\tObsPeptide\tRefNucleotide");
-			BWGenomicTuple.append("ObsPeptide\tLocation\tStrand");
 			// append barcode ids in whitelist
 			for(String barcodeId : BarcodeTable.barcodeIds) {
 				BW.append("\t").append(barcodeId);
-				BWGenomicTuple.append("\t").append(barcodeId);
 			}
-			
 		} else {
-			BW.append(SequenceRecord.header+"\tLocation\tMutations\tStrand\tObsNucleotide\tObsPeptide\tRefNucleotide\tReadCount\tRPHM");
-			BWGenomicTuple.append("ObsPeptide\tLocation\tStrand\tReadCount\tRPHM");
+			BW.append("\t" + Constants.MATCHED_READ_COUNT +
+					"\t" + Constants.MATCHED_RPHM);
 		}
 		BW.newLine();
-		BWGenomicTuple.newLine();
 		
-		BWNotFound.append(SequenceRecord.header+"\tLocation");
-		BWNotFound.newLine();
-		
-		// write records
-		// unique observed sequence.
-		Hashtable<String, Hashtable<String, Long>> readCountsPeptLevel = new Hashtable<String, Hashtable<String, Long>>();
-		Hashtable<String, Integer> locationsPeptLevel = new Hashtable<String, Integer>();
-		
-		Hashtable<String, Hashtable<String, Long>> readCountsRandomPeptLevel = new Hashtable<String, Hashtable<String, Long>>();
-		Hashtable<String, Integer> locationsRandomPeptLevel = new Hashtable<String, Integer>();
-		
-		Hashtable<String, Hashtable<String, Long>> readCountsTupleLevel = new Hashtable<String, Hashtable<String, Long>>();
+		BWMiss.append(SequenceRecord.header);
+		BWMiss.newLine();
 		
 		for(int i=0; i<records.size(); i++) {
 			SequenceRecord record = records.get(i);
@@ -251,16 +202,67 @@ public class ParseRecord {
 			
 			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
 			
-			for(LocationInformation location : locations) {
-				if(!record.location.equalsIgnoreCase(location.location)) {
-					continue;
+			for(int j=0; j<record.records.size(); j++) {
+				if(locations.size() == 0) {
+					BWMiss.append(record.records.get(j));
+					BWMiss.newLine();
+				} else {
+					for(LocationInformation location : locations) {
+						// full information (including genomic sequence)
+						if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET) && 
+							!record.location.equalsIgnoreCase(location.location)) {
+							continue;
+						}
+						BW.append(record.records.get(j)).append("\t"+location.getRes());
+						BW.newLine();
+					}
 				}
+			}
+		}
+		BW.close();
+		BWMiss.close();
+	}
+	
+	public static void writeLocationLevelOutput (ArrayList<SequenceRecord> records, String baseOutputPath, LocTable locTable) throws IOException {
+		BufferedWriter BW = new BufferedWriter(new FileWriter(baseOutputPath+".gloc.tsv"));
+		
+		// define field index
+		BW.append(Constants.MATCHED_PEPTIDE +
+				"\t" + Constants.MATCHED_LOCATION +
+				"\t" + Constants.MATCHED_STRAND);
+		if(Scan.isSingleCellMode) {
+			// append barcode ids in whitelist
+			for(String barcodeId : BarcodeTable.barcodeIds) {
+				BW.append("\t").append(barcodeId);
+			}
+		} else {
+			BW.append("\t" + Constants.MATCHED_READ_COUNT +
+					"\t" + Constants.MATCHED_RPHM);
+		}
+		BW.newLine();
+		// end of header //
+		
+		// write records
+		// unique observed sequence.
+		Hashtable<String, Hashtable<String, Long>> readCountsTupleLevel = new Hashtable<String, Hashtable<String, Long>>();
+		
+		for(int i=0; i<records.size(); i++) {
+			SequenceRecord record = records.get(i);
+			String sequence = record.sequence;
+			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
+			
+			for(LocationInformation location : locations) {
+				if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET) && 
+						!record.location.equalsIgnoreCase(location.location)) {
+						continue;
+					}
+				
 				Hashtable<String, Long> readCounts = location.readCounts;
 				// it must be calculated once!
 				// peptide level count
 				
-				// random count
-				Hashtable<String, Long> sumReads = readCountsPeptLevel.get(location.obsPeptide);
+				String tupleKey = location.obsPeptide+"\t"+location.location+"\t"+location.strand;
+				Hashtable<String, Long> sumReads = readCountsTupleLevel.get(tupleKey);
 				if(sumReads == null) {
 					sumReads = new Hashtable<String, Long>();
 				}
@@ -275,333 +277,126 @@ public class ParseRecord {
 					sumReads.put(barcodeId, (readCounts.get(barcodeId) + val));
 				}
 				
-				readCountsPeptLevel.put(location.obsPeptide, sumReads);
-				locationsPeptLevel.put(location.obsPeptide, locations.size());
-				
-				// tuple level count
-				String tupleKey = location.obsPeptide+"\t"+location.location+"\t"+location.strand;
-				sumReads = readCountsTupleLevel.get(tupleKey);
-				if(sumReads == null) {
-					sumReads = new Hashtable<String, Long>();
-				}
-				
-				keys = (Iterator<String>) readCounts.keys();
-				while(keys.hasNext()) {
-					String barcodeId = keys.next();
-					Long val = sumReads.get(barcodeId);
-					if(val == null) {
-						val = 0L;
-					}
-					sumReads.put(barcodeId, (readCounts.get(barcodeId) + val));
-				}
-				
 				readCountsTupleLevel.put(tupleKey, sumReads);
 			}
 			
-			
-			for(int j=0; j<record.records.size(); j++) {
-				if(locations.size() == 0) {
-					BWNotFound.append(record.records.get(j)).append("\tNot found");
-					BWNotFound.newLine();
-				} else {
-					for(LocationInformation location : locations) {
-						// full information (including genomic sequence)
-						if(!record.location.equalsIgnoreCase(location.location)) {
-							continue;
-						}
-						BW.append(record.records.get(j)).append("\t"+location.getRes());
-						BW.newLine();
-					}
-				}
-			}
 		}
-		BW.close();
-		BWNotFound.close();
 		
 		readCountsTupleLevel.forEach((tupleKey, reads)->{
 			try {
 				if(Scan.isSingleCellMode) {
-					BWGenomicTuple.append(tupleKey);
+					BW.append(tupleKey);
 					for(String barcodeId : BarcodeTable.barcodeIds) {
 						Long read = reads.get(barcodeId);
 						if(read == null) {
 							read = 0L;
 						}
-						BWGenomicTuple.append("\t"+read);
+						BW.append("\t"+read);
 					}
 				} else {
 					Long read = reads.get(Constants.DEFAULT_BARCODE_ID);
-					BWGenomicTuple.append(tupleKey+"\t"+read+"\t"+Utils.getRPHM((double)read));
+					BW.append(tupleKey+"\t"+read+"\t"+Utils.getRPHM((double)read));
 				}
 				
-				BWGenomicTuple.newLine();
+				BW.newLine();
 			}catch(IOException ioe) {
 				
 			}
  		});
-		BWGenomicTuple.close();
-		// write statistics
-		WriteStatistics.write(file.getAbsolutePath()+".stat.tsv", records, readCountsPeptLevel, readCountsRandomPeptLevel);
+		BW.close();
 	}
 	
-	/**
-	 * For scan mode
-	 * 
-	 * @param records
-	 * @param file
-	 * @param tasks
-	 * @throws IOException
-	 */
-	public static void writeRecords (ArrayList<SequenceRecord> records, File file, ArrayList<Task> tasks) throws IOException {
-		writeLibSize(file);
+	public static void writePeptideLevelOutput (ArrayList<SequenceRecord> records, String baseOutputPath, LocTable locTable) throws IOException {
+		BufferedWriter BW = new BufferedWriter(new FileWriter(baseOutputPath+".peptide.tsv"));
 		
-		BufferedWriter BW = new BufferedWriter(new FileWriter(file));
-		BufferedWriter BWGenomicTuple = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".gloc.tsv"));
-		BufferedWriter BWNotFound = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".not_found.tsv"));
-		BufferedWriter BWPeptCount = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".pept_count.tsv"));
-		
-		LocTable locTable = new LocTable();
-		
-		// union information
-		for(Task task : tasks) {
-			task.locTable.table.forEach((sequence, lInfos) -> {
-				lInfos.forEach((key, lInfo)->{
-					locTable.putLocation(lInfo);
-				});
-			});
-		}
-		
-		// write header
+		// define field index
+		BW.append(Constants.MATCHED_PEPTIDE + "(" + Scan.union + ")" +
+				"\t" + Constants.MATCHED_NUM_LOCATION);
 		if(Scan.isSingleCellMode) {
-			BW.append(SequenceRecord.header+"\tLocation\tMutations\tStrand\tObsNucleotide\tObsPeptide\tRefNucleotide");
-			BWGenomicTuple.append("ObsPeptide\tLocation\tStrand");
-			BWPeptCount.append("ObsPeptide\tNumLocations");
-			
 			// append barcode ids in whitelist
 			for(String barcodeId : BarcodeTable.barcodeIds) {
 				BW.append("\t").append(barcodeId);
-				BWGenomicTuple.append("\t").append(barcodeId);
-				BWPeptCount.append("\t").append(barcodeId);
 			}
-			
 		} else {
-			BW.append(SequenceRecord.header+"\tLocation\tMutations\tStrand\tObsNucleotide\tObsPeptide\tRefNucleotide\tReadCount\tRPHM");
-			BWGenomicTuple.append("ObsPeptide\tLocation\tStrand\tReadCount\tRPHM");
-			BWPeptCount.append("ObsPeptide\tNumLocations\tReadCount\tRPHM");
+			BW.append("\t" + Constants.MATCHED_READ_COUNT +
+					"\t" + Constants.MATCHED_RPHM);
 		}
 		BW.newLine();
-		BWGenomicTuple.newLine();
-		
-		BWNotFound.append(SequenceRecord.header+"\tLocation");
-		BWNotFound.newLine();
-		BWPeptCount.newLine();
-		
+		// end of header //
 		
 		// write records
 		// unique observed sequence.
 		Hashtable<String, Hashtable<String, Long>> readCountsPeptLevel = new Hashtable<String, Hashtable<String, Long>>();
 		Hashtable<String, Integer> locationsPeptLevel = new Hashtable<String, Integer>();
 		
-		Hashtable<String, Hashtable<String, Long>> readCountsRandomPeptLevel = new Hashtable<String, Hashtable<String, Long>>();
-		Hashtable<String, Integer> locationsRandomPeptLevel = new Hashtable<String, Integer>();
-		
-		Hashtable<String, Hashtable<String, Long>> readCountsTupleLevel = new Hashtable<String, Hashtable<String, Long>>();
-		Hashtable<String, Boolean> isUniqueCal = new Hashtable<String, Boolean>();
-		
 		for(int i=0; i<records.size(); i++) {
 			SequenceRecord record = records.get(i);
 			String sequence = record.sequence;
 			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
 			
-			// the records must be an unique item!
-			if(isUniqueCal.get(sequence) != null) {
-				System.err.println("Severe: the records is not unique!");
-			}
-			isUniqueCal.put(sequence, true);
-			
 			for(LocationInformation location : locations) {
+				if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET) && 
+						!record.location.equalsIgnoreCase(location.location)) {
+						continue;
+					}
+				
 				Hashtable<String, Long> readCounts = location.readCounts;
 				// it must be calculated once!
 				// peptide level count
 				
-				// random count
-				if(record.isRandom) {
-					Hashtable<String, Long> sumReads = readCountsRandomPeptLevel.get(location.obsPeptide);
-					if(sumReads == null) {
-						sumReads = new Hashtable<String, Long>();
-					}
-					
-					Iterator<String> keys = (Iterator<String>) readCounts.keys();
-					while(keys.hasNext()) {
-						String barcodeId = keys.next();
-						Long val = sumReads.get(barcodeId);
-						if(val == null) {
-							val = 0L;
-						}
-						sumReads.put(barcodeId, (readCounts.get(barcodeId) + val));
-					}
-					
-					readCountsRandomPeptLevel.put(location.obsPeptide, sumReads);
-					locationsRandomPeptLevel.put(location.obsPeptide, locations.size());
-				} 
-				// non-random count
-				else {
-					Hashtable<String, Long> sumReads = readCountsPeptLevel.get(location.obsPeptide);
-					if(sumReads == null) {
-						sumReads = new Hashtable<String, Long>();
-					}
-					
-					Iterator<String> keys = (Iterator<String>) readCounts.keys();
-					while(keys.hasNext()) {
-						String barcodeId = keys.next();
-						Long val = sumReads.get(barcodeId);
-						if(val == null) {
-							val = 0L;
-						}
-						sumReads.put(barcodeId, (readCounts.get(barcodeId) + val));
-					}
-					
-					readCountsPeptLevel.put(location.obsPeptide, sumReads);
-					locationsPeptLevel.put(location.obsPeptide, locations.size());
-					
-					// tuple level count
-					String tupleKey = location.obsPeptide+"\t"+location.location+"\t"+location.strand;
-					sumReads = readCountsTupleLevel.get(tupleKey);
-					if(sumReads == null) {
-						sumReads = new Hashtable<String, Long>();
-					}
-					
-					keys = (Iterator<String>) readCounts.keys();
-					while(keys.hasNext()) {
-						String barcodeId = keys.next();
-						Long val = sumReads.get(barcodeId);
-						if(val == null) {
-							val = 0L;
-						}
-						sumReads.put(barcodeId, (readCounts.get(barcodeId) + val));
-					}
-					
-					readCountsTupleLevel.put(tupleKey, sumReads);
+				Hashtable<String, Long> unionReads = readCountsPeptLevel.get(location.obsPeptide);
+				if(unionReads == null) {
+					unionReads = new Hashtable<String, Long>();
 				}
-			}
-			
-			
-			
-			// if there are duplicated records, then this size > 1
-			// if there is no duplication, then this size = 1
-			
-			// pass random sequence
-			// random sequences are only written in the peptide count.
-			if(!record.isRandom) {
-				for(int j=0; j<record.records.size(); j++) {
-					if(locations.size() == 0) {
-						BWNotFound.append(record.records.get(j)).append("\tNot found");
-						BWNotFound.newLine();
-					} else {
-						for(LocationInformation location : locations) {
-							// full information (including genomic sequence)
-							BW.append(record.records.get(j)).append("\t"+location.getRes());
-							BW.newLine();
-						}
+				
+				Iterator<String> keys = (Iterator<String>) readCounts.keys();
+				while(keys.hasNext()) {
+					String barcodeId = keys.next();
+					Long val = unionReads.get(barcodeId);
+					if(val == null) {
+						val = 0L;
+					}
+					if(Scan.union.equalsIgnoreCase(Constants.UNION_MAX)) {
+						unionReads.put(barcodeId, Math.max(readCounts.get(barcodeId), val));
+					} else if(Scan.union.equalsIgnoreCase(Constants.UNION_SUM)){
+						unionReads.put(barcodeId, (readCounts.get(barcodeId) + val));
 					}
 				}
+				
+				readCountsPeptLevel.put(location.obsPeptide, unionReads);
+				locationsPeptLevel.put(location.obsPeptide, locations.size());
 			}
 			
 		}
-		BWNotFound.close();
-		BW.close();
-		
+
 		readCountsPeptLevel.forEach((sequence, reads)->{
 			try {
 				if(Scan.isSingleCellMode) {
-					BWPeptCount.append(sequence+"\t"+locationsPeptLevel.get(sequence));
+					BW.append(sequence+"\t"+locationsPeptLevel.get(sequence));
 					for(String barcodeId : BarcodeTable.barcodeIds) {
 						Long read = reads.get(barcodeId);
 						if(read == null) {
 							read = 0L;
 						}
-						BWPeptCount.append("\t"+read);
+						BW.append("\t"+read);
 					}
 				} else {
 					Long read = reads.get(Constants.DEFAULT_BARCODE_ID);
-					BWPeptCount.append(sequence+"\t"+locationsPeptLevel.get(sequence)+"\t"+read+"\t"+Utils.getRPHM((double)read));
+					BW.append(sequence+"\t"+locationsPeptLevel.get(sequence)+"\t"+read+"\t"+Utils.getRPHM((double)read));
 				}
-				BWPeptCount.newLine();
+				BW.newLine();
 			}catch(IOException ioe) {
 				
 			}
  		});
 		
-		BWPeptCount.close();
+		BW.close();
 		
-		readCountsTupleLevel.forEach((tupleKey, reads)->{
-			try {
-				if(Scan.isSingleCellMode) {
-					BWGenomicTuple.append(tupleKey);
-					for(String barcodeId : BarcodeTable.barcodeIds) {
-						Long read = reads.get(barcodeId);
-						if(read == null) {
-							read = 0L;
-						}
-						BWGenomicTuple.append("\t"+read);
-					}
-				} else {
-					Long read = reads.get(Constants.DEFAULT_BARCODE_ID);
-					BWGenomicTuple.append(tupleKey+"\t"+read+"\t"+Utils.getRPHM((double)read));
-				}
-				
-				BWGenomicTuple.newLine();
-			}catch(IOException ioe) {
-				
-			}
- 		});
-		BWGenomicTuple.close();
-		
-		
-		
-		// if calculate random distribution is on :
-		if(Scan.isRandom) {
-			BufferedWriter BWRandomPeptCount = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".pept_count.random.tsv"));
-			if(Scan.isSingleCellMode) {
-				BWRandomPeptCount.append("rObsPeptide\tNumLocations");
-				for(String barcodeId : BarcodeTable.barcodeIds) {
-					BWRandomPeptCount.append("\t").append(barcodeId);
-				}
-			} else {
-				BWRandomPeptCount.append("rObsPeptide\tNumLocations\tReadCount\tRPHM");
-			}
-			BWRandomPeptCount.newLine();
-			readCountsRandomPeptLevel.forEach((sequence, reads)->{
-				try {
-					if(Scan.isSingleCellMode) {
-						BWRandomPeptCount.append(sequence+"\t"+locationsRandomPeptLevel.get(sequence));
-						for(String barcodeId : BarcodeTable.barcodeIds) {
-							Long read = reads.get(barcodeId);
-							if(read == null) {
-								read = 0L;
-							}
-							BWRandomPeptCount.append("\t"+read);
-						}
-					} else {
-						Long read = reads.get(Constants.DEFAULT_BARCODE_ID);
-						BWRandomPeptCount.append(sequence+"\t"+locationsRandomPeptLevel.get(sequence)+"\t"+read+"\t"+Utils.getRPHM((double)read));
-					}
-					BWRandomPeptCount.newLine();
-				}catch(IOException ioe) {
-					
-				}
-	 		});
-			
-			BWRandomPeptCount.close();
-		}
-		
-		
-		// write statistics
-		WriteStatistics.write(file.getAbsolutePath()+".stat.tsv", records, readCountsPeptLevel, readCountsRandomPeptLevel);
+		WriteStatistics.write(baseOutputPath+".stat.tsv", records, readCountsPeptLevel);
 	}
 	
 	private static void writeLibSize (File file) throws IOException {
-		BufferedWriter BW = new BufferedWriter(new FileWriter(file.getAbsolutePath()+".libsize"));
+		BufferedWriter BW = new BufferedWriter(new FileWriter(file));
 		BW.append(Scan.libSize+"");
 		BW.close();
 	}

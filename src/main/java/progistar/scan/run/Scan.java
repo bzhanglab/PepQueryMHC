@@ -22,6 +22,7 @@ import htsjdk.samtools.util.Log;
 import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Codon;
 import progistar.scan.data.Constants;
+import progistar.scan.data.LocTable;
 import progistar.scan.data.ParseRecord;
 import progistar.scan.data.Phred;
 import progistar.scan.data.SequenceRecord;
@@ -40,17 +41,17 @@ public class Scan {
 	
 	public static File inputFile = null;
 	public static File bamFile = null;
-	public static File outputFile	   = null;
 	public static File whitelistFile = null;
+	public static String outputBaseFilePath	= null;
 	public static String mode	=	Constants.MODE_TARGET;
 	public static String sequence	=	Constants.SEQUENCE_PEPTIDE;
 	public static String count	=	Constants.COUNT_PRIMARY;
+	public static String union	=	Constants.UNION_MAX;
 	public static double libSize = 0;
 	
 	public static boolean isILEqual = false;
 	public static boolean isSingleCellMode = false;
 	public static boolean verbose = false;
-	public static boolean isRandom = false;
 	public static int threadNum = 4;
 	public static int chunkSize = 100;
 	
@@ -138,12 +139,21 @@ public class Scan {
 			}
 		}
 		
-		if(mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
-//			ParseRecord.writeRecords(records, outputFile);
-			ParseRecord.writeRecords2(records, outputFile, tasks);
-		} else if(mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
-			ParseRecord.writeRecords(records, outputFile, tasks);
+		// make location table
+		LocTable locTable = new LocTable();
+		
+		// union information
+		for(Task task : tasks) {
+			task.locTable.table.forEach((sequence, lInfos) -> {
+				lInfos.forEach((key, lInfo)->{
+					locTable.putLocation(lInfo);
+				});
+			});
 		}
+		
+		ParseRecord.writeMainOutput(records, outputBaseFilePath, locTable);
+		ParseRecord.writeLocationLevelOutput(records, outputBaseFilePath, locTable);
+		ParseRecord.writePeptideLevelOutput(records, outputBaseFilePath, locTable);
 		
 		// check peak memory
 		peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
@@ -175,7 +185,7 @@ public class Scan {
 				.build();
 		
 		Option optionBam = Option.builder("b")
-				.longOpt("bam").argName("bam/sam")
+				.longOpt("bam").argName("bam|sam")
 				.hasArg()
 				.required(true)
 				.desc("bam or sam file")
@@ -189,7 +199,7 @@ public class Scan {
 				.build();
 		
 		Option optionMode = Option.builder("m")
-				.longOpt("mode").argName("scan/target")
+				.longOpt("mode").argName("scan|target")
 				.hasArg()
 				.required(false)
 				.desc("\"scan-mode\" counts all reads matching a given sequence by traversing all reads and annotates their genomic information. "
@@ -198,7 +208,7 @@ public class Scan {
 				.build();
 		
 		Option optionSequence = Option.builder("s")
-				.longOpt("sequence").argName("peptide/nucleotide")
+				.longOpt("sequence").argName("peptide|nucleotide")
 				.hasArg()
 				.required(false)
 				.desc("sequence type")
@@ -212,10 +222,10 @@ public class Scan {
 				.build();
 		
 		Option optionPrimary = Option.builder("c")
-				.longOpt("count").argName("primary/all")
+				.longOpt("count").argName("primary|all")
 				.hasArg()
 				.required(false)
-				.desc("count only primary or all reads")
+				.desc("count only primary or all reads (default is primary).")
 				.build();
 		
 		Option optionIL = Option.builder("e")
@@ -230,12 +240,6 @@ public class Scan {
 				.required(false)
 				.desc("library size to calculate RPHM value." +
 						"\nif this option is not used, then it estimates the library size automatically. This estimation takes additional time for target mode.")
-				.build();
-		
-		Option optionRandomDist = Option.builder("r")
-				.longOpt("random").argName("fasta")
-				.required(false)
-				.desc("generate and match reversed sequence to find a random distribution (only available in scan mode).")
 				.build();
 		
 		Option optionVerbose = Option.builder("v")
@@ -258,6 +262,13 @@ public class Scan {
 				.desc("ignore ROIs (region of interests) with greater than a given error probability (default is 0.05).")
 				.build();
 		
+		Option optionUnionPeptide = Option.builder("u")
+				.longOpt("union").argName("max|sum")
+				.hasArg()
+				.required(false)
+				.desc("calculate peptide level count by maximum or sum of the same peptide (default is max).")
+				.build();
+		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
 		.addOption(optionMode)
@@ -267,10 +278,10 @@ public class Scan {
 		.addOption(optionPrimary)
 		.addOption(optionIL)
 		.addOption(optionLibSize)
-		.addOption(optionRandomDist)
 		.addOption(optionVerbose)
 		.addOption(optionWhiteList)
-		.addOption(optionPhredThreshold);
+		.addOption(optionPhredThreshold)
+		.addOption(optionUnionPeptide);
 		
 		CommandLineParser parser = new DefaultParser();
 	    HelpFormatter helper = new HelpFormatter();
@@ -288,13 +299,9 @@ public class Scan {
 		    }
 		    
 		    if(cmd.hasOption("o")) {
-		    	Scan.outputFile = new File(cmd.getOptionValue("o"));
+		    	Scan.outputBaseFilePath = new File(cmd.getOptionValue("o")).getAbsolutePath();
 		    }
-		    /*
-		    if(cmd.hasOption("r")) {
-		    	fastaFile = new File(cmd.getOptionValue("r"));
-		    }
-		    */
+		    
 		    if(cmd.hasOption("m")) {
 		    	Scan.mode = cmd.getOptionValue("m");
 		    	
@@ -315,10 +322,6 @@ public class Scan {
 		    
 		    if(cmd.hasOption("e")) {
 		    	Scan.isILEqual = true;
-		    }
-		    
-		    if(cmd.hasOption("r")) {
-		    	Scan.isRandom = true;
 		    }
 		    
 		    if(cmd.hasOption("@")) {
@@ -352,6 +355,13 @@ public class Scan {
 		    	Scan.ROIErrorThreshold = Double.parseDouble(cmd.getOptionValue("p"));
 		    }
 		    
+		    if(cmd.hasOption("u")) {
+		    	// default is max.
+		    	if(cmd.getOptionValue("u").equalsIgnoreCase("sum")) {
+		    		Scan.union = Constants.UNION_SUM;
+		    	}
+		    }
+		    
 		} catch (ParseException e) {
 			System.out.println(e.getMessage());
 			isFail = true;
@@ -361,9 +371,9 @@ public class Scan {
 		    helper.printHelp("Usage:", options);
 		    System.exit(0);
 		} else {
-			System.out.println("Input file name: "+Scan.inputFile.getName());
-			System.out.println("BAM/SAM file name: "+Scan.bamFile.getName());
-			System.out.println("Output file name: "+Scan.outputFile.getName());
+			System.out.println("Input file name: "+Scan.inputFile.getAbsolutePath());
+			System.out.println("BAM/SAM file name: "+Scan.bamFile.getAbsolutePath());
+			System.out.println("Output file name: "+Scan.outputBaseFilePath);
 
 			if(whitelistFile != null) {
 				System.out.println("White-list file name: "+Scan.whitelistFile.getName() +" (single-cell mode)");
@@ -385,16 +395,6 @@ public class Scan {
 					Scan.isILEqual = false;
 				}
 			}
-			
-			if(Scan.isRandom) {
-				if(Scan.mode.equalsIgnoreCase(Constants.MODE_SCAN) && Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
-					System.out.println("Generate random sequences.");
-				} else {
-					System.out.println("This is target mode or nucleotide input. Generation of random distribution is ignored.");
-					Scan.isRandom = false;
-				}
-			}
-			
 		}
 		System.out.println();
 	}

@@ -146,6 +146,8 @@ public class ScanModeRun {
             				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, fr, strandChar);
             				if(matchedLocation != null) {
             					matchedLocation.inputSequence = emit.getKeyword();
+            					
+            					// we are only interested in the given region in case of target mode.
             					if(task.type == Constants.TYPE_TARGET_MODE_MAPPED_TASK) {
             						
             						// discard if the location is not matched

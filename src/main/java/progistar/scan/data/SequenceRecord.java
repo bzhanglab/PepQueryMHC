@@ -21,7 +21,6 @@ public class SequenceRecord {
 	public int start = 0;
 	public int end = 0;
 	public String chr = null;
-	public boolean isRandom = false;
 	
 	public Hashtable<String, Long> readCounts = new Hashtable<String, Long>();
 	

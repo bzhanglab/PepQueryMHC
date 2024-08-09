@@ -22,88 +22,75 @@ public class WriteStatistics {
 	 */
 	public static void write (String fileName,
 							  ArrayList<SequenceRecord> records,
-							  Hashtable<String, Hashtable<String, Long>> readCountsPeptLevel, 
-							  Hashtable<String, Hashtable<String, Long>> readCountsRandomPeptLevel) 
+							  Hashtable<String, Hashtable<String, Long>> readCountsPeptLevel) 
 							  throws IOException {
 		BufferedWriter BW = new BufferedWriter(new FileWriter(fileName));
 		
-		long[][] wholeTable = new long[Scan.longestSequenceLen+1][2];
-		long[][] matchTable = new long[Scan.longestSequenceLen+1][2];
+		long[] wholeTable = new long[Scan.longestSequenceLen+1];
+		long[] matchTable = new long[Scan.longestSequenceLen+1];
+		int maxLen = 0;
+		int minLen = Integer.MAX_VALUE;
 		
 		// count input and decoy sequences
+		Hashtable<String, Boolean> checkList1 = new Hashtable<String, Boolean>();
 		for(SequenceRecord record : records) {
 			String sequence = record.sequence;
-			int length = sequence.length();
+			if(Scan.isILEqual) {
+				sequence = sequence.replace("I", "L");
+			}
 			
-			if(record.isRandom) {
-				wholeTable[length][1]++;
-				wholeTable[0][1]++;
-			} else {
-				wholeTable[length][0]++;
-				wholeTable[0][0]++;
+			if(checkList1.get(sequence) == null) {
+				int sequenceLen = sequence.length();
+				wholeTable[sequenceLen]++;
+				wholeTable[0]++;
+				checkList1.put(sequence, true);
+				
+				maxLen = Math.max(maxLen, sequenceLen);
+				minLen = Math.min(minLen, sequenceLen);
 			}
 		}
 		
 		// check list to deal with I/L equal option
 		// input and random sequences share the hashtable, assuming that there are no overlaps between them.
-		Hashtable<String, Boolean> checkList = new Hashtable<String, Boolean>();
+		Hashtable<String, Boolean> checkList2 = new Hashtable<String, Boolean>();
 		// count for input sequences
 		readCountsPeptLevel.forEach((sequence, cnt) -> {
 			if(Scan.isILEqual) {
 				sequence = sequence.replace("I", "L");
 			}
 			
-			if(checkList.get(sequence) == null) {
+			if(checkList2.get(sequence) == null) {
 				int sequenceLen = sequence.length();
-				matchTable[sequenceLen][0]++;
-				checkList.put(sequence, true);
-			}
-		});
-		// count for input decoy sequences
-		readCountsRandomPeptLevel.forEach((sequence, cnt) -> {
-			if(Scan.isILEqual) {
-				sequence = sequence.replace("I", "L");
-			}
-			
-			if(checkList.get(sequence) == null) {
-				int sequenceLen = sequence.length();
-				matchTable[sequenceLen][1]++;
-				checkList.put(sequence, true);
+				matchTable[sequenceLen]++;
+				matchTable[0]++;
+				checkList2.put(sequence, true);
 			}
 		});
 		
-		for(int i=0; i<matchTable.length; i++) {
-			matchTable[0][0] += matchTable[i][0];
-			matchTable[0][1] += matchTable[i][1];
-		}
-		
-		BW.append("Label\tLength\tNumOfSequences\tNumOfMatches\tProportion");
+		BW.append("Length\tInput_sequences\tMatched_sequences\tProportion");
 		BW.newLine();
 		
 		// for input
 		for(int i=0; i<wholeTable.length; i++) {
-			if(wholeTable[i][0] > 0) {
-				BW.append("Input\t")
-				.append(i+"\t")
-				.append(wholeTable[i][0]+"\t")
-				.append(matchTable[i][0]+"\t")
-				.append(""+((double)(matchTable[i][0])) / ((double)(wholeTable[i][0])));
-				BW.newLine();
+			if(i == 0 || (i >= minLen && i <= maxLen)) {
+				if(i == 0) {
+					BW.append("Total\t");
+				} else {
+					BW.append(i+"\t");
+				}
+				if(wholeTable[i] > 0) {
+					BW.append(wholeTable[i]+"\t")
+					.append(matchTable[i]+"\t")
+					.append(""+((double)(matchTable[i])) / ((double)(wholeTable[i])));
+				} else {
+					BW.append(wholeTable[i]+"\t")
+					.append(matchTable[i]+"\t")
+					.append("NaN");
+				}
+				BW.newLine();	
 			}
+			
 		}
-		
-		// for random
-		for(int i=0; i<wholeTable.length; i++) {
-			if(wholeTable[i][1] > 0) {
-				BW.append("Random\t")
-				.append(i+"\t")
-				.append(wholeTable[i][1]+"\t")
-				.append(matchTable[i][1]+"\t")
-				.append(""+((double)(matchTable[i][1])) / ((double)(wholeTable[i][1])));
-				BW.newLine();
-			}
-		}
-		
 		
 		BW.close();
 	}

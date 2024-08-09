@@ -13,6 +13,9 @@ public class Constants {
 	public static final String COUNT_ALL= "all";
 	public static final String COUNT_PRIMARY = "primary";
 	
+	public static final String UNION_MAX = "max";
+	public static final String UNION_SUM = "sum";
+	
 	public static final int	TYPE_TARGET_MODE_MAPPED_TASK	=	1;
 	public static final int	TYPE_TARGET_MODE_UNMAPPED_TASK	=	2;
 	public static final int TYPE_TARGET_MODE_LIBRARY_ESTIMATION_TASK = 3;
@@ -63,4 +66,21 @@ public class Constants {
 	public static final String DEFAULT_BARCODE_ID	=	"ReadCount";
 	public static final String NULL_BARCODE_ID	=	"Null";
 	public static final String OTHER_BARCODE_ID	=	"Others";
+	
+	
+	
+	
+	
+	
+	// Output fields //
+	public static final String MATCHED_LOCATION		= "Matched_location";
+	public static final String MATCHED_MUTATIONS	= "Matched_mutations";
+	public static final String MATCHED_STRAND		= "Matched_strand";
+	public static final String MATCHED_PEPTIDE		= "Matched_peptide";
+	public static final String MATCHED_NUCLEOTIDE	= "Matched_nucleotide";
+	public static final String MATCHED_REFNUCLEOTIDE= "Matched_reference_nucleotide";
+	public static final String MATCHED_READ_COUNT	= "Matched_read_count";
+	public static final String MATCHED_RPHM			= "Matched_RPHM";
+	public static final String MATCHED_NUM_LOCATION		= "Matched_num_locations";
+	
 }

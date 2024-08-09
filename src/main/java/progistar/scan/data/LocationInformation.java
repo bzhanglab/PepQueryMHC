@@ -35,7 +35,7 @@ public class LocationInformation {
 	
 	public String getRes () {
 		if(Scan.isSingleCellMode) {
-			StringBuilder str = new StringBuilder(location+"\t"+mutation+"\t"+strand+"\t"+obsNucleotide+"\t"+obsPeptide+"\t"+refNucleotide);
+			StringBuilder str = new StringBuilder(location+"\t"+mutation+"\t"+strand+"\t"+obsPeptide+"\t"+obsNucleotide+"\t"+refNucleotide);
 			for(String barcodeId : BarcodeTable.barcodeIds) {
 				Long read = readCounts.get(barcodeId);
 				if(read == null) {
@@ -46,7 +46,7 @@ public class LocationInformation {
 			return str.toString();
 		} else {
 			Long read = readCounts.get(Constants.DEFAULT_BARCODE_ID);
-			return location+"\t"+mutation+"\t"+strand+"\t"+obsNucleotide+"\t"+obsPeptide+"\t"+refNucleotide+"\t"+read+"\t"+Utils.getRPHM((double)read);
+			return location+"\t"+mutation+"\t"+strand+"\t"+obsPeptide+"\t"+obsNucleotide+"\t"+refNucleotide+"\t"+read+"\t"+Utils.getRPHM((double)read);
 		}
 	}
 	
