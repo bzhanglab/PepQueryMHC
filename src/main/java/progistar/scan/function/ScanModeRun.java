@@ -34,7 +34,7 @@ public class ScanModeRun extends Mode{
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			SAMRecordIterator iterator = null;
 			if(task.readType == Constants.MAPPED_READS) {
-				iterator = samReader.query(task.chrName, task.start, task.end, false);
+				iterator = samReader.queryOverlapping(task.chrName, task.start, task.end);
 			} else {
 				iterator = samReader.queryUnmapped();
 			}

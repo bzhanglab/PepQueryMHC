@@ -32,7 +32,7 @@ public abstract class Mode {
             	// In case of TargetMode, iterator is already checked by a previous call.
             	if(task.type == Constants.TYPE_SCAN_MODE_TASK) {
             		if( !(samRecord.getAlignmentStart() >= task.start && 
-            				samRecord.getAlignmentStart() < task.end) ) {
+            				samRecord.getAlignmentStart() <= task.end) ) {
             			isPass = true;
             		}
             	}

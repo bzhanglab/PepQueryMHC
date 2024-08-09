@@ -73,7 +73,6 @@ public class Task implements Comparable<Task> {
 		}
 		int size = end - start + 1;
 		int interval = Math.max( (size / divider) + 1, 100000);
-		
 		int startInterval = 1;
 		int endInterval = 1;
 		
@@ -184,31 +183,33 @@ public class Task implements Comparable<Task> {
 		
 		// generate unmapped tasks
 		File file = new File(Scan.bamFile.getAbsolutePath());
-		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
-			// for unmapped reads
-			SAMRecordIterator unmappedIter = samReader.queryUnmapped();
-			int size = 0;
-			while(unmappedIter.hasNext()) {
-				SAMRecord samRecord = unmappedIter.next();
-				if(Scan.unmmapedMarker == null) {
-					Scan.unmmapedMarker = samRecord.getReferenceName();
+		if(unmappedSize != 0) {
+			try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
+				// for unmapped reads
+				SAMRecordIterator unmappedIter = samReader.queryUnmapped();
+				int size = 0;
+				while(unmappedIter.hasNext()) {
+					SAMRecord samRecord = unmappedIter.next();
+					if(Scan.unmmapedMarker == null) {
+						Scan.unmmapedMarker = samRecord.getReferenceName();
+					}
+					size ++;
 				}
-				size ++;
+				if(Scan.unmmapedMarker != null) {
+					// System.out.println("@SQ\t"+Scan.unmmapedMarker+"\tLN:"+size);
+					tasks.addAll(getChromosomeLevelTasks(unmappedRecords, Constants.NULL, 1, size, Constants.TYPE_TARGET_MODE_TASK));
+				}
+				
+				// assign idx
+				for(int i=0; i<tasks.size(); i++) {
+					tasks.get(i).taskIdx = (i+1);
+				}
+				
+				unmappedIter.close();
+			} catch(Exception e) {
+				e.printStackTrace();
+				System.exit(1);
 			}
-			if(Scan.unmmapedMarker != null) {
-				// System.out.println("@SQ\t"+Scan.unmmapedMarker+"\tLN:"+size);
-				tasks.addAll(getChromosomeLevelTasks(unmappedRecords, Constants.NULL, 1, size, Constants.TYPE_TARGET_MODE_TASK));
-			}
-			
-			// assign idx
-			for(int i=0; i<tasks.size(); i++) {
-				tasks.get(i).taskIdx = (i+1);
-			}
-			
-			unmappedIter.close();
-		} catch(Exception e) {
-			e.printStackTrace();
-			System.exit(1);
 		}
 		
 		
