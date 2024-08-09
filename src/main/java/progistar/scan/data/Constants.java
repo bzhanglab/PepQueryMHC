@@ -2,7 +2,8 @@ package progistar.scan.data;
 
 public class Constants {
 	public static final String NAME = "BamScan";
-	public static final String VERSION = "v1.0.0a";
+	public static final String VERSION = "v1.0.0b";
+	public static final String RELEASE = "August 9, 2024";
 	
 	public static final String MODE_TARGET = "target";
 	public static final String MODE_SCAN = "scan";
@@ -64,13 +65,8 @@ public class Constants {
 	public static final byte CLP			=	3;
 	
 	public static final String DEFAULT_BARCODE_ID	=	"ReadCount";
-	public static final String NULL_BARCODE_ID	=	"Null";
-	public static final String OTHER_BARCODE_ID	=	"Others";
-	
-	
-	
-	
-	
+	public static final String NULL_BARCODE_ID		=	"Null";
+	public static final String OTHER_BARCODE_ID		=	"Others";
 	
 	// Output fields //
 	public static final String MATCHED_LOCATION		= "Matched_location";
@@ -81,6 +77,6 @@ public class Constants {
 	public static final String MATCHED_REFNUCLEOTIDE= "Matched_reference_nucleotide";
 	public static final String MATCHED_READ_COUNT	= "Matched_read_count";
 	public static final String MATCHED_RPHM			= "Matched_RPHM";
-	public static final String MATCHED_NUM_LOCATION		= "Matched_num_locations";
+	public static final String MATCHED_NUM_LOCATION	= "Matched_num_locations";
 	
 }

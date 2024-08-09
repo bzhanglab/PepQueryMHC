@@ -46,7 +46,7 @@ public class Scan {
 	public static String mode	=	Constants.MODE_TARGET;
 	public static String sequence	=	Constants.SEQUENCE_PEPTIDE;
 	public static String count	=	Constants.COUNT_PRIMARY;
-	public static String union	=	Constants.UNION_MAX;
+	public static String union	=	Constants.UNION_SUM;
 	public static double libSize = 0;
 	
 	public static boolean isILEqual = false;
@@ -263,10 +263,10 @@ public class Scan {
 				.build();
 		
 		Option optionUnionPeptide = Option.builder("u")
-				.longOpt("union").argName("max|sum")
+				.longOpt("union").argName("sum|max")
 				.hasArg()
 				.required(false)
-				.desc("calculate peptide level count by maximum or sum of the same peptide (default is max).")
+				.desc("calculate peptide level count by maximum or sum of the same peptide (default is sum).")
 				.build();
 		
 		options.addOption(optionInput)
@@ -382,6 +382,7 @@ public class Scan {
 			System.out.println("Type: "+Scan.sequence);
 			System.out.println("Mode: "+Scan.mode);
 			System.out.println("Count: "+Scan.count);
+			System.out.println("Peptide level count: "+Scan.union);
 			System.out.println("ROI cutoff: "+Scan.ROIErrorThreshold);
 			System.out.println("Threads: "+Scan.threadNum);
 			if(Scan.verbose) {
