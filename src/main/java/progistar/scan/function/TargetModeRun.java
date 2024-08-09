@@ -1,18 +1,14 @@
 package progistar.scan.function;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.Hashtable;
-import java.util.LinkedList;
+import java.util.ArrayList;
 
-import org.ahocorasick.trie.Emit;
 import org.ahocorasick.trie.Trie;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
-import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LocationInformation;
 import progistar.scan.data.SequenceRecord;
@@ -31,6 +27,7 @@ public class TargetModeRun {
 		}
 	}
 
+	
 	private static void countUnmappedReads(Task task) {
 		long startTime = System.currentTimeMillis();
 		// to prevent racing
@@ -38,133 +35,8 @@ public class TargetModeRun {
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			// for unmapped reads
 			Trie trie = SequenceRecord.getTrie(task.records);
-			
-			Hashtable<String, Hashtable<String, Long>> totalCounts = new Hashtable<String, Hashtable<String, Long>>();
 			SAMRecordIterator iterator = samReader.queryUnmapped();
-			while (iterator.hasNext()) {
-                SAMRecord samRecord = iterator.next();
-                
-                if(Scan.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
-                	continue;
-                }
-                
-                String barcodeId = BarcodeTable.getBarcodeFromBam(samRecord);
-                
-                // Process each SAM record
-                String frSequence = samRecord.getReadString();
-                String rcSequence = Translator.getReverseComplement(frSequence);
-                Hashtable<String, String> findings = new Hashtable<String, String>();
-                Collection<Emit> emits = new LinkedList<Emit>();
-                if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE)) {
-                	
-                	// forward strand //
-            		Collection<Emit> tmpEmits = trie.parseText(frSequence);
-            		for(Emit emit : tmpEmits) {
-            			int startPos = emit.getStart();
-            			int endPos = emit.getEnd()+1;
-            			
-            			// if pass the quality control
-            			if(PhredQualityCheck.isPass(samRecord, startPos, endPos)) {
-            				emits.add(emit);
-            			}
-            		}
-            		/////////////////////
-            		
-            		// reverse strand //
-            		tmpEmits = trie.parseText(rcSequence);
-            		for(Emit emit : tmpEmits) {
-            			int startPos = emit.getStart();
-            			int endPos = emit.getEnd()+1;
-            			
-            			// reverse the position
-            			int len = samRecord.getReadString().length();
-            			int tmp = len - startPos;
-            			startPos = len - endPos;
-            			endPos = tmp;
-            			
-            			// if pass the quality control
-            			if(PhredQualityCheck.isPass(samRecord, startPos, endPos)) {
-            				emits.add(emit);
-            			}
-            		}
-            		///////////
-                } else if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
-                	for(int fr=0; fr<3; fr++) {
-                		
-                		// forward strand //
-                		String peptide = Translator.translation(frSequence, fr);
-                		Collection<Emit> tmpEmits = trie.parseText(peptide);
-                		for(Emit emit : tmpEmits) {
-                			int startPos = emit.getStart();
-                			int endPos = emit.getEnd()+1;
-                			
-                			// convert to nt position
-                			startPos = (startPos) * 3 + fr;
-                			endPos = (endPos) * 3 + fr;
-                			
-                			// if pass the quality control
-                			if(PhredQualityCheck.isPass(samRecord, startPos, endPos)) {
-                				emits.add(emit);
-                			}
-                		}
-                		/////////////////////
-                		
-                		// reverse strand //
-                		peptide = Translator.translation(rcSequence, fr);
-                		tmpEmits = trie.parseText(peptide);
-                		for(Emit emit : tmpEmits) {
-                			int startPos = emit.getStart();
-                			int endPos = emit.getEnd()+1;
-                			
-                			// convert to nt position
-                			startPos = (startPos) * 3 + fr;
-                			endPos = (endPos) * 3 + fr;
-                			
-                			// reverse the position
-                			int len = samRecord.getReadString().length();
-                			int tmp = len - startPos;
-                			startPos = len - endPos;
-                			endPos = tmp;
-                			
-                			// if pass the quality control
-                			if(PhredQualityCheck.isPass(samRecord, startPos, endPos)) {
-                				emits.add(emit);
-                			}
-                		}
-                		///////////
-                	}
-                }
-                
-                
-                // save findings
-            	for(Emit emit : emits) {
-            		findings.put(emit.getKeyword(), barcodeId);
-            	}
-            	
-            	// increase +1
-            	findings.forEach((peptide, id)->{
-            		Hashtable<String, Long> counts = totalCounts.get(peptide);
-            		if(counts == null) {
-            			counts = new Hashtable<String, Long>();
-            			totalCounts.put(peptide, counts);
-            		}
-            		
-            		Long val = counts.get(id);
-            		if(val == null) {
-            			val = 0L;
-            		}
-            		counts.put(id, val + 1);
-            	});
-            	
-            }
-            iterator.close();
-            
-            task.records.forEach(record -> {
-            	Hashtable<String, Long> counts = totalCounts.get(record.sequence);
-            	if(counts != null) {
-            		record.readCounts = counts;
-            	}
-            });
+			ScanModeRun.find(iterator, trie, task);
             
 		} catch(Exception e) {
 			e.printStackTrace();
@@ -185,21 +57,14 @@ public class TargetModeRun {
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			double size = task.records.size();
 			for(int i=0; i<size; i++) {
-
+				task.currentRecordIdx = i;
 				SequenceRecord record = task.records.get(i);
+				
 				Trie trie = Trie.builder().addKeyword(record.sequence).build();
 				
-				SAMRecordIterator iterator = samReader.queryOverlapping(record.chr, record.start, record.end);
-				int leastCount = find(iterator, record, trie, true);
-	            
-	            //
 	            // in case of soft-clip, it can be zero because of unstable record range.
-	            //////////////////////////////////// START SFOT-CLIP /////////////////////
-	            if(leastCount == 0) {
-	            	iterator = samReader.queryOverlapping(record.chr, record.start-100, record.end+100);
-	            	find(iterator, record, trie, false);
-	            }
-	            ////////////////////////////////////// END SFOT-CLIP /////////////////////
+				SAMRecordIterator iterator = samReader.queryOverlapping(record.chr, record.start-100, record.end+100);
+				ScanModeRun.find(iterator, trie, task);
 			}
             
 		} catch(Exception e) {
@@ -211,83 +76,6 @@ public class TargetModeRun {
 		if(Scan.verbose) {
 			System.out.println(task.taskIdx+" "+(endTime-startTime)/1000+" sec");
 		}
-	}
-	
-	/**
-	 * trie has a single sequence.
-	 * 
-	 * @param iterator
-	 * @param record
-	 * @param trie
-	 * @param included
-	 * @return
-	 */
-	private static int find (SAMRecordIterator iterator, SequenceRecord record, Trie trie, boolean included) {
-		int leastCount = 0;
-		char strand = record.strand.charAt(0);
-		while (iterator.hasNext()) {
-            SAMRecord samRecord = iterator.next();
-            LocationInformation matchedLocation = null;
-            
-            
-            if(Scan.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
-            	continue;
-            }
-            
-        	String sequence = samRecord.getReadString();
-            boolean isFound = false;
-            if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE)) {
-            	Collection<Emit> emits = trie.parseText(sequence);
-        		
-        		for(Emit emit : emits) {
-    				matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, 0, strand);
-    				if(matchedLocation != null) {
-    					matchedLocation.inputSequence = emit.getKeyword();
-    					if(record.location.equalsIgnoreCase(matchedLocation.location)) {
-    						isFound = true;
-    						break;
-    					}
-    				}
-    			}
-            } else if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
-            	if(record.strand.equalsIgnoreCase("-")) {
-            		sequence = Translator.getReverseComplement(sequence);
-            	}
-            	
-            	for(int fr=0; fr<3; fr++) {
-            		String peptide = Translator.translation(sequence, fr);
-            		Collection<Emit> emits = trie.parseText(peptide);
-            		
-            		for(Emit emit : emits) {
-        				matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, fr, strand);
-        				if(matchedLocation != null) {
-        					if(record.location.equalsIgnoreCase(matchedLocation.location)) {
-        						isFound = true;
-        						fr = 3;
-        						break;
-        					}
-        				}
-        			}
-            	}
-            }
-            
-            if(isFound) {
-            	matchedLocation.readCounts.forEach((barcodeId, value)->{
-            		Long val = record.readCounts.get(barcodeId);
-            		if(val == null) {
-            			val = 0L;
-            		}
-            		record.readCounts.put(barcodeId, value + val);
-            	});
-            	leastCount++;
-            }
-            
-            
-            
-        }
-        iterator.close();
-        
-        return leastCount;
 	}
 	
 	private static void estimateLibSize (Task task) {

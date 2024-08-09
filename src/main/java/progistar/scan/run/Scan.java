@@ -54,6 +54,9 @@ public class Scan {
 	public static int threadNum = 4;
 	public static int chunkSize = 100;
 	
+	
+	public static int longestSequenceLen = -1;
+	
 	// read quality control ///////////////////
 	/**
 	 * single base cutoff
@@ -136,7 +139,8 @@ public class Scan {
 		}
 		
 		if(mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
-			ParseRecord.writeRecords(records, outputFile);
+//			ParseRecord.writeRecords(records, outputFile);
+			ParseRecord.writeRecords2(records, outputFile, tasks);
 		} else if(mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
 			ParseRecord.writeRecords(records, outputFile, tasks);
 		}
@@ -145,6 +149,7 @@ public class Scan {
 		peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
 		
 		long endTime = System.currentTimeMillis();
+		System.out.println("Library size: "+libSize);
 		System.out.println("Total Elapsed Time: "+(endTime-startTime)/1000+" sec");
 		System.out.println("Estimated Peak Memory: "+peakMemory +" MB");
 	}
@@ -228,7 +233,7 @@ public class Scan {
 				.build();
 		
 		Option optionRandomDist = Option.builder("r")
-				.longOpt("random").argName("")
+				.longOpt("random").argName("fasta")
 				.required(false)
 				.desc("generate and match reversed sequence to find a random distribution (only available in scan mode).")
 				.build();
@@ -275,72 +280,76 @@ public class Scan {
 		    cmd = parser.parse(options, args);
 		    
 		    if(cmd.hasOption("i")) {
-		    	inputFile = new File(cmd.getOptionValue("i"));
+		    	Scan.inputFile = new File(cmd.getOptionValue("i"));
 		    }
 		    
 		    if(cmd.hasOption("b")) {
-		    	bamFile = new File(cmd.getOptionValue("b"));
+		    	Scan.bamFile = new File(cmd.getOptionValue("b"));
 		    }
 		    
 		    if(cmd.hasOption("o")) {
-		    	outputFile = new File(cmd.getOptionValue("o"));
+		    	Scan.outputFile = new File(cmd.getOptionValue("o"));
 		    }
-		    
+		    /*
+		    if(cmd.hasOption("r")) {
+		    	fastaFile = new File(cmd.getOptionValue("r"));
+		    }
+		    */
 		    if(cmd.hasOption("m")) {
-		    	mode = cmd.getOptionValue("m");
+		    	Scan.mode = cmd.getOptionValue("m");
 		    	
 		    	if( !(mode.equalsIgnoreCase(Constants.MODE_SCAN) || 
-		    	   mode.equalsIgnoreCase(Constants.MODE_TARGET)) ) {
+		    			Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET)) ) {
 		    		isFail = true;
 		    	}
 		    }
 		    
 		    if(cmd.hasOption("s")) {
-		    	sequence = cmd.getOptionValue("s");
+		    	Scan.sequence = cmd.getOptionValue("s");
 		    	
-		    	if( !(sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE) || 
-		    			sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) ) {
+		    	if( !(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE) || 
+		    			Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) ) {
 		    		isFail = true;
 		    	}
 		    }
 		    
 		    if(cmd.hasOption("e")) {
-		    	isILEqual = true;
+		    	Scan.isILEqual = true;
 		    }
 		    
 		    if(cmd.hasOption("r")) {
-		    	isRandom = true;
+		    	Scan.isRandom = true;
 		    }
 		    
 		    if(cmd.hasOption("@")) {
-		    	threadNum = Integer.parseInt(cmd.getOptionValue("@"));
+		    	Scan.threadNum = Integer.parseInt(cmd.getOptionValue("@"));
 		    }
 		    
 		    if(cmd.hasOption("c")) {
-		    	count = cmd.getOptionValue("c");
+		    	Scan.count = cmd.getOptionValue("c");
 		    	
-		    	if(count.equalsIgnoreCase(Constants.COUNT_PRIMARY)) {
-		    		count = Constants.COUNT_PRIMARY;
+		    	if(Scan.count.equalsIgnoreCase(Constants.COUNT_PRIMARY)) {
+		    		Scan.count = Constants.COUNT_PRIMARY;
 		    	} else {
-		    		count = Constants.COUNT_ALL;
+		    		Scan.count = Constants.COUNT_ALL;
 		    	}
 		    }
 		    
 		    if(cmd.hasOption("v")) {
-		    	verbose = true;
+		    	Scan.verbose = true;
 		    }
 		    
 		    if(cmd.hasOption("l")) {
-		    	libSize = Double.parseDouble(cmd.getOptionValue("l"));
+		    	Scan.libSize = Double.parseDouble(cmd.getOptionValue("l"));
 		    }
 		    
 		    if(cmd.hasOption("w")) {
-		    	whitelistFile = new File(cmd.getOptionValue("w"));
-		    	isSingleCellMode = true;
+		    	Scan.whitelistFile = new File(cmd.getOptionValue("w"));
+		    	Scan.isSingleCellMode = true;
 		    }
 		    
 		    if(cmd.hasOption("p")) {
-		    	ROIErrorThreshold = Double.parseDouble(cmd.getOptionValue("p"));
+		    	Scan.ROIErrorThreshold = Double.parseDouble(cmd.getOptionValue("p"));
 		    }
 		    
 		} catch (ParseException e) {
@@ -352,37 +361,37 @@ public class Scan {
 		    helper.printHelp("Usage:", options);
 		    System.exit(0);
 		} else {
-			System.out.println("Input file name: "+inputFile.getName());
-			System.out.println("BAM/SAM file name: "+bamFile.getName());
-			System.out.println("Output file name: "+outputFile.getName());
+			System.out.println("Input file name: "+Scan.inputFile.getName());
+			System.out.println("BAM/SAM file name: "+Scan.bamFile.getName());
+			System.out.println("Output file name: "+Scan.outputFile.getName());
 
 			if(whitelistFile != null) {
-				System.out.println("White-list file name: "+whitelistFile.getName() +" (single-cell mode)");
+				System.out.println("White-list file name: "+Scan.whitelistFile.getName() +" (single-cell mode)");
 				
 			}
-			System.out.println("Type: "+sequence);
-			System.out.println("Mode: "+mode);
-			System.out.println("Count: "+count);
-			System.out.println("ROI cutoff: "+ROIErrorThreshold);
-			System.out.println("Threads: "+threadNum);
-			if(verbose) {
+			System.out.println("Type: "+Scan.sequence);
+			System.out.println("Mode: "+Scan.mode);
+			System.out.println("Count: "+Scan.count);
+			System.out.println("ROI cutoff: "+Scan.ROIErrorThreshold);
+			System.out.println("Threads: "+Scan.threadNum);
+			if(Scan.verbose) {
 				System.out.println("Verbose messages");
 			}
-			if(isILEqual) {
-				if(mode.equalsIgnoreCase(Constants.MODE_SCAN) && sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
+			if(Scan.isILEqual) {
+				if(Scan.mode.equalsIgnoreCase(Constants.MODE_SCAN) && Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
 					System.out.println("I and L are equivalent!");
 				} else {
 					System.out.println("This is target mode or nucleotide input. IL option is ignored.");
-					isILEqual = false;
+					Scan.isILEqual = false;
 				}
 			}
 			
-			if(isRandom) {
-				if(mode.equalsIgnoreCase(Constants.MODE_SCAN) && sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
+			if(Scan.isRandom) {
+				if(Scan.mode.equalsIgnoreCase(Constants.MODE_SCAN) && Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
 					System.out.println("Generate random sequences.");
 				} else {
 					System.out.println("This is target mode or nucleotide input. Generation of random distribution is ignored.");
-					isRandom = false;
+					Scan.isRandom = false;
 				}
 			}
 			

@@ -17,9 +17,9 @@ public class Random {
 		
 		int len = str.length();
 		// forward shifted
-		for(int i=1; i<len; i++) {
-			list.add(str.substring(len-i, len) + str.substring(0, len-i));
-		}
+		//for(int i=1; i<len; i++) {
+		//	list.add(str.substring(len-i, len) + str.substring(0, len-i));
+		//}
 		// reverse shifted
 		for(int i=1; i<len; i++) {
 			list.add(revSequence.substring(len-i, len) + revSequence.substring(0, len-i));

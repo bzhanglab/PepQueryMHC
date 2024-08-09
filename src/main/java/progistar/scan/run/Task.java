@@ -22,14 +22,17 @@ public class Task implements Comparable<Task> {
 	public int type = Constants.TYPE_TARGET_MODE_MAPPED_TASK;
 	public int readType = Constants.MAPPED_READS;
 	public double processedReads = 0;
+	// only available for TargetMode
 	public ArrayList<SequenceRecord> records = new ArrayList<SequenceRecord>();
+	public int currentRecordIdx = 0;
 	
-	// only available for FullMode.
+	// only available for ScanMode.
 	public static Trie allTrie = null;
 	public LocTable locTable = new LocTable();
 	public String chrName;
 	public int start;
 	public int end;
+	
 	
 	// estimated memory usage
 	public long peakMemory = 0;
