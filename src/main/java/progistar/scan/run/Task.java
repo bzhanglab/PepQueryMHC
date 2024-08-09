@@ -19,7 +19,7 @@ import progistar.scan.data.SequenceRecord;
 public class Task implements Comparable<Task> {
 
 	public int taskIdx = -1;
-	public int type = Constants.TYPE_TARGET_MODE_MAPPED_TASK;
+	public int type = Constants.TYPE_TARGET_MODE_TASK;
 	public int readType = Constants.MAPPED_READS;
 	public double processedReads = 0;
 	// only available for TargetMode
@@ -39,9 +39,13 @@ public class Task implements Comparable<Task> {
 	
 	
 	public String getTaskInfo () {
-		String typeStr = "target mode (mapped)";
-		if(type == Constants.TYPE_TARGET_MODE_UNMAPPED_TASK) {
-			typeStr = "target mode (unmapped)";
+		String typeStr = null;
+		if(type == Constants.TYPE_TARGET_MODE_TASK) {
+			if(readType == Constants.MAPPED_READS) {
+				typeStr = "target mode (mapped)";
+			} else {
+				typeStr = "target mode (unmapped)";
+			}
 		} else if(type == Constants.TYPE_SCAN_MODE_TASK) {
 			typeStr = "scan mode";
 		} else if(type == Constants.TYPE_TARGET_MODE_LIBRARY_ESTIMATION_TASK) {
@@ -190,7 +194,7 @@ public class Task implements Comparable<Task> {
 			tasks.add(task);
 			task.taskIdx = tasks.size();
 			sIdx = eIdx;*/
-			Task task = new Task(Constants.TYPE_TARGET_MODE_UNMAPPED_TASK);
+			Task task = new Task(Constants.TYPE_TARGET_MODE_TASK);
 			task.readType = Constants.UNMAPPED_READS;
 			task.records = unmappedRecords;
 			tasks.add(task);
@@ -202,7 +206,7 @@ public class Task implements Comparable<Task> {
 		sIdx = 0;
 		while(sIdx < mappedSize) {
 			int eIdx = sIdx + chunkSize > mappedSize ? mappedSize : sIdx + chunkSize;
-			Task task = new Task(Constants.TYPE_TARGET_MODE_MAPPED_TASK);
+			Task task = new Task(Constants.TYPE_TARGET_MODE_TASK);
 			task.readType = Constants.MAPPED_READS;
 			
 			for(int i=sIdx; i<eIdx; i++) {

@@ -13,18 +13,17 @@ import progistar.scan.data.SequenceRecord;
 import progistar.scan.run.Scan;
 import progistar.scan.run.Task;
 
-public class TargetModeRun {
+public class TargetModeRun extends Mode {
 	
 	public static void runTargetMode (Task task) {
-		if(task.type == Constants.TYPE_TARGET_MODE_MAPPED_TASK) {
+		if(task.readType == Constants.MAPPED_READS) {
 			countMappedReads(task);
-		} else if(task.type == Constants.TYPE_TARGET_MODE_UNMAPPED_TASK) {
+		} else if(task.readType == Constants.UNMAPPED_READS) {
 			countUnmappedReads(task);
 		} else if(task.type == Constants.TYPE_TARGET_MODE_LIBRARY_ESTIMATION_TASK) {
 			estimateLibSize(task);
 		}
 	}
-
 	
 	private static void countUnmappedReads(Task task) {
 		long startTime = System.currentTimeMillis();
@@ -34,8 +33,7 @@ public class TargetModeRun {
 			// for unmapped reads
 			Trie trie = SequenceRecord.getTrie(task.records);
 			SAMRecordIterator iterator = samReader.queryUnmapped();
-			ScanModeRun.find(iterator, trie, task);
-            
+			find(iterator, trie, task);
 		} catch(Exception e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -46,7 +44,6 @@ public class TargetModeRun {
 			System.out.println("Task"+task.taskIdx+" "+(endTime-startTime)/1000+" sec");
 		}
 	}
-	
 	
 	private static void countMappedReads (Task task) {
 		long startTime = System.currentTimeMillis();
@@ -62,7 +59,7 @@ public class TargetModeRun {
 				
 	            // in case of soft-clip, it can be zero because of unstable record range.
 				SAMRecordIterator iterator = samReader.queryOverlapping(record.chr, record.start-100, record.end+100);
-				ScanModeRun.find(iterator, trie, task);
+				find(iterator, trie, task);
 			}
             
 		} catch(Exception e) {
