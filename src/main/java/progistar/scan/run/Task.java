@@ -59,7 +59,10 @@ public class Task implements Comparable<Task> {
 	}
 	
 	
-	private static ArrayList<Task> getChromosomeLevelTasks (ArrayList<SequenceRecord> records, String chrName, int start, int end) {
+	private static ArrayList<Task> getChromosomeLevelTasks (ArrayList<SequenceRecord> records, 
+			String chrName, int start, int end, int mode) {
+		assert mode == Constants.TYPE_SCAN_MODE_TASK || mode == Constants.TYPE_TARGET_MODE_TASK;
+		
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		
 		int divider = Scan.threadNum * Scan.chunkSize;
@@ -83,7 +86,7 @@ public class Task implements Comparable<Task> {
 				isEndOfLength = true;
 			}
 			
-			Task task = new Task(Constants.TYPE_SCAN_MODE_TASK);
+			Task task = new Task(mode);
 			// if the chrName equals to Constans.NULL => it is belonged to an unmapped read group
 			if(chrName.equalsIgnoreCase(Constants.NULL)) {
 				task.readType = Constants.UNMAPPED_READS;
@@ -123,7 +126,7 @@ public class Task implements Comparable<Task> {
 				int start = chromosome.getStart();
 				int end = chromosome.getEnd();
 				
-				tasks.addAll(getChromosomeLevelTasks(records, chrName, start, end));
+				tasks.addAll(getChromosomeLevelTasks(records, chrName, start, end, Constants.TYPE_SCAN_MODE_TASK));
 			}
 			
 			// for unmapped reads
@@ -138,7 +141,7 @@ public class Task implements Comparable<Task> {
 			}
 			if(Scan.unmmapedMarker != null) {
 				// System.out.println("@SQ\t"+Scan.unmmapedMarker+"\tLN:"+size);
-				tasks.addAll(getChromosomeLevelTasks(records, Constants.NULL, 1, size));
+				tasks.addAll(getChromosomeLevelTasks(records, Constants.NULL, 1, size, Constants.TYPE_SCAN_MODE_TASK));
 			}
 			
 			// assign idx
@@ -177,33 +180,40 @@ public class Task implements Comparable<Task> {
 		int unmappedSize = unmappedRecords.size();
 		
 		System.out.println("Mapped records: "+mappedSize);
-		System.out.println("=> "+(mappedSize/chunkSize+1) +" tasks");
 		System.out.println("Unmapped records: "+unmappedSize);
-		//System.out.println("=> "+(unmappedSize/chunkSize+1) +" tasks");
-		System.out.println("=> "+(1) +" task");
 		
 		// generate unmapped tasks
-		int sIdx = 0;
-		while(sIdx < unmappedSize) {
-			/*
-			int eIdx = sIdx + chunkSize > unmappedSize ? unmappedSize : sIdx + chunkSize;
-			Task task = new Task(Constants.TYPE_UNMAPPED_TASK);
-			for(int i=sIdx; i<eIdx; i++) {
-				task.records.add(unmappedRecords.get(i));
+		File file = new File(Scan.bamFile.getAbsolutePath());
+		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
+			// for unmapped reads
+			SAMRecordIterator unmappedIter = samReader.queryUnmapped();
+			int size = 0;
+			while(unmappedIter.hasNext()) {
+				SAMRecord samRecord = unmappedIter.next();
+				if(Scan.unmmapedMarker == null) {
+					Scan.unmmapedMarker = samRecord.getReferenceName();
+				}
+				size ++;
 			}
-			tasks.add(task);
-			task.taskIdx = tasks.size();
-			sIdx = eIdx;*/
-			Task task = new Task(Constants.TYPE_TARGET_MODE_TASK);
-			task.readType = Constants.UNMAPPED_READS;
-			task.records = unmappedRecords;
-			tasks.add(task);
-			task.taskIdx = tasks.size();
-			sIdx = unmappedSize;
+			if(Scan.unmmapedMarker != null) {
+				// System.out.println("@SQ\t"+Scan.unmmapedMarker+"\tLN:"+size);
+				tasks.addAll(getChromosomeLevelTasks(unmappedRecords, Constants.NULL, 1, size, Constants.TYPE_TARGET_MODE_TASK));
+			}
+			
+			// assign idx
+			for(int i=0; i<tasks.size(); i++) {
+				tasks.get(i).taskIdx = (i+1);
+			}
+			
+			unmappedIter.close();
+		} catch(Exception e) {
+			e.printStackTrace();
+			System.exit(1);
 		}
 		
+		
 		// generate mapped tasks
-		sIdx = 0;
+		int sIdx = 0;
 		while(sIdx < mappedSize) {
 			int eIdx = sIdx + chunkSize > mappedSize ? mappedSize : sIdx + chunkSize;
 			Task task = new Task(Constants.TYPE_TARGET_MODE_TASK);
@@ -217,9 +227,11 @@ public class Task implements Comparable<Task> {
 			sIdx = eIdx;
 		}
 		
-		System.out.println("Task list");
-		for(Task task : tasks) {
-			System.out.println(task.getTaskInfo());
+		if(Scan.verbose) {
+			System.out.println("Task list");
+			for(Task task : tasks) {
+				System.out.println(task.getTaskInfo());
+			}
 		}
 		
 		return tasks;
@@ -239,7 +251,7 @@ public class Task implements Comparable<Task> {
 				String chrName = chromosome.getSequenceName();
 				int start = chromosome.getStart();
 				int end = chromosome.getEnd();
-				tasks.addAll(getChromosomeLevelTasks(records, chrName, start, end));
+				tasks.addAll(getChromosomeLevelTasks(records, chrName, start, end, Constants.TYPE_TARGET_MODE_TASK));
 			}
 		} catch(Exception e) {
 			e.printStackTrace();

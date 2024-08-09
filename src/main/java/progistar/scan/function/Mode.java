@@ -41,13 +41,10 @@ public abstract class Mode {
             }
             // if the task is for unmapped reads
             // only process reads given range
-            else {
-            	// TODO: validate this logic in target mode
-            	if(task.type == Constants.TYPE_SCAN_MODE_TASK) {
-            		if(count < task.start || count > task.end) {
-            			isPass = true;
-            		}
-            	}
+            else if(task.readType == Constants.UNMAPPED_READS) {
+            	if(count < task.start || count > task.end) {
+        			isPass = true;
+        		}
             }
 
             

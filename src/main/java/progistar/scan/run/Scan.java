@@ -401,7 +401,7 @@ public class Scan {
 	}
 	
 	public static void printDescription (String[] args) {
-		System.out.println(Constants.NAME+" "+Constants.VERSION+"("+Constants.RELEASE+")");
+		System.out.println(Constants.NAME+" "+Constants.VERSION+" ("+Constants.RELEASE+")");
 		System.out.println("running date: " + java.time.LocalDate.now());
 		StringBuilder optionStr = new StringBuilder();
 		optionStr.append("command line: ");
