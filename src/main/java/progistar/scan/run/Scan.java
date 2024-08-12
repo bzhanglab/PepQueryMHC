@@ -255,8 +255,8 @@ public class Scan {
 				.desc("cell barcode list (tsv)")
 				.build();
 		
-		Option optionPhredThreshold = Option.builder("p")
-				.longOpt("prob").argName("float")
+		Option optionROIThreshold = Option.builder("p")
+				.longOpt("prob").argName("float (0,1]")
 				.hasArg()
 				.required(false)
 				.desc("ignore ROIs (region of interests) with greater than a given error probability (default is 0.05).")
@@ -280,7 +280,7 @@ public class Scan {
 		.addOption(optionLibSize)
 		.addOption(optionVerbose)
 		.addOption(optionWhiteList)
-		.addOption(optionPhredThreshold)
+		.addOption(optionROIThreshold)
 		.addOption(optionUnionPeptide);
 		
 		CommandLineParser parser = new DefaultParser();
@@ -352,7 +352,14 @@ public class Scan {
 		    }
 		    
 		    if(cmd.hasOption("p")) {
-		    	Scan.ROIErrorThreshold = Double.parseDouble(cmd.getOptionValue("p"));
+		    	double roiCutoff = Double.parseDouble(cmd.getOptionValue("p"));
+		    	if(Math.abs(roiCutoff) > 1 || roiCutoff == 0) {
+		    		System.out.println("ROI cutoff is out of range (0,1]: "+roiCutoff);
+		    		isFail = true;
+		    	} else {
+		    		Scan.ROIErrorThreshold = roiCutoff;
+		    	}
+		    	
 		    }
 		    
 		    if(cmd.hasOption("u")) {
