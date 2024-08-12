@@ -1,7 +1,7 @@
 package progistar.scan.data;
 
 public class Constants {
-	public static final String NAME = "BamScan";
+	public static final String NAME = "PepQueryHLA";
 	public static final String VERSION = "v1.0.0b";
 	public static final String RELEASE = "August 9, 2024";
 	
@@ -18,9 +18,8 @@ public class Constants {
 	public static final String UNION_SUM = "sum";
 	
 	public static final int	TYPE_TARGET_MODE_TASK	=	1;
-//	public static final int	TYPE_TARGET_MODE_UNMAPPED_TASK	=	2;
 	public static final int TYPE_TARGET_MODE_LIBRARY_ESTIMATION_TASK = 2;
-	public static final int TYPE_SCAN_MODE_TASK	=	4;
+	public static final int TYPE_SCAN_MODE_TASK	=	3;
 	
 	//
 	public static final int MAPPED_READS		=	1;
