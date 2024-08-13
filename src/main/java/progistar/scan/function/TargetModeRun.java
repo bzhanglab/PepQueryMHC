@@ -126,7 +126,7 @@ public class TargetModeRun extends Mode {
             }
             
 
-        	if(samRecord.isSecondaryAlignment()) {
+        	if(!samRecord.isSecondaryAlignment()) {
         		task.processedReads++;
         	}
             

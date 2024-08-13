@@ -265,7 +265,6 @@ public class Task implements Comparable<Task> {
 				}
 				size ++;
 			}
-			
 			if(Scan.unmmapedMarker != null) {
 				// System.out.println("@SQ\t"+Scan.unmmapedMarker+"\tLN:"+size);
 				tasks.addAll(getChromosomeLevelTasks(null, Constants.NULL, 1, size, Constants.TYPE_TARGET_MODE_TASK));

@@ -36,8 +36,6 @@ public abstract class Mode {
             			isPass = true;
             		}
             	}
-            	
-            	
             }
             // if the task is for unmapped reads
             // only process reads given range
@@ -53,8 +51,9 @@ public abstract class Mode {
             }
             
             // increase processed reads if and only if
-            // a read is primary and mapped to a genomic region.
-            if(!samRecord.isSecondaryAlignment()) {
+            // a read is primary.
+            // In case of target mode, we do not count the reads in this routine.
+            if(!samRecord.isSecondaryAlignment() && task.type == Constants.TYPE_SCAN_MODE_TASK) {
             	task.processedReads++;
             }
             
