@@ -327,7 +327,7 @@ public class ParseRecord {
 		// write records
 		// unique observed sequence.
 		Hashtable<String, Hashtable<String, Long>> readCountsPeptLevel = new Hashtable<String, Hashtable<String, Long>>();
-		Hashtable<String, Integer> locationsPeptLevel = new Hashtable<String, Integer>();
+		Hashtable<String, Hashtable<String, Boolean>> locationsPeptLevel = new Hashtable<String, Hashtable<String, Boolean>>();
 		
 		for(int i=0; i<records.size(); i++) {
 			SequenceRecord record = records.get(i);
@@ -364,7 +364,14 @@ public class ParseRecord {
 				}
 				
 				readCountsPeptLevel.put(location.obsPeptide, unionReads);
-				locationsPeptLevel.put(location.obsPeptide, locations.size());
+				
+				Hashtable<String, Boolean> gLocationMap = locationsPeptLevel.get(location.obsPeptide);
+				if(gLocationMap == null) {
+					gLocationMap = new Hashtable<String, Boolean>();
+					locationsPeptLevel.put(location.obsPeptide, gLocationMap);
+				}
+				
+				gLocationMap.put(location.location, true);
 			}
 			
 		}
@@ -382,7 +389,7 @@ public class ParseRecord {
 					}
 				} else {
 					Long read = reads.get(Constants.DEFAULT_BARCODE_ID);
-					BW.append(sequence+"\t"+locationsPeptLevel.get(sequence)+"\t"+read+"\t"+Utils.getRPHM((double)read));
+					BW.append(sequence+"\t"+locationsPeptLevel.get(sequence).size()+"\t"+read+"\t"+Utils.getRPHM((double)read));
 				}
 				BW.newLine();
 			}catch(IOException ioe) {
