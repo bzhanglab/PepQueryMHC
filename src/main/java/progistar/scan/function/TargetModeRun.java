@@ -83,8 +83,10 @@ public class TargetModeRun extends Mode {
 			SAMRecordIterator iterator = null;
 			if(task.readType == Constants.MAPPED_READS) {
 				iterator = samReader.query(task.chrName, task.start, task.end, false);
-				estimate(iterator, task);
+			} else {
+				iterator = samReader.queryUnmapped();
 			}
+			estimate(iterator, task);
 		} catch(Exception e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -99,31 +101,34 @@ public class TargetModeRun extends Mode {
 	
 
 	private static void estimate (SAMRecordIterator iterator, Task task) {
+		int count = 0;
 		while (iterator.hasNext()) {
             SAMRecord samRecord = iterator.next();
             boolean isPass = false;
-
+            count ++;
+            
             // if the task is for mapped reads
             // only reads with below that genomic start are retrieved
             if(task.readType == Constants.MAPPED_READS) {
             	if( !(samRecord.getAlignmentStart() >= task.start && 
-            			samRecord.getAlignmentStart() < task.end) ) {
+            			samRecord.getAlignmentStart() <= task.end) ) {
             		isPass = true;
             	}
             	
-            	if(samRecord.isSecondaryAlignment()) {
-            		isPass = true;
-            	}
-            	
-            } else {
-            	isPass = true;
+            } else if(task.readType == Constants.UNMAPPED_READS) {
+            	if(count < task.start || count > task.end) {
+        			isPass = true;
+        		}
             }
             
             if(isPass) {
             	continue;
             }
             
-            task.processedReads++;
+
+        	if(samRecord.isSecondaryAlignment()) {
+        		task.processedReads++;
+        	}
             
         }
         iterator.close();

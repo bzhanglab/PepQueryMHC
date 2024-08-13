@@ -252,8 +252,32 @@ public class Task implements Comparable<Task> {
 				String chrName = chromosome.getSequenceName();
 				int start = chromosome.getStart();
 				int end = chromosome.getEnd();
-				tasks.addAll(getChromosomeLevelTasks(records, chrName, start, end, Constants.TYPE_TARGET_MODE_TASK));
+				tasks.addAll(getChromosomeLevelTasks(null, chrName, start, end, Constants.TYPE_TARGET_MODE_TASK));
 			}
+			
+			// for unmapped reads
+			SAMRecordIterator unmappedIter = samReader.queryUnmapped();
+			int size = 0;
+			while(unmappedIter.hasNext()) {
+				SAMRecord samRecord = unmappedIter.next();
+				if(Scan.unmmapedMarker == null) {
+					Scan.unmmapedMarker = samRecord.getReferenceName();
+				}
+				size ++;
+			}
+			
+			if(Scan.unmmapedMarker != null) {
+				// System.out.println("@SQ\t"+Scan.unmmapedMarker+"\tLN:"+size);
+				tasks.addAll(getChromosomeLevelTasks(null, Constants.NULL, 1, size, Constants.TYPE_TARGET_MODE_TASK));
+			}
+			
+			// assign idx
+			for(int i=0; i<tasks.size(); i++) {
+				tasks.get(i).taskIdx = (i+1);
+			}
+			
+			unmappedIter.close();
+			
 		} catch(Exception e) {
 			e.printStackTrace();
 			System.exit(1);
