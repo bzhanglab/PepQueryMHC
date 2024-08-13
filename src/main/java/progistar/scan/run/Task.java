@@ -245,7 +245,7 @@ public class Task implements Comparable<Task> {
 		Task.allTrie = null;
 		
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
-			System.out.println(samReader.getFileHeader().getSequenceDictionary().getSequences().get(0).getSequenceLength());
+			// System.out.println(samReader.getFileHeader().getSequenceDictionary().getSequences().get(0).getSequenceLength());
 			List<SAMSequenceRecord> chromosomes = samReader.getFileHeader().getSequenceDictionary().getSequences();
 			for(SAMSequenceRecord chromosome : chromosomes) {
 				// System.out.println(chromosome.getSAMString());

@@ -16,10 +16,12 @@ import progistar.scan.run.Task;
 public class TargetModeRun extends Mode {
 	
 	public static void runTargetMode (Task task) {
-		if(task.readType == Constants.MAPPED_READS) {
-			countMappedReads(task);
-		} else if(task.readType == Constants.UNMAPPED_READS) {
-			countUnmappedReads(task);
+		if(task.type == Constants.TYPE_TARGET_MODE_TASK) {
+			if(task.readType == Constants.MAPPED_READS) {
+				countMappedReads(task);
+			} else if(task.readType == Constants.UNMAPPED_READS) {
+				countUnmappedReads(task);
+			}
 		} else if(task.type == Constants.TYPE_TARGET_MODE_LIBRARY_ESTIMATION_TASK) {
 			estimateLibSize(task);
 		}
