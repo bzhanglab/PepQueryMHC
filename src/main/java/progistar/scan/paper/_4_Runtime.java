@@ -9,16 +9,16 @@ import java.util.Hashtable;
 public class _4_Runtime {
 
 	public static void main(String[] args) throws IOException {
-		File[] files = new File("/Volumes/Zhanglab/2024_BamScan/4.Performance_test/1.BamScan").listFiles();
+		File[] files = new File("/Volumes/Zhanglab/2024_BamScan/4.Performance_test/1.BamScan/threads").listFiles();
 		Hashtable<String, Double> libSizes = new Hashtable<String, Double>();
 		
 		for(File file : files) {
 			if(file.getName().startsWith(".")) continue;
-			if(!file.getName().contains("0.05")) continue;
-			if(!file.getName().endsWith(".libsize")) continue;
-			
+			//if(!file.getName().contains("0.05")) continue;
+			if(!file.getName().endsWith(".libsize.tsv")) continue;
+			System.out.println(file.getName());
 			BufferedReader BR = new BufferedReader(new FileReader(file));
-			String bamName = file.getName().replace(".libsize", "");
+			String bamName = file.getName().replace(".libsize.tsv", "");
 			double value = Double.parseDouble(BR.readLine());
 			
 			libSizes.put(bamName, value);
@@ -26,7 +26,7 @@ public class _4_Runtime {
 			BR.close();
 		}
 		
-		File logFile = new File("/Volumes/Zhanglab/2024_BamScan/4.Performance_test/1.BamScan/log");
+		File logFile = new File("/Volumes/Zhanglab/2024_BamScan/4.Performance_test/1.BamScan/LUAD_HLA_I_Thread.log");
 		BufferedReader BR = new BufferedReader(new FileReader(logFile));
 		String line = null;
 		
@@ -46,7 +46,7 @@ public class _4_Runtime {
 		}
 		
 		BR.close();
-		System.out.println("File\tLibSize\tTime\tpHLAs\tLocations");
+		System.out.println("File\tLibSize\tTime\tMemory");
 		runTimes.forEach((bam, time)->{
 			Double libSize = libSizes.get(bam);
 			Double peakMem = peakMemory.get(bam);

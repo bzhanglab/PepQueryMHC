@@ -181,21 +181,21 @@ public class Scan {
 				.longOpt("input").argName("file path")
 				.hasArg()
 				.required(true)
-				.desc("input path")
+				.desc("input path.")
 				.build();
 		
 		Option optionBam = Option.builder("b")
 				.longOpt("bam").argName("bam|sam")
 				.hasArg()
 				.required(true)
-				.desc("bam or sam file")
+				.desc("bam or sam file.")
 				.build();
 		
 		Option optionOutput = Option.builder("o")
 				.longOpt("output").argName("file path")
 				.hasArg()
 				.required(true)
-				.desc("output matrix path")
+				.desc("output prefix path.")
 				.build();
 		
 		Option optionMode = Option.builder("m")
@@ -204,21 +204,21 @@ public class Scan {
 				.required(false)
 				.desc("\"scan-mode\" counts all reads matching a given sequence by traversing all reads and annotates their genomic information. "
 						+ "\n\"target-mode\" counts all reads matching a given sequence in a given genomic region."
-						+ " \"target-mode\" requires .bai in advance.")
+						+ " \"both modes\" require .bai in advance.")
 				.build();
 		
 		Option optionSequence = Option.builder("s")
 				.longOpt("sequence").argName("peptide|nucleotide")
 				.hasArg()
 				.required(false)
-				.desc("sequence type")
+				.desc("sequence type.")
 				.build();
 		
 		Option optionThread = Option.builder("@")
 				.longOpt("thread").argName("int")
 				.hasArg()
 				.required(false)
-				.desc("the number of threads")
+				.desc("the number of threads.")
 				.build();
 		
 		Option optionPrimary = Option.builder("c")
@@ -252,7 +252,7 @@ public class Scan {
 				.longOpt("whitelist").argName("file path")
 				.hasArg()
 				.required(false)
-				.desc("cell barcode list (tsv)")
+				.desc("cell barcode list (tsv).")
 				.build();
 		
 		Option optionROIThreshold = Option.builder("p")
