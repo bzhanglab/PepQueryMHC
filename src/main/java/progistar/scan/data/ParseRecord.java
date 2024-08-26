@@ -405,6 +405,7 @@ public class ParseRecord {
 	private static void writeLibSize (File file) throws IOException {
 		BufferedWriter BW = new BufferedWriter(new FileWriter(file));
 		BW.append(Scan.libSize+"");
+		BW.newLine();
 		BW.close();
 	}
 }
