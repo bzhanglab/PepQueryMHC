@@ -59,6 +59,23 @@ public class ParseRecord {
 			} 
 		}
 		
+		// fail to find fields
+		if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+			if(inputSeqIdx == -1 || genomicLociIdx == -1 || strandIdx == -1) {
+				System.out.println("Fail to find column names: sequence, location, strand");
+				System.out.println("Please specify exact column names in your input file.");
+				System.exit(1);
+			}
+			
+		} else {
+			if(inputSeqIdx == -1) {
+				System.out.println("Fail to find column names: sequence");
+				System.out.println("Please specify exact column names in your input file.");
+				System.exit(1);
+			}
+		}
+			
+		
 		if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
 
 			while((line = BR.readLine()) != null) {

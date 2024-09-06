@@ -8,15 +8,10 @@ public class _5_CalComb {
 	public static Hashtable<Character, Double> loadTable(boolean isILEqual) {
 		Hashtable<Character, Double> table = new Hashtable<Character, Double>();
 		
-		table.put('F', 2.);
-		table.put('L', 6.);
-		table.put('I', 3.);
 		table.put('M', 1.);
-		table.put('V', 4.);
-		table.put('S', 6.);
-		table.put('P', 4.);
-		table.put('T', 4.);
-		table.put('A', 4.);
+		table.put('W', 1.);
+		
+		table.put('F', 2.);
 		table.put('Y', 2.);
 		table.put('H', 2.);
 		table.put('Q', 2.);
@@ -25,9 +20,18 @@ public class _5_CalComb {
 		table.put('D', 2.);
 		table.put('E', 2.);
 		table.put('C', 2.);
-		table.put('W', 1.);
-		table.put('R', 6.);
+		
+		table.put('I', 3.);
+		
+		table.put('V', 4.);
+		table.put('P', 4.);
+		table.put('T', 4.);
+		table.put('A', 4.);
 		table.put('G', 4.);
+		
+		table.put('L', 6.);
+		table.put('S', 6.);
+		table.put('R', 6.);
 		
 		// for I = L
 		if(isILEqual) {
