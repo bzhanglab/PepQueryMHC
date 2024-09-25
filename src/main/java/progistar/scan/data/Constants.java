@@ -2,13 +2,16 @@ package progistar.scan.data;
 
 public class Constants {
 	public static final String NAME = "PepQueryHLA";
-	public static final String VERSION = "v1.0.0b";
-	public static final String RELEASE = "August 9, 2024";
+	public static final String VERSION = "v1.0.0b+";
+	public static final String RELEASE = "September 24, 2024";
 	
 	public static final String MODE_TARGET = "target";
 	public static final String MODE_SCAN = "scan";
 	
 	public static final String SEQUENCE_PEPTIDE = "peptide";
+	/**
+	 * @deprecated
+	 */
 	public static final String SEQUENCE_NUCLEOTIDE = "nucleotide";
 	
 	public static final String COUNT_ALL= "all";
@@ -17,9 +20,10 @@ public class Constants {
 	public static final String UNION_MAX = "max";
 	public static final String UNION_SUM = "sum";
 	
-	public static final int	TYPE_TARGET_MODE_TASK	=	1;
-	public static final int TYPE_TARGET_MODE_LIBRARY_ESTIMATION_TASK = 2;
-	public static final int TYPE_SCAN_MODE_TASK	=	3;
+	public static final int	TYPE_TARGET_MODE_TASK						= 1;
+	public static final int TYPE_TARGET_MODE_LIBRARY_ESTIMATION_TASK 	= 2;
+	public static final int TYPE_SCAN_MODE_TASK							= 3;
+	public static final int	TYPE_STRAND_DETECTION_TASK					= 4;
 	
 	//
 	public static final int MAPPED_READS		=	1;
@@ -66,6 +70,25 @@ public class Constants {
 	public static final String DEFAULT_BARCODE_ID	=	"ReadCount";
 	public static final String NULL_BARCODE_ID		=	"Null";
 	public static final String OTHER_BARCODE_ID		=	"Others";
+	
+	// Strand-specific
+	public static final String NON_STRANDED			=	"non";
+	/**
+	 * FR_STRANDED: fr-second strand, direct stranded
+	 * the first read: forward
+	 * the second read: reverse
+	 */
+	public static final String FR_STRANDED			=	"fr";
+	/**
+	 * RF_STRANDED: fr-first strand, reverse stranded
+	 * the first read: reverse
+	 * the second read: forward
+	 */
+	public static final String RF_STRANDED			=	"rf";
+	/**
+	 * Determine strand-specific using XS and FLAGs
+	 */
+	public static final String AUTO_STRANDED			=	"auto";
 	
 	// Output fields //
 	public static final String MATCHED_LOCATION		= "Matched_location";

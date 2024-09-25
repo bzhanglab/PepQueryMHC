@@ -22,6 +22,11 @@ public class Phred {
 		}
 	}
 	
+	/**
+	 * Use ROI
+	 * @param phredStr
+	 * @return
+	 */
 	private static double getProbOfAllCorrected (String phredStr) {
 		double sumOfCorrectPhreds = 0;
 		int len = phredStr.length();

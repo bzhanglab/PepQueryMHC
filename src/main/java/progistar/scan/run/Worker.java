@@ -5,6 +5,7 @@ import java.util.concurrent.Callable;
 import progistar.scan.data.Constants;
 import progistar.scan.function.CheckMemory;
 import progistar.scan.function.ScanModeRun;
+import progistar.scan.function.StrandDetection;
 import progistar.scan.function.TargetModeRun;
 
 public class Worker implements Callable<String> {
@@ -20,11 +21,20 @@ public class Worker implements Callable<String> {
 		if(Scan.verbose) {
 			System.out.println(task.getTaskInfo());
 		}
-		if(Scan.mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
-			ScanModeRun.runScanMode(task);
-		} else if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
-			TargetModeRun.runTargetMode(task);
+		
+		// strand auto detection
+		if(this.task.type == Constants.TYPE_STRAND_DETECTION_TASK) {
+			StrandDetection.runDetection(task);
+		} 
+		// else: general scan / target modes
+		else {
+			if(Scan.mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
+				ScanModeRun.runScanMode(task);
+			} else if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+				TargetModeRun.runTargetMode(task);
+			}
 		}
+		
 		
 		// call once
 		this.task.peakMemory = CheckMemory.checkUsedMemoryMB();

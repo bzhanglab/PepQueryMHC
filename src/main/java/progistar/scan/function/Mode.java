@@ -1,5 +1,6 @@
 package progistar.scan.function;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 import org.ahocorasick.trie.Emit;
@@ -13,6 +14,59 @@ import progistar.scan.run.Scan;
 import progistar.scan.run.Task;
 
 public abstract class Mode {
+	
+	private static ArrayList<Character> getStrandedness (int flags) {
+		ArrayList<Character> strands = new ArrayList<Character>();
+		boolean isFirstSegment = (0x40 & flags) == 0x40 ? true : false;
+		boolean isForward = (0x10 & flags) == 0x10 ? false : true;
+		
+		// R1
+		if(isFirstSegment) {
+			if(Scan.strandedness.equalsIgnoreCase(Constants.FR_STRANDED)) {
+				if(isForward) {
+					strands.add('+');
+				} else {
+					strands.add('-');
+				}
+			} else if(Scan.strandedness.equalsIgnoreCase(Constants.RF_STRANDED)) {
+				if(isForward) {
+					strands.add('-');
+				} else {
+					strands.add('+');
+				}
+			} 
+			// single end
+			// nonstranded paired-ends
+			else {
+				strands.add('+');
+				strands.add('-');
+			}
+		} 
+		// R2
+		else {
+			if(Scan.strandedness.equalsIgnoreCase(Constants.FR_STRANDED)) {
+				if(isForward) {
+					strands.add('-');
+				} else {
+					strands.add('+');
+				}
+			} else if(Scan.strandedness.equalsIgnoreCase(Constants.RF_STRANDED)) {
+				if(isForward) {
+					strands.add('+');
+				} else {
+					strands.add('-');
+				}
+			} 
+			// single end
+			// nonstranded paired-ends
+			else {
+				strands.add('+');
+				strands.add('-');
+			}
+		}
+		
+		return strands;
+	}
 	
 	public static void find (SAMRecordIterator iterator, Trie trie, Task task) {
 		int count = 0;
@@ -58,21 +112,24 @@ public abstract class Mode {
             }
             
             // Process each SAM record
-            String[] frrvSequences = {samRecord.getReadString(), Translator.getReverseComplement(samRecord.getReadString())};
+            // determine strand
+            // int insertSize = samRecord.getInferredInsertSize();
+            int flags = samRecord.getFlags();
+            ArrayList<Character> strands = getStrandedness(flags);
             
-            int strand = 0;
-            for(String sequence : frrvSequences) {
-            	char strandChar = '+';
-            	if(strand != 0) {
-            		strandChar = '-';
+            for(Character strand : strands) {
+            	String sequence = null;
+            	if(strand == '+') {
+            		sequence = samRecord.getReadString();
+            	} else {
+            		sequence = Translator.getReverseComplement(samRecord.getReadString());
             	}
-            	strand++;
             	
             	if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE)) {
             		Collection<Emit> emits = trie.parseText(sequence);
             		
             		for(Emit emit : emits) {
-        				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, 0, strandChar);
+        				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, 0, strand);
         				if(matchedLocation != null) {
         					matchedLocation.inputSequence = emit.getKeyword();
         					if(task.type == Constants.TYPE_TARGET_MODE_TASK) {
@@ -102,7 +159,7 @@ public abstract class Mode {
             			Collection<Emit> emits = trie.parseText(peptide);
             			
             			for(Emit emit : emits) {
-            				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, fr, strandChar);
+            				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, fr, strand);
             				if(matchedLocation != null) {
             					matchedLocation.inputSequence = emit.getKeyword();
             					

@@ -37,6 +37,11 @@ public class Task implements Comparable<Task> {
 	// estimated memory usage
 	public long peakMemory = 0;
 	
+	// for strand type
+	public int R1F = 0;
+	public int R1R = 0;
+	public int R2F = 0;
+	public int R2R = 0;
 	
 	public String getTaskInfo () {
 		String typeStr = null;
@@ -50,6 +55,8 @@ public class Task implements Comparable<Task> {
 			typeStr = "scan mode";
 		} else if(type == Constants.TYPE_TARGET_MODE_LIBRARY_ESTIMATION_TASK) {
 			typeStr = "target mode (libary estimation)";
+		} else if(type == Constants.TYPE_STRAND_DETECTION_TASK) {
+			typeStr = "strand detection";
 		}
 		return typeStr+": Task"+taskIdx+" has "+records.size();
 	}
@@ -58,6 +65,20 @@ public class Task implements Comparable<Task> {
 		this.type = type;
 	}
 	
+	private static ArrayList<Task> getStrandDectectionTasks (String chrName, int size, int mode) {
+		assert mode == Constants.TYPE_STRAND_DETECTION_TASK;
+		
+		ArrayList<Task> tasks = new ArrayList<Task>();
+		Task task = new Task(mode);
+		task.readType = Constants.MAPPED_READS;
+		task.records = null;
+		task.chrName = chrName;
+		task.start = 1;
+		task.end = size;
+		tasks.add(task);
+		
+		return tasks;
+	}
 	
 	private static ArrayList<Task> getChromosomeLevelTasks (ArrayList<SequenceRecord> records, 
 			String chrName, int start, int end, int mode) {
@@ -238,7 +259,34 @@ public class Task implements Comparable<Task> {
 		return tasks;
 	}
 	
-	public static ArrayList<Task> getLibSizeTask (ArrayList<SequenceRecord> records) {
+	public static ArrayList<Task> getStrandDetectionTask () {
+		ArrayList<Task> tasks = new ArrayList<Task>();
+		
+		File file = new File(Scan.bamFile.getAbsolutePath());
+		Task.allTrie = null;
+		
+		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
+			// System.out.println(samReader.getFileHeader().getSequenceDictionary().getSequences().get(0).getSequenceLength());
+			List<SAMSequenceRecord> chromosomes = samReader.getFileHeader().getSequenceDictionary().getSequences();
+			for(SAMSequenceRecord chromosome : chromosomes) {
+				// System.out.println(chromosome.getSAMString());
+				String chrName = chromosome.getSequenceName();
+				tasks.addAll(getStrandDectectionTasks(chrName, 100000, Constants.TYPE_STRAND_DETECTION_TASK));
+			}
+			
+			// assign idx
+			for(int i=0; i<tasks.size(); i++) {
+				tasks.get(i).taskIdx = (i+1);
+			}
+		} catch(Exception e) {
+			e.printStackTrace();
+			System.exit(1);
+		}
+		
+		return tasks;
+	}
+	
+	public static ArrayList<Task> getLibSizeTask () {
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		
 		File file = new File(Scan.bamFile.getAbsolutePath());

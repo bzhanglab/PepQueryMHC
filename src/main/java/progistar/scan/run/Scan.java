@@ -47,6 +47,7 @@ public class Scan {
 	public static String sequence	=	Constants.SEQUENCE_PEPTIDE;
 	public static String count	=	Constants.COUNT_PRIMARY;
 	public static String union	=	Constants.UNION_SUM;
+	public static String strandedness = Constants.AUTO_STRANDED;
 	public static double libSize = 0;
 	
 	public static boolean isILEqual = false;
@@ -93,10 +94,56 @@ public class Scan {
 		
 		//// Prepare tasks
 		ArrayList<Task> tasks = new ArrayList<Task>();
+		
+		// auto strand detection
+		if(strandedness.equalsIgnoreCase(Constants.AUTO_STRANDED)) {
+			tasks.addAll(Task.getStrandDetectionTask());
+			ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
+			List<Worker> callableExList = new ArrayList<>();
+			for(int i=0; i<tasks.size(); i++) {
+				Task task = tasks.get(i);
+				callableExList.add(new Worker(task));
+			}
+			
+			// check peak memory
+			peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
+			
+			executorService.invokeAll(callableExList);
+			executorService.shutdown();
+			
+			int R1F = 0;
+			int R1R = 0;
+			int R2F = 0;
+			int R2R = 0;
+			
+			for(Task task :tasks) {
+				R1F += task.R1F;
+				R1R += task.R1R;
+				R2F += task.R2F;
+				R2R += task.R2R;
+			}
+			
+			if(R1F*10 < R1R && R2F > R2R*10) {
+				strandedness = Constants.RF_STRANDED;
+			} else if(R1F > R1R*10 && R2F*10 < R2R) {
+				strandedness = Constants.FR_STRANDED;
+			} else {
+				strandedness = Constants.NON_STRANDED;
+			}
+			System.out.println("Estimate strandedness");
+			System.out.println("1F\t1R\t2F\t2R");
+			System.out.println(R1F+"\t"+R1R+"\t"+R2F+"\t"+R2R);
+			System.out.println("Strandedness: "+strandedness+"-stranded");
+			
+			tasks.clear();
+		}
+		/////////////////////////////////////////////////////////////////
+		
+		// core algorithm
 		if(mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
 			// estimate library size
 			if(libSize == 0) {
-				tasks.addAll(Task.getLibSizeTask(records));
+				tasks.addAll(Task.getLibSizeTask());
 			}
 			// target mode
 			chunkSize = (records.size() / (10 * threadNum) ) +1;
@@ -207,13 +254,6 @@ public class Scan {
 						+ " \"both modes\" require .bai in advance.")
 				.build();
 		
-		Option optionSequence = Option.builder("s")
-				.longOpt("sequence").argName("peptide|nucleotide")
-				.hasArg()
-				.required(false)
-				.desc("sequence type.")
-				.build();
-		
 		Option optionThread = Option.builder("@")
 				.longOpt("thread").argName("int")
 				.hasArg()
@@ -269,10 +309,17 @@ public class Scan {
 				.desc("calculate peptide level count by maximum or sum of the same peptide (default is sum).")
 				.build();
 		
+		Option optionStrandeness = Option.builder("s")
+				.longOpt("strand").argName("non|fr|rf|auto")
+				.hasArg()
+				.required(false)
+				.desc("strand-specificity. non: non-stranded, fr: fr-second strand, rf: fr-first strand, auto: auto-detection. Auto-detection is only available if there is XS tag in a given BAM file (default is auto).")
+				.build();
+		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
 		.addOption(optionMode)
-		.addOption(optionSequence)
+		.addOption(optionStrandeness)
 		.addOption(optionBam)
 		.addOption(optionThread)
 		.addOption(optionPrimary)
@@ -312,10 +359,13 @@ public class Scan {
 		    }
 		    
 		    if(cmd.hasOption("s")) {
-		    	Scan.sequence = cmd.getOptionValue("s");
-		    	
-		    	if( !(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE) || 
-		    			Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) ) {
+		    	Scan.strandedness = cmd.getOptionValue("s");
+		    	// there is no matched option
+		    	if(!Scan.strandedness.equalsIgnoreCase(Constants.AUTO_STRANDED) &&
+		    		!Scan.strandedness.equalsIgnoreCase(Constants.FR_STRANDED) &&
+		    		!Scan.strandedness.equalsIgnoreCase(Constants.RF_STRANDED) &&
+		    		!Scan.strandedness.equalsIgnoreCase(Constants.NON_STRANDED) ) {
+		    		System.out.println("Wrong strandedness: "+Scan.strandedness);
 		    		isFail = true;
 		    	}
 		    }
@@ -384,9 +434,9 @@ public class Scan {
 
 			if(whitelistFile != null) {
 				System.out.println("White-list file name: "+Scan.whitelistFile.getName() +" (single-cell mode)");
-				
 			}
-			System.out.println("Type: "+Scan.sequence);
+			
+			System.out.println("Strandedness: "+Scan.strandedness);
 			System.out.println("Mode: "+Scan.mode);
 			System.out.println("Count: "+Scan.count);
 			System.out.println("Peptide level count: "+Scan.union);
