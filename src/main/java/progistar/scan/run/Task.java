@@ -58,7 +58,7 @@ public class Task implements Comparable<Task> {
 		} else if(type == Constants.TYPE_STRAND_DETECTION_TASK) {
 			typeStr = "strand detection";
 		}
-		return typeStr+": Task"+taskIdx+" has "+records.size();
+		return typeStr+": Task"+taskIdx;
 	}
 	
 	public Task(int type) {
