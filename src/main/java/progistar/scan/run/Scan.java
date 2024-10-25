@@ -136,7 +136,7 @@ public class Scan {
 			
 			if(R1F+R1R+R2F+R2R == 0) {
 				System.out.println("Fail to estimate stradedness!");
-				System.out.println("It looks single-read RNA-seq experiement. Please specify strandedness.");
+				System.out.println("It looks single-end RNA-seq experiement. Please specify strandedness.");
 				System.exit(1);
 			} else {
 				System.out.println("Strandedness: "+strandedness+"-stranded");

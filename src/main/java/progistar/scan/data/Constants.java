@@ -86,11 +86,11 @@ public class Constants {
 	 */
 	public static final String RF_STRANDED			=	"rf";
 	/**
-	 * F_STRANDED: forward - single-read
+	 * F_STRANDED: forward - single-end
 	 */
 	public static final String F_STRANDED			=	"f";
 	/**
-	 * R_STRANDED: reverse - single-read
+	 * R_STRANDED: reverse - single-end
 	 */
 	public static final String R_STRANDED			=	"r";
 	/**
