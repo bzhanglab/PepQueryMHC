@@ -86,6 +86,14 @@ public class Constants {
 	 */
 	public static final String RF_STRANDED			=	"rf";
 	/**
+	 * F_STRANDED: forward - single-read
+	 */
+	public static final String F_STRANDED			=	"f";
+	/**
+	 * R_STRANDED: reverse - single-read
+	 */
+	public static final String R_STRANDED			=	"r";
+	/**
 	 * Determine strand-specific using XS and FLAGs
 	 */
 	public static final String AUTO_STRANDED			=	"auto";

@@ -133,7 +133,14 @@ public class Scan {
 			System.out.println("Estimate strandedness");
 			System.out.println("1F\t1R\t2F\t2R");
 			System.out.println(R1F+"\t"+R1R+"\t"+R2F+"\t"+R2R);
-			System.out.println("Strandedness: "+strandedness+"-stranded");
+			
+			if(R1F+R1R+R2F+R2R == 0) {
+				System.out.println("Fail to estimate stradedness!");
+				System.out.println("It looks single-read RNA-seq experiement. Please specify strandedness.");
+				System.exit(1);
+			} else {
+				System.out.println("Strandedness: "+strandedness+"-stranded");
+			}
 			
 			tasks.clear();
 		}
@@ -310,10 +317,11 @@ public class Scan {
 				.build();
 		
 		Option optionStrandeness = Option.builder("s")
-				.longOpt("strand").argName("non|fr|rf|auto")
+				.longOpt("strand").argName("non|fr|rf|f|r|auto")
 				.hasArg()
 				.required(false)
-				.desc("strand-specificity. non: non-stranded, fr: fr-second strand, rf: fr-first strand, auto: auto-detection. Auto-detection is only available if there is XS tag in a given BAM file (default is auto).")
+				.desc("strand-specificity. non: non-stranded, fr: fr-second strand, rf: fr-first strand, f: forward strand for single-end, r: reverse strand for single-end, "
+						+ "auto: auto-detection. Auto-detection is only available if there is XS tag in a given BAM file (default is auto).")
 				.build();
 		
 		options.addOption(optionInput)
@@ -364,6 +372,8 @@ public class Scan {
 		    	if(!Scan.strandedness.equalsIgnoreCase(Constants.AUTO_STRANDED) &&
 		    		!Scan.strandedness.equalsIgnoreCase(Constants.FR_STRANDED) &&
 		    		!Scan.strandedness.equalsIgnoreCase(Constants.RF_STRANDED) &&
+		    		!Scan.strandedness.equalsIgnoreCase(Constants.F_STRANDED) &&
+		    		!Scan.strandedness.equalsIgnoreCase(Constants.R_STRANDED) &&
 		    		!Scan.strandedness.equalsIgnoreCase(Constants.NON_STRANDED) ) {
 		    		System.out.println("Wrong strandedness: "+Scan.strandedness);
 		    		isFail = true;
