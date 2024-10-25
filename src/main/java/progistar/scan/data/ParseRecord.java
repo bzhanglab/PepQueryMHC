@@ -10,13 +10,11 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 
-import progistar.scan.function.Random;
 import progistar.scan.function.Translator;
 import progistar.scan.function.Utils;
 import progistar.scan.function.Validation;
 import progistar.scan.function.WriteStatistics;
 import progistar.scan.run.Scan;
-import progistar.scan.run.Task;
 
 public class ParseRecord {
 
@@ -201,8 +199,13 @@ public class ParseRecord {
 				"\t" + Constants.MATCHED_REFNUCLEOTIDE);
 		if(Scan.isSingleCellMode) {
 			// append barcode ids in whitelist
+			// write a header for raw read count
 			for(String barcodeId : BarcodeTable.barcodeIds) {
-				BW.append("\t").append(barcodeId);
+				BW.append("\t").append("Match_read_").append(barcodeId);
+			}
+			// write a header for RPHM
+			for(String barcodeId : BarcodeTable.barcodeIds) {
+				BW.append("\t").append("Match_RPHT_").append(barcodeId);
 			}
 		} else {
 			BW.append("\t" + Constants.MATCHED_READ_COUNT +
@@ -249,8 +252,13 @@ public class ParseRecord {
 				"\t" + Constants.MATCHED_STRAND);
 		if(Scan.isSingleCellMode) {
 			// append barcode ids in whitelist
+			// write a header for raw read count
 			for(String barcodeId : BarcodeTable.barcodeIds) {
-				BW.append("\t").append(barcodeId);
+				BW.append("\t").append("Match_read_").append(barcodeId);
+			}
+			// write a header for RPHM
+			for(String barcodeId : BarcodeTable.barcodeIds) {
+				BW.append("\t").append("Match_RPHT_").append(barcodeId);
 			}
 		} else {
 			BW.append("\t" + Constants.MATCHED_READ_COUNT +
@@ -303,6 +311,7 @@ public class ParseRecord {
 			try {
 				if(Scan.isSingleCellMode) {
 					BW.append(tupleKey);
+					// write raw read counts
 					for(String barcodeId : BarcodeTable.barcodeIds) {
 						Long read = reads.get(barcodeId);
 						if(read == null) {
@@ -310,9 +319,17 @@ public class ParseRecord {
 						}
 						BW.append("\t"+read);
 					}
+					// write RPHTs
+					for(String barcodeId : BarcodeTable.barcodeIds) {
+						Long read = reads.get(barcodeId);
+						if(read == null) {
+							read = 0L;
+						}
+						BW.append("\t"+Utils.getRPHT(read, barcodeId));
+					}
 				} else {
 					Long read = reads.get(Constants.DEFAULT_BARCODE_ID);
-					BW.append(tupleKey+"\t"+read+"\t"+Utils.getRPHM((double)read));
+					BW.append(tupleKey+"\t"+read+"\t"+Utils.getRPHM((double)read, Constants.DEFAULT_BARCODE_ID));
 				}
 				
 				BW.newLine();
@@ -331,8 +348,13 @@ public class ParseRecord {
 				"\t" + Constants.MATCHED_NUM_LOCATION);
 		if(Scan.isSingleCellMode) {
 			// append barcode ids in whitelist
+			// write a header for raw read count
 			for(String barcodeId : BarcodeTable.barcodeIds) {
-				BW.append("\t").append(barcodeId);
+				BW.append("\t").append("Match_read_").append(barcodeId);
+			}
+			// write a header for RPHM
+			for(String barcodeId : BarcodeTable.barcodeIds) {
+				BW.append("\t").append("Match_RPHT_").append(barcodeId);
 			}
 		} else {
 			BW.append("\t" + Constants.MATCHED_READ_COUNT +
@@ -396,7 +418,8 @@ public class ParseRecord {
 		readCountsPeptLevel.forEach((sequence, reads)->{
 			try {
 				if(Scan.isSingleCellMode) {
-					BW.append(sequence+"\t"+locationsPeptLevel.get(sequence));
+					BW.append(sequence+"\t"+locationsPeptLevel.get(sequence).size());
+					// write raw read counts
 					for(String barcodeId : BarcodeTable.barcodeIds) {
 						Long read = reads.get(barcodeId);
 						if(read == null) {
@@ -404,9 +427,17 @@ public class ParseRecord {
 						}
 						BW.append("\t"+read);
 					}
+					// write RPHTs
+					for(String barcodeId : BarcodeTable.barcodeIds) {
+						Long read = reads.get(barcodeId);
+						if(read == null) {
+							read = 0L;
+						}
+						BW.append("\t"+Utils.getRPHT(read, barcodeId));
+					}
 				} else {
 					Long read = reads.get(Constants.DEFAULT_BARCODE_ID);
-					BW.append(sequence+"\t"+locationsPeptLevel.get(sequence).size()+"\t"+read+"\t"+Utils.getRPHM((double)read));
+					BW.append(sequence+"\t"+locationsPeptLevel.get(sequence).size()+"\t"+read+"\t"+Utils.getRPHM((double)read, Constants.DEFAULT_BARCODE_ID));
 				}
 				BW.newLine();
 			}catch(IOException ioe) {
@@ -421,8 +452,23 @@ public class ParseRecord {
 	
 	private static void writeLibSize (File file) throws IOException {
 		BufferedWriter BW = new BufferedWriter(new FileWriter(file));
-		BW.append(Scan.libSize+"");
+		BW.append("Barcode\tLibrary_size");
 		BW.newLine();
+		ArrayList<String> barcodes = new ArrayList<String>();
+		if(Scan.isSingleCellMode) {
+			barcodes = BarcodeTable.barcodeIds;
+		} else {
+			barcodes.add(Constants.DEFAULT_BARCODE_ID);
+		}
+		
+		for(String barcode : barcodes) {
+			Double libSize = LibraryTable.table.get(barcode);
+			if(libSize == null) {
+				libSize = .0;
+			}
+			BW.append(barcode+"\t"+libSize);
+			BW.newLine();
+		}
 		BW.close();
 	}
 }

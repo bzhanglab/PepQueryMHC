@@ -8,6 +8,7 @@ import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
+import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Constants;
 import progistar.scan.data.SequenceRecord;
 import progistar.scan.run.Scan;
@@ -127,7 +128,13 @@ public class TargetModeRun extends Mode {
             
 
         	if(!samRecord.isSecondaryAlignment()) {
-        		task.processedReads++;
+        		String barcodeId = BarcodeTable.getBarcodeFromBam(samRecord);
+            	Double pReads = task.processedReads.get(barcodeId);
+            	if(pReads == null) {
+            		pReads = .0;
+            	}
+            	pReads++;
+            	task.processedReads.put(barcodeId, pReads);
         	}
             
         }

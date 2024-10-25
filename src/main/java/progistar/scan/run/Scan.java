@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -16,12 +17,10 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import htsjdk.samtools.SamReaderFactory;
-import htsjdk.samtools.ValidationStringency;
-import htsjdk.samtools.util.Log;
 import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Codon;
 import progistar.scan.data.Constants;
+import progistar.scan.data.LibraryTable;
 import progistar.scan.data.LocTable;
 import progistar.scan.data.ParseRecord;
 import progistar.scan.data.Phred;
@@ -41,6 +40,7 @@ public class Scan {
 	
 	public static File inputFile = null;
 	public static File bamFile = null;
+	public static File libFile = null;
 	public static File whitelistFile = null;
 	public static String outputBaseFilePath	= null;
 	public static String mode	=	Constants.MODE_TARGET;
@@ -48,7 +48,6 @@ public class Scan {
 	public static String count	=	Constants.COUNT_PRIMARY;
 	public static String union	=	Constants.UNION_SUM;
 	public static String strandedness = Constants.AUTO_STRANDED;
-	public static double libSize = 0;
 	
 	public static boolean isILEqual = false;
 	public static boolean isSingleCellMode = false;
@@ -88,6 +87,11 @@ public class Scan {
 		// single cell barcode
 		if(isSingleCellMode) {
 			BarcodeTable.load();
+		}
+		
+		// load library table
+		if(libFile != null) {
+			LibraryTable.loadTable(libFile);
 		}
 		
 		ArrayList<SequenceRecord> records = ParseRecord.parse(inputFile);
@@ -149,7 +153,7 @@ public class Scan {
 		// core algorithm
 		if(mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
 			// estimate library size
-			if(libSize == 0) {
+			if(LibraryTable.isEmpty()) {
 				tasks.addAll(Task.getLibSizeTask());
 			}
 			// target mode
@@ -187,9 +191,16 @@ public class Scan {
 		}
 		
 		// calculate library size
-		if(libSize == 0) {
+		if(LibraryTable.isEmpty()) {
 			for(Task task : tasks) {
-				libSize += task.processedReads;
+				task.processedReads.forEach((barcode, count)->{
+					Double libSize = LibraryTable.table.get(barcode);
+					if(libSize == null) {
+						libSize = .0;
+					}
+					libSize += count;
+					LibraryTable.table.put(barcode, libSize);
+				});
 			}
 		}
 		
@@ -213,7 +224,6 @@ public class Scan {
 		peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
 		
 		long endTime = System.currentTimeMillis();
-		System.out.println("Library size: "+libSize);
 		System.out.println("Total Elapsed Time: "+(endTime-startTime)/1000+" sec");
 		System.out.println("Estimated Peak Memory: "+peakMemory +" MB");
 	}
@@ -282,11 +292,11 @@ public class Scan {
 				.build();
 		
 		Option optionLibSize = Option.builder("l")
-				.longOpt("lib_size").argName("int")
+				.longOpt("lib_size").argName("file path")
 				.hasArg()
 				.required(false)
-				.desc("library size to calculate RPHM value." +
-						"\nif this option is not used, then it estimates the library size automatically. This estimation takes additional time for target mode.")
+				.desc("TSV file including library size information." +
+						"\nIf this option is not specified, then it estimates the library size automatically. This estimation takes additional time for target mode.")
 				.build();
 		
 		Option optionVerbose = Option.builder("v")
@@ -403,7 +413,7 @@ public class Scan {
 		    }
 		    
 		    if(cmd.hasOption("l")) {
-		    	Scan.libSize = Double.parseDouble(cmd.getOptionValue("l"));
+		    	Scan.libFile = new File(cmd.getOptionValue("l"));
 		    }
 		    
 		    if(cmd.hasOption("w")) {

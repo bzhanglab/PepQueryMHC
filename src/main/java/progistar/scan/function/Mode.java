@@ -8,6 +8,7 @@ import org.ahocorasick.trie.Trie;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
+import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LocationInformation;
 import progistar.scan.run.Scan;
@@ -120,7 +121,13 @@ public abstract class Mode {
             // a read is primary.
             // In case of target mode, we do not count the reads in this routine.
             if(!samRecord.isSecondaryAlignment() && task.type == Constants.TYPE_SCAN_MODE_TASK) {
-            	task.processedReads++;
+            	String barcodeId = BarcodeTable.getBarcodeFromBam(samRecord);
+            	Double pReads = task.processedReads.get(barcodeId);
+            	if(pReads == null) {
+            		pReads = .0;
+            	}
+            	pReads++;
+            	task.processedReads.put(barcodeId, pReads);
             }
             
             // Process each SAM record
@@ -184,7 +191,6 @@ public abstract class Mode {
             								.equalsIgnoreCase(matchedLocation.location)) {
             							continue;
             						}
-            						
             					}
             					
             					if(task.locTable.putLocation(matchedLocation)) {

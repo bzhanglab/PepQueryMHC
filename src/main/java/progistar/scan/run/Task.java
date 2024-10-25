@@ -2,6 +2,7 @@ package progistar.scan.run;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 import org.ahocorasick.trie.Trie;
@@ -11,7 +12,6 @@ import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SAMSequenceRecord;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
-import htsjdk.samtools.ValidationStringency;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LocTable;
 import progistar.scan.data.SequenceRecord;
@@ -21,7 +21,7 @@ public class Task implements Comparable<Task> {
 	public int taskIdx = -1;
 	public int type = Constants.TYPE_TARGET_MODE_TASK;
 	public int readType = Constants.MAPPED_READS;
-	public double processedReads = 0;
+	public Hashtable<String, Double> processedReads = new Hashtable<String, Double>();
 	// only available for TargetMode
 	public ArrayList<SequenceRecord> records = new ArrayList<SequenceRecord>();
 	public int currentRecordIdx = 0;

@@ -67,7 +67,7 @@ public class Constants {
 	public static final byte DEL			=	2;
 	public static final byte CLP			=	3;
 	
-	public static final String DEFAULT_BARCODE_ID	=	"ReadCount";
+	public static final String DEFAULT_BARCODE_ID	=	"Undefined";
 	public static final String NULL_BARCODE_ID		=	"Null";
 	public static final String OTHER_BARCODE_ID		=	"Others";
 	
