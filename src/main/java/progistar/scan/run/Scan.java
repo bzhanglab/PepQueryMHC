@@ -446,7 +446,7 @@ public class Scan {
 				System.out.println("White-list file name: "+Scan.whitelistFile.getName() +" (single-cell mode)");
 			}
 			
-			System.out.println("Strandedness: "+Scan.strandedness);
+			System.out.println("Strandedness: "+Constants.getFullNameOfStrandedness(Scan.strandedness));
 			System.out.println("Mode: "+Scan.mode);
 			System.out.println("Count: "+Scan.count);
 			System.out.println("Peptide level count: "+Scan.union);

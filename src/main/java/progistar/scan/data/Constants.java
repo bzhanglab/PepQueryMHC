@@ -2,8 +2,8 @@ package progistar.scan.data;
 
 public class Constants {
 	public static final String NAME = "PepQueryHLA";
-	public static final String VERSION = "v1.0.0b+";
-	public static final String RELEASE = "September 24, 2024";
+	public static final String VERSION = "v1.0.0b++";
+	public static final String RELEASE = "October 25, 2024";
 	
 	public static final String MODE_TARGET = "target";
 	public static final String MODE_SCAN = "scan";
@@ -108,5 +108,26 @@ public class Constants {
 	public static final String MATCHED_READ_COUNT	= "Matched_read_count";
 	public static final String MATCHED_RPHM			= "Matched_RPHM";
 	public static final String MATCHED_NUM_LOCATION	= "Matched_num_locations";
+	
+	public static String getFullNameOfStrandedness (String strandedness) {
+		String fullName = null;
+		
+		if(strandedness.equalsIgnoreCase(Constants.NON_STRANDED)) {
+			fullName = "Non-stranded";
+		} else if(strandedness.equalsIgnoreCase(Constants.F_STRANDED)) {
+			fullName = "Forward-stranded (single-end)";
+		} else if(strandedness.equalsIgnoreCase(Constants.R_STRANDED)) {
+			fullName = "Reverse-stranded (single-end)";
+		} else if(strandedness.equalsIgnoreCase(Constants.FR_STRANDED)) {
+			fullName = "FR-stranded (paired-end)";
+		} else if(strandedness.equalsIgnoreCase(Constants.RF_STRANDED)) {
+			fullName = "RF-stranded (paired-end)";
+		} else if(strandedness.equalsIgnoreCase(Constants.AUTO_STRANDED)) {
+			fullName = "Auto-detection";
+		}
+		
+		
+		return fullName;
+	}
 	
 }
