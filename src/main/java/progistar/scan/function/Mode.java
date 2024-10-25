@@ -20,50 +20,62 @@ public abstract class Mode {
 		boolean isFirstSegment = (0x40 & flags) == 0x40 ? true : false;
 		boolean isForward = (0x10 & flags) == 0x10 ? false : true;
 		
-		// R1
-		if(isFirstSegment) {
-			if(Scan.strandedness.equalsIgnoreCase(Constants.FR_STRANDED)) {
-				if(isForward) {
-					strands.add('+');
-				} else {
-					strands.add('-');
-				}
-			} else if(Scan.strandedness.equalsIgnoreCase(Constants.RF_STRANDED)) {
-				if(isForward) {
-					strands.add('-');
-				} else {
-					strands.add('+');
-				}
-			} 
-			// single end
-			// nonstranded paired-ends
-			else {
+		// non-stranded
+		if(Scan.strandedness.equalsIgnoreCase(Constants.NON_STRANDED)) {
+			strands.add('+');
+			strands.add('-');
+		}  
+		// Single-end
+		else if(Scan.strandedness.equalsIgnoreCase(Constants.F_STRANDED)) {
+			if(isForward) {
 				strands.add('+');
+			} else {
 				strands.add('-');
+			}
+		} else if(Scan.strandedness.equalsIgnoreCase(Constants.R_STRANDED)) {
+			if(isForward) {
+				strands.add('-');
+			} else {
+				strands.add('+');
 			}
 		} 
-		// R2
+		// Paired-end
 		else {
-			if(Scan.strandedness.equalsIgnoreCase(Constants.FR_STRANDED)) {
-				if(isForward) {
-					strands.add('-');
-				} else {
-					strands.add('+');
-				}
-			} else if(Scan.strandedness.equalsIgnoreCase(Constants.RF_STRANDED)) {
-				if(isForward) {
-					strands.add('+');
-				} else {
-					strands.add('-');
+			// R1
+			if(isFirstSegment) {
+				if(Scan.strandedness.equalsIgnoreCase(Constants.FR_STRANDED)) {
+					if(isForward) {
+						strands.add('+');
+					} else {
+						strands.add('-');
+					}
+				} else if(Scan.strandedness.equalsIgnoreCase(Constants.RF_STRANDED)) {
+					if(isForward) {
+						strands.add('-');
+					} else {
+						strands.add('+');
+					}
 				}
 			} 
-			// single end
-			// nonstranded paired-ends
+			// R2
 			else {
-				strands.add('+');
-				strands.add('-');
+				if(Scan.strandedness.equalsIgnoreCase(Constants.FR_STRANDED)) {
+					if(isForward) {
+						strands.add('-');
+					} else {
+						strands.add('+');
+					}
+				} else if(Scan.strandedness.equalsIgnoreCase(Constants.RF_STRANDED)) {
+					if(isForward) {
+						strands.add('+');
+					} else {
+						strands.add('-');
+					}
+				} 
 			}
 		}
+		
+		
 		
 		return strands;
 	}
