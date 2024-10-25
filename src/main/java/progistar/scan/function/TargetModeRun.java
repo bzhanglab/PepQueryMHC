@@ -126,9 +126,14 @@ public class TargetModeRun extends Mode {
             	continue;
             }
             
-
+            // if barcode id is null or others, pass the read
+            // no worry about bulk RNA-seq because it should be "undefined" in the bulk RNA-seq.
+            String barcodeId = BarcodeTable.getBarcodeFromBam(samRecord);
+            if(barcodeId.equalsIgnoreCase(Constants.NULL_BARCODE_ID) || barcodeId.equalsIgnoreCase(Constants.OTHER_BARCODE_ID) ) {
+            	continue;
+            }
+            
         	if(!samRecord.isSecondaryAlignment()) {
-        		String barcodeId = BarcodeTable.getBarcodeFromBam(samRecord);
             	Double pReads = task.processedReads.get(barcodeId);
             	if(pReads == null) {
             		pReads = .0;

@@ -117,11 +117,18 @@ public abstract class Mode {
             	continue;
             }
             
+            // if barcode id is null or others, pass the read
+            // no worry about bulk RNA-seq because it should be "undefined" in the bulk RNA-seq.
+            String barcodeId = BarcodeTable.getBarcodeFromBam(samRecord);
+            if(barcodeId.equalsIgnoreCase(Constants.NULL_BARCODE_ID) || barcodeId.equalsIgnoreCase(Constants.OTHER_BARCODE_ID) ) {
+            	continue;
+            }
+            
+            
             // increase processed reads if and only if
             // a read is primary.
             // In case of target mode, we do not count the reads in this routine.
             if(!samRecord.isSecondaryAlignment() && task.type == Constants.TYPE_SCAN_MODE_TASK) {
-            	String barcodeId = BarcodeTable.getBarcodeFromBam(samRecord);
             	Double pReads = task.processedReads.get(barcodeId);
             	if(pReads == null) {
             		pReads = .0;

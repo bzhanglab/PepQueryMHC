@@ -22,8 +22,16 @@ public class BarcodeTable {
 		try {
 			BufferedReader BR = new BufferedReader(new FileReader(Scan.whitelistFile));
 			String line = null;
-			barcodeIds.add(Constants.NULL_BARCODE_ID);
-			barcodeIds.add(Constants.OTHER_BARCODE_ID);
+			
+			/**
+			 * deprecated
+			 * Proportion of null and undefined barcodes is small, and they barely give a good information.
+			 * Nevertheless, saving their count information take a lot of space, memory (> 1GB).
+			 * We skip their information to reduce space waste.
+			 * 
+			 */
+			//barcodeIds.add(Constants.NULL_BARCODE_ID);
+			//barcodeIds.add(Constants.OTHER_BARCODE_ID);
 			
 			BR.readLine(); // skip header
 			while((line = BR.readLine()) != null) {
