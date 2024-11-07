@@ -121,7 +121,7 @@ public abstract class Mode {
             // no worry about bulk RNA-seq because it should be "undefined" in the bulk RNA-seq.
             String barcodeId = BarcodeTable.getBarcodeFromBam(samRecord);
             if(barcodeId.equalsIgnoreCase(Constants.NULL_BARCODE_ID) || barcodeId.equalsIgnoreCase(Constants.OTHER_BARCODE_ID) ) {
-            	continue;
+            	//continue;
             }
             
             
