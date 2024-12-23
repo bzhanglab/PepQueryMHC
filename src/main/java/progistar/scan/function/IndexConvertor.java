@@ -26,6 +26,10 @@ public class IndexConvertor {
 		
 		return indexValue;
 	}
+	
+	public static int size () {
+		return strToIndex.size();
+	}
 	/**
 	 * 
 	 * the index for that chr is automatically assigned by auto-increment key. <br>

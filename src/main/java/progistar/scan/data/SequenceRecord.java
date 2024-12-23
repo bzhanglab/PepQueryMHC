@@ -5,7 +5,7 @@ import java.util.Hashtable;
 
 import org.ahocorasick.trie.Trie;
 
-import progistar.scan.run.Scan;
+import progistar.scan.run.Main;
 
 public class SequenceRecord {
 
@@ -28,6 +28,9 @@ public class SequenceRecord {
 		return (sequence+"_"+location+"_"+strand);
 	}
 	
+	public String toString() {
+		return getKey();
+	}
 
 	/**
 	 * If mode is all, than it uses all records.

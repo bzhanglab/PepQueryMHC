@@ -4,17 +4,19 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Hashtable;
 
-import progistar.scan.data.ABlock;
 import progistar.scan.data.Constants;
-import progistar.scan.data.GenomicAnnotation;
-import progistar.scan.data.TBlock;
+import progistar.scan.data.Exon;
+import progistar.scan.data.Gene;
+import progistar.scan.data.GeneArray;
+import progistar.scan.data.Transcript;
 import progistar.scan.function.IndexConvertor;
 
-public class GTFParser {
+public class ParseGTF {
 
 	// prevent to generate constructor
-	private GTFParser () {}
+	private ParseGTF () {}
 	
 	private static final String[] SELECTED_FEATURES = {"exon", "cds"};
 	
@@ -40,15 +42,13 @@ public class GTFParser {
 		return null;
 	}
 	
-	public static GenomicAnnotation parseGTF (String gtfFilePath) {
-		System.out.print("Parsing GTF: "+gtfFilePath);
+	public static GeneArray[] parseGTF (File gtfFile) {
+		System.out.println("Build an interval tree: "+gtfFile.getAbsolutePath());
 		long startTime = System.currentTimeMillis();
-		
-		GenomicAnnotation annotation = new GenomicAnnotation();
+		Hashtable<String, Gene> geneTable = new Hashtable<String, Gene>();
+		Hashtable<String, Transcript> transcriptTable = new Hashtable<String, Transcript>();
 		try {
-			File samFile = new File(gtfFilePath);
-			
-			BufferedReader BR = new BufferedReader(new FileReader(samFile));
+			BufferedReader BR = new BufferedReader(new FileReader(gtfFile));
 			
 			String line = null;
 			
@@ -71,23 +71,45 @@ public class GTFParser {
 				String[] attr = fields[attrIndex].split(";");
 				
 				if(feature.equalsIgnoreCase("transcript")) {
-					String transcriptID = getGtfAttr(attr, "transcript_id");
-					String transcriptName = getGtfAttr(attr, "transcript_name");
-					String transcriptType = getGtfAttr(attr, "transcript_type");
-					
 					String geneID = getGtfAttr(attr, "gene_id");
 					String geneName = getGtfAttr(attr, "gene_name");
 					String geneType = getGtfAttr(attr, "gene_type");
+					String transcriptID = getGtfAttr(attr, "transcript_id");
 					
 					boolean strand = fields[strandIndex].equalsIgnoreCase("-") ? false : true;
 					
 					String chr = fields[chrIndex];
 					// enroll chr index and chr string
 					IndexConvertor.putChrIndexer(chr);
+					int chrIdx = IndexConvertor.chrToIndex(chr);
 					
-					// put transcript ID
-					annotation.putTBlock(IndexConvertor.chrToIndex(chr), strand, start, end, 
-							transcriptID, transcriptName, transcriptType, geneID, geneName, geneType);
+					Gene gene = geneTable.get(geneID);
+					if(gene == null) {
+						gene = new Gene();
+						gene.chrIdx = chrIdx;
+						gene.start = start;
+						gene.end = end;
+						gene.id = geneID;
+						gene.name = geneName;
+						gene.type = geneType;
+						geneTable.put(geneID, gene);
+					} else {
+						gene.start = Integer.min(gene.start, start);
+						gene.end = Integer.max(gene.end, end);
+					}
+					
+					Transcript transcript = transcriptTable.get(transcriptID);
+					if(transcript == null) {
+						transcript = new Transcript();
+						transcript.id = transcriptID;
+						transcript.start = start;
+						transcript.end = end;
+						transcript.strand = strand;
+						gene.transcripts.put(transcriptID, transcript);
+						transcriptTable.put(transcriptID, transcript);
+					} else {
+						System.out.println(transcriptID +" is duplicated and ignored.");
+					}
 				} 
 
 				else {
@@ -100,22 +122,19 @@ public class GTFParser {
 					if(!isSelectedFeature) continue;
 					
 					// selected features consist of structural blocks which are building block of a transcript.
-					byte bFeature = feature.equalsIgnoreCase("CDS") ? Constants.CDS : Constants.EXON;
+					byte bFeature = feature.equalsIgnoreCase("CDS") ? Constants.CDS : Constants.NCDS;
 					
 					
 					String transcriptID = getGtfAttr(attr, "transcript_id");
-					TBlock tBlock = annotation.getTBlockByTID(transcriptID);
+					Transcript transcript = transcriptTable.get(transcriptID);
 					
 					// ASSERT!
-					assert tBlock != null;
-					
-					ABlock aBlock = new ABlock();
+					Exon aBlock = new Exon();
 					aBlock.start = start;
 					aBlock.end = end;
 					aBlock.feature = bFeature;
-					aBlock.transcriptIndex = tBlock.tBlockID;
 					
-					tBlock.aBlocks.add(aBlock);
+					transcript.exons.add(aBlock);
 				}
 			}
 			
@@ -123,19 +142,41 @@ public class GTFParser {
 			
 			// classify exon into CDS, NCDS and UTR.
 			// plus, define intron and intergenic regions.
-			annotation.assignTypesInTBlocks();
 			
 		}catch(IOException ioe) {
 			System.out.println("...\tFail to load GTF");
 		}
 		
 		
-		// update ENST mapper
-		annotation.updateENSTMapper();
+
+		System.out.println("The number of chromosomes: "+IndexConvertor.size());
+		System.out.println("The number of genes: "+geneTable.size());
+		System.out.println("The number of transcripts: "+transcriptTable.size());
+		GeneArray[] geneArrays = new GeneArray[IndexConvertor.size()];
+		geneTable.forEach((id, g)->{
+			int chrIdx = g.chrIdx;
+			if(geneArrays[chrIdx] == null) {
+				geneArrays[chrIdx] = new GeneArray();
+				geneArrays[chrIdx].chrIdx = chrIdx;
+			}
+			geneArrays[chrIdx].genes.add(g);
+		});
+		
+		for(GeneArray geneArray : geneArrays) {
+			geneArray.refine();
+			for(int i=0; i< geneArray.genes.size(); i++) {
+				Gene gene = geneArray.genes.get(i);
+				gene.transcripts.forEach((id, t)->{
+					t.refine();
+				});
+			}
+		}
+		
 		
 		long endTime = System.currentTimeMillis();
 		System.out.println("\tElapsed time: "+((endTime-startTime)/1000) + " sec");
 		
-		return annotation;
+		return geneArrays;
+		
 	}
 }

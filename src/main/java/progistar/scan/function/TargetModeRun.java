@@ -10,8 +10,8 @@ import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
 import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Constants;
+import progistar.scan.data.Parameters;
 import progistar.scan.data.SequenceRecord;
-import progistar.scan.run.Scan;
 import progistar.scan.run.Task;
 
 public class TargetModeRun extends Mode {
@@ -31,7 +31,7 @@ public class TargetModeRun extends Mode {
 	private static void countUnmappedReads(Task task) {
 		long startTime = System.currentTimeMillis();
 		// to prevent racing
-		File file = new File(Scan.bamFile.getAbsolutePath());
+		File file = new File(Parameters.bamFile.getAbsolutePath());
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			// for unmapped reads
 			Trie trie = SequenceRecord.getTrie(task.records);
@@ -43,7 +43,7 @@ public class TargetModeRun extends Mode {
 		}
 		long endTime = System.currentTimeMillis();
 		
-		if(Scan.verbose) {
+		if(Parameters.verbose) {
 			System.out.println("Task"+task.taskIdx+" "+(endTime-startTime)/1000+" sec");
 		}
 	}
@@ -51,7 +51,7 @@ public class TargetModeRun extends Mode {
 	private static void countMappedReads (Task task) {
 		long startTime = System.currentTimeMillis();
 		// to prevent racing
-		File file = new File(Scan.bamFile.getAbsolutePath());
+		File file = new File(Parameters.bamFile.getAbsolutePath());
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			double size = task.records.size();
 			for(int i=0; i<size; i++) {
@@ -71,7 +71,7 @@ public class TargetModeRun extends Mode {
 		}
 		long endTime = System.currentTimeMillis();
 		
-		if(Scan.verbose) {
+		if(Parameters.verbose) {
 			System.out.println(task.taskIdx+" "+(endTime-startTime)/1000+" sec");
 		}
 	}
@@ -79,7 +79,7 @@ public class TargetModeRun extends Mode {
 	private static void estimateLibSize (Task task) {
 		long startTime = System.currentTimeMillis();
 		// to prevent racing
-		File file = new File(Scan.bamFile.getAbsolutePath());
+		File file = new File(Parameters.bamFile.getAbsolutePath());
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			SAMRecordIterator iterator = null;
 			if(task.readType == Constants.MAPPED_READS) {
@@ -95,7 +95,7 @@ public class TargetModeRun extends Mode {
 		
 		long endTime = System.currentTimeMillis();
 		
-		if(Scan.verbose) {
+		if(Parameters.verbose) {
 			System.out.println("Task"+task.taskIdx+" "+(endTime-startTime)/1000+" sec");
 		}
 	}

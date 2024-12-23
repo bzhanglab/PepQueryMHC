@@ -7,14 +7,14 @@ import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
 import progistar.scan.data.Constants;
-import progistar.scan.run.Scan;
+import progistar.scan.data.Parameters;
 import progistar.scan.run.Task;
 
 public class StrandDetection {
 
 	public static void runDetection (Task task) {
 		if(task.type == Constants.TYPE_STRAND_DETECTION_TASK) {
-			if(Scan.verbose) {
+			if(Parameters.verbose) {
 				System.out.println(task.chrName+":"+task.start+"-"+task.end);
 			}
 			detect(task);
@@ -24,7 +24,7 @@ public class StrandDetection {
 	private static void detect (Task task) {
 		long startTime = System.currentTimeMillis();
 		// to prevent racing
-		File file = new File(Scan.bamFile.getAbsolutePath());
+		File file = new File(Parameters.bamFile.getAbsolutePath());
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			SAMRecordIterator iterator = samReader.queryOverlapping(task.chrName, 1, Integer.MAX_VALUE);
 			int size = task.end;
@@ -33,7 +33,7 @@ public class StrandDetection {
 				SAMRecord samRecord = iterator.next();
 				
 				boolean isPass = false;
-				if(Scan.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
+				if(Parameters.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
             		isPass = true;
             	}
 				
@@ -78,7 +78,7 @@ public class StrandDetection {
 		}
 		
 		long endTime = System.currentTimeMillis();
-		if(Scan.verbose) {
+		if(Parameters.verbose) {
 			System.out.println("Task"+task.taskIdx+" "+(endTime-startTime)/1000+" sec");
 		}
 	}

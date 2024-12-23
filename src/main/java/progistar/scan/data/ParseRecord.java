@@ -14,7 +14,7 @@ import progistar.scan.function.Translator;
 import progistar.scan.function.Utils;
 import progistar.scan.function.Validation;
 import progistar.scan.function.WriteStatistics;
-import progistar.scan.run.Scan;
+import progistar.scan.run.Main;
 
 public class ParseRecord {
 
@@ -36,7 +36,10 @@ public class ParseRecord {
 		String line = null;
 		
 		SequenceRecord.header = BR.readLine();
-		SequenceRecord.fileName = Scan.bamFile.getName();
+		
+		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) || Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
+			SequenceRecord.fileName = Parameters.bamFile.getName();
+		}
 		
 		String[] headerSplit = SequenceRecord.header.split("\t");
 		int inputSeqIdx = -1;
@@ -44,10 +47,10 @@ public class ParseRecord {
 		int strandIdx = -1;
 		
 		for(int i=0; i<headerSplit.length; i++) {
-			if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE) && 
+			if(Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE) && 
 					headerSplit[i].equalsIgnoreCase("sequence")) {
 				inputSeqIdx = i;
-			} else if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE) && 
+			} else if(Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE) && 
 					headerSplit[i].equalsIgnoreCase("sequence")) {
 				inputSeqIdx = i;
 			} else if(headerSplit[i].equalsIgnoreCase("location")) {
@@ -58,14 +61,20 @@ public class ParseRecord {
 		}
 		
 		// fail to find fields
-		if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
 			if(inputSeqIdx == -1 || genomicLociIdx == -1 || strandIdx == -1) {
 				System.out.println("Fail to find column names: sequence, location, strand");
 				System.out.println("Please specify exact column names in your input file.");
 				System.exit(1);
 			}
 			
-		} else {
+		} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_ANNOTATE)) {
+			if(genomicLociIdx == -1 || strandIdx == -1) {
+				System.out.println("Fail to find column names: location, strand");
+				System.out.println("Please specify exact column names in your input file.");
+				System.exit(1);
+			}
+		} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
 			if(inputSeqIdx == -1) {
 				System.out.println("Fail to find column names: sequence");
 				System.out.println("Please specify exact column names in your input file.");
@@ -74,30 +83,39 @@ public class ParseRecord {
 		}
 			
 		
-		if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) || Parameters.mode.equalsIgnoreCase(Constants.MODE_ANNOTATE)) {
 
 			while((line = BR.readLine()) != null) {
 				String[] fields = line.split("\t");
-				String sequence = fields[inputSeqIdx];
 				String genomicLoci = fields[genomicLociIdx];
 				String strand = fields[strandIdx];
 				
-				// if the sequence is invalid
-				if(!Validation.checkValidSequence(sequence)) {
-					continue;
-				}
 				
 				SequenceRecord record = new SequenceRecord();
-				record.sequence = sequence;
+				
+				if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+					// if the sequence is invalid
+					String sequence = fields[inputSeqIdx];
+					if(Validation.checkValidSequence(sequence)) {
+						record.sequence = sequence;
+					} else {
+						continue;
+					}
+				} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_ANNOTATE)) {
+					// pass
+				}
+				
 				record.strand = strand;
 				record.location = genomicLoci;
 				
+				/** deprecated
 				if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE)) {
 					if(strand.charAt(0) == '-') {
 						// rc sequence of nucleotide
 						record.sequence = Translator.getReverseComplement(record.sequence);
 					}
 				}
+				**/
 				
 				String chr = Constants.NULL;
 				int start = -1;
@@ -138,7 +156,7 @@ public class ParseRecord {
 				}
 				indexedRecord.records.add(line);
 			}
-		} else {
+		} else if (Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN)){
 			while((line = BR.readLine()) != null) {
 				String[] fields = line.split("\t");
 				String sequence = fields[inputSeqIdx];
@@ -149,7 +167,7 @@ public class ParseRecord {
 				}
 				
 				SequenceRecord record = new SequenceRecord();
-				record.sequence = Scan.isILEqual ? sequence.replace("I", "L") : sequence;
+				record.sequence = Parameters.isILEqual ? sequence.replace("I", "L") : sequence;
 				record.strand = Constants.NULL;
 				record.location = Constants.NULL;
 				
@@ -165,12 +183,16 @@ public class ParseRecord {
 			}
 		}
 		
-		// set longestLengthOfInputSequences
-		for(SequenceRecord record : records) {
-			Scan.longestSequenceLen = Math.max(record.sequence.length(), Scan.longestSequenceLen);
+		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) || Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
+			// set longestLengthOfInputSequences
+			for(SequenceRecord record : records) {
+				Parameters.longestSequenceLen = Math.max(record.sequence.length(), Parameters.longestSequenceLen);
+			}
+			System.out.println("Longest length of input sequences: "+Parameters.longestSequenceLen);
+		} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_ANNOTATE)) {
+			
 		}
 		System.out.println("Records without duplication: "+records.size());
-		System.out.println("Longest length of input sequences: "+Scan.longestSequenceLen);
 		
 		
 		BR.close();
@@ -186,7 +208,7 @@ public class ParseRecord {
 	 */
 	public static void writeMainOutput (ArrayList<SequenceRecord> records, String baseOutputPath, LocTable locTable) throws IOException {
 		writeLibSize(new File(baseOutputPath+".libsize.tsv"));
-		BufferedWriter BW = new BufferedWriter(new FileWriter(baseOutputPath+"."+Scan.mode+".tsv"));
+		BufferedWriter BW = new BufferedWriter(new FileWriter(baseOutputPath+"."+Parameters.mode+".tsv"));
 		BufferedWriter BWMiss = new BufferedWriter(new FileWriter(baseOutputPath+".miss.tsv"));
 		
 		// write header
@@ -197,7 +219,7 @@ public class ParseRecord {
 				"\t" + Constants.MATCHED_PEPTIDE +
 				"\t" + Constants.MATCHED_NUCLEOTIDE +
 				"\t" + Constants.MATCHED_REFNUCLEOTIDE);
-		if(Scan.isSingleCellMode) {
+		if(Parameters.isSingleCellMode) {
 			// append barcode ids in whitelist
 			// write a header for raw read count
 			for(String barcodeId : BarcodeTable.barcodeIds) {
@@ -229,7 +251,7 @@ public class ParseRecord {
 				} else {
 					for(LocationInformation location : locations) {
 						// full information (including genomic sequence)
-						if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET) && 
+						if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) && 
 							!record.location.equalsIgnoreCase(location.location)) {
 							continue;
 						}
@@ -250,7 +272,7 @@ public class ParseRecord {
 		BW.append(Constants.MATCHED_PEPTIDE +
 				"\t" + Constants.MATCHED_LOCATION +
 				"\t" + Constants.MATCHED_STRAND);
-		if(Scan.isSingleCellMode) {
+		if(Parameters.isSingleCellMode) {
 			// append barcode ids in whitelist
 			// write a header for raw read count
 			for(String barcodeId : BarcodeTable.barcodeIds) {
@@ -277,7 +299,7 @@ public class ParseRecord {
 			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
 			
 			for(LocationInformation location : locations) {
-				if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET) && 
+				if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) && 
 						!record.location.equalsIgnoreCase(location.location)) {
 						continue;
 					}
@@ -309,7 +331,7 @@ public class ParseRecord {
 		
 		readCountsTupleLevel.forEach((tupleKey, reads)->{
 			try {
-				if(Scan.isSingleCellMode) {
+				if(Parameters.isSingleCellMode) {
 					BW.append(tupleKey);
 					// write raw read counts
 					for(String barcodeId : BarcodeTable.barcodeIds) {
@@ -344,9 +366,9 @@ public class ParseRecord {
 		BufferedWriter BW = new BufferedWriter(new FileWriter(baseOutputPath+".peptide.tsv"));
 		
 		// define field index
-		BW.append(Constants.MATCHED_PEPTIDE + "(" + Scan.union + ")" +
+		BW.append(Constants.MATCHED_PEPTIDE + "(" + Parameters.union + ")" +
 				"\t" + Constants.MATCHED_NUM_LOCATION);
-		if(Scan.isSingleCellMode) {
+		if(Parameters.isSingleCellMode) {
 			// append barcode ids in whitelist
 			// write a header for raw read count
 			for(String barcodeId : BarcodeTable.barcodeIds) {
@@ -374,7 +396,7 @@ public class ParseRecord {
 			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
 			
 			for(LocationInformation location : locations) {
-				if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET) && 
+				if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) && 
 						!record.location.equalsIgnoreCase(location.location)) {
 						continue;
 					}
@@ -395,9 +417,9 @@ public class ParseRecord {
 					if(val == null) {
 						val = 0L;
 					}
-					if(Scan.union.equalsIgnoreCase(Constants.UNION_MAX)) {
+					if(Parameters.union.equalsIgnoreCase(Constants.UNION_MAX)) {
 						unionReads.put(barcodeId, Math.max(readCounts.get(barcodeId), val));
-					} else if(Scan.union.equalsIgnoreCase(Constants.UNION_SUM)){
+					} else if(Parameters.union.equalsIgnoreCase(Constants.UNION_SUM)){
 						unionReads.put(barcodeId, (readCounts.get(barcodeId) + val));
 					}
 				}
@@ -417,7 +439,7 @@ public class ParseRecord {
 
 		readCountsPeptLevel.forEach((sequence, reads)->{
 			try {
-				if(Scan.isSingleCellMode) {
+				if(Parameters.isSingleCellMode) {
 					BW.append(sequence+"\t"+locationsPeptLevel.get(sequence).size());
 					// write raw read counts
 					for(String barcodeId : BarcodeTable.barcodeIds) {
@@ -455,7 +477,7 @@ public class ParseRecord {
 		BW.append("Barcode\tLibrary_size");
 		BW.newLine();
 		ArrayList<String> barcodes = new ArrayList<String>();
-		if(Scan.isSingleCellMode) {
+		if(Parameters.isSingleCellMode) {
 			barcodes = BarcodeTable.barcodeIds;
 		} else {
 			barcodes.add(Constants.DEFAULT_BARCODE_ID);

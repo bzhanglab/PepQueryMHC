@@ -1,8 +1,9 @@
 package progistar.scan.function;
 
 import htsjdk.samtools.SAMRecord;
+import progistar.scan.data.Parameters;
 import progistar.scan.data.Phred;
-import progistar.scan.run.Scan;
+import progistar.scan.run.Main;
 
 public class PhredQualityCheck {
 
@@ -25,7 +26,7 @@ public class PhredQualityCheck {
 			int score = (int)phredStr.charAt(i);
 			score -= 33; // Phred33
 			
-			if(score < Scan.singleBaseThreshold) {
+			if(score < Parameters.singleBaseThreshold) {
 				return false;
 			}
 		}
@@ -41,7 +42,7 @@ public class PhredQualityCheck {
 	 * @return
 	 */
 	private static boolean testByROI (String phredStr) {
-		if(Phred.getProbOfAtLeastOneError(phredStr) < Scan.ROIErrorThreshold) {
+		if(Phred.getProbOfAtLeastOneError(phredStr) < Parameters.ROIErrorThreshold) {
 			return true;
 		}
 		

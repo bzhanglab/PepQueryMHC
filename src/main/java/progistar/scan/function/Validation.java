@@ -1,7 +1,7 @@
 package progistar.scan.function;
 
 import progistar.scan.data.Constants;
-import progistar.scan.run.Scan;
+import progistar.scan.data.Parameters;
 
 public class Validation {
 
@@ -11,11 +11,11 @@ public class Validation {
 	public static boolean checkValidSequence (String sequence) {
 		boolean pass = true;
 		
-		if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE)) {
+		if(Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE)) {
 			if(sequence.replaceAll(NUCLEOTIDE_REG_EXP, "").length() != 0) {
 				pass = false;
 			}
-		} else if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
+		} else if(Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
 			if(sequence.replaceAll(PEPTIDE_REG_EXP, "").length() != 0) {
 				pass = false;
 			}

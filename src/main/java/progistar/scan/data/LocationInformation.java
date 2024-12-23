@@ -12,7 +12,6 @@ import htsjdk.samtools.SAMTag;
 import progistar.scan.function.PhredQualityCheck;
 import progistar.scan.function.Translator;
 import progistar.scan.function.Utils;
-import progistar.scan.run.Scan;
 
 public class LocationInformation {
 	public static final Pattern EACH_CIGAR_REGEX = Pattern.compile("([0-9]+)([MINDSHPX=])");
@@ -34,7 +33,7 @@ public class LocationInformation {
 	}
 	
 	public String getRes () {
-		if(Scan.isSingleCellMode) {
+		if(Parameters.isSingleCellMode) {
 			StringBuilder str = new StringBuilder(location+"\t"+mutation+"\t"+strand+"\t"+obsPeptide+"\t"+obsNucleotide+"\t"+refNucleotide);
 			// write raw read counts
 			for(String barcodeId : BarcodeTable.barcodeIds) {
@@ -197,7 +196,7 @@ public class LocationInformation {
 		int startPos = emit.getStart();
 		int endPos = emit.getEnd()+1;
 		
-		if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
+		if(Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
 			startPos = (startPos) * 3 + frame;
 			endPos = (endPos) * 3 + frame;
 		}

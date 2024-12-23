@@ -14,6 +14,7 @@ import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LocTable;
+import progistar.scan.data.Parameters;
 import progistar.scan.data.SequenceRecord;
 
 public class Task implements Comparable<Task> {
@@ -86,11 +87,11 @@ public class Task implements Comparable<Task> {
 		
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		
-		int divider = Scan.threadNum * Scan.chunkSize;
+		int divider = Parameters.threadNum * Parameters.chunkSize;
 		// if unmapped reads?
 		// only number of threads will be partitioned
 		if(chrName.equalsIgnoreCase(Constants.NULL)) {
-			divider = Scan.threadNum;
+			divider = Parameters.threadNum;
 		}
 		int size = end - start + 1;
 		int interval = Math.max( (size / divider) + 1, 100000);
@@ -132,7 +133,7 @@ public class Task implements Comparable<Task> {
 	public static ArrayList<Task> getScanModeTasks (ArrayList<SequenceRecord> records) {
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		
-		File file = new File(Scan.bamFile.getAbsolutePath());
+		File file = new File(Parameters.bamFile.getAbsolutePath());
 		// build global trie
 		System.out.println("Build Trie");
 		Task.allTrie = SequenceRecord.getTrie(records);
@@ -154,12 +155,12 @@ public class Task implements Comparable<Task> {
 			int size = 0;
 			while(unmappedIter.hasNext()) {
 				SAMRecord samRecord = unmappedIter.next();
-				if(Scan.unmmapedMarker == null) {
-					Scan.unmmapedMarker = samRecord.getReferenceName();
+				if(Parameters.unmmapedMarker == null) {
+					Parameters.unmmapedMarker = samRecord.getReferenceName();
 				}
 				size ++;
 			}
-			if(Scan.unmmapedMarker != null) {
+			if(Parameters.unmmapedMarker != null) {
 				// System.out.println("@SQ\t"+Scan.unmmapedMarker+"\tLN:"+size);
 				tasks.addAll(getChromosomeLevelTasks(records, Constants.NULL, 1, size, Constants.TYPE_SCAN_MODE_TASK));
 			}
@@ -203,7 +204,7 @@ public class Task implements Comparable<Task> {
 		System.out.println("Unmapped records: "+unmappedSize);
 		
 		// generate unmapped tasks
-		File file = new File(Scan.bamFile.getAbsolutePath());
+		File file = new File(Parameters.bamFile.getAbsolutePath());
 		if(unmappedSize != 0) {
 			try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 				// for unmapped reads
@@ -211,12 +212,12 @@ public class Task implements Comparable<Task> {
 				int size = 0;
 				while(unmappedIter.hasNext()) {
 					SAMRecord samRecord = unmappedIter.next();
-					if(Scan.unmmapedMarker == null) {
-						Scan.unmmapedMarker = samRecord.getReferenceName();
+					if(Parameters.unmmapedMarker == null) {
+						Parameters.unmmapedMarker = samRecord.getReferenceName();
 					}
 					size ++;
 				}
-				if(Scan.unmmapedMarker != null) {
+				if(Parameters.unmmapedMarker != null) {
 					// System.out.println("@SQ\t"+Scan.unmmapedMarker+"\tLN:"+size);
 					tasks.addAll(getChromosomeLevelTasks(unmappedRecords, Constants.NULL, 1, size, Constants.TYPE_TARGET_MODE_TASK));
 				}
@@ -249,7 +250,7 @@ public class Task implements Comparable<Task> {
 			sIdx = eIdx;
 		}
 		
-		if(Scan.verbose) {
+		if(Parameters.verbose) {
 			System.out.println("Task list");
 			for(Task task : tasks) {
 				System.out.println(task.getTaskInfo());
@@ -262,7 +263,7 @@ public class Task implements Comparable<Task> {
 	public static ArrayList<Task> getStrandDetectionTask () {
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		
-		File file = new File(Scan.bamFile.getAbsolutePath());
+		File file = new File(Parameters.bamFile.getAbsolutePath());
 		Task.allTrie = null;
 		
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
@@ -289,7 +290,7 @@ public class Task implements Comparable<Task> {
 	public static ArrayList<Task> getLibSizeTask () {
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		
-		File file = new File(Scan.bamFile.getAbsolutePath());
+		File file = new File(Parameters.bamFile.getAbsolutePath());
 		Task.allTrie = null;
 		
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
@@ -308,12 +309,12 @@ public class Task implements Comparable<Task> {
 			int size = 0;
 			while(unmappedIter.hasNext()) {
 				SAMRecord samRecord = unmappedIter.next();
-				if(Scan.unmmapedMarker == null) {
-					Scan.unmmapedMarker = samRecord.getReferenceName();
+				if(Parameters.unmmapedMarker == null) {
+					Parameters.unmmapedMarker = samRecord.getReferenceName();
 				}
 				size ++;
 			}
-			if(Scan.unmmapedMarker != null) {
+			if(Parameters.unmmapedMarker != null) {
 				// System.out.println("@SQ\t"+Scan.unmmapedMarker+"\tLN:"+size);
 				tasks.addAll(getChromosomeLevelTasks(null, Constants.NULL, 1, size, Constants.TYPE_TARGET_MODE_TASK));
 			}

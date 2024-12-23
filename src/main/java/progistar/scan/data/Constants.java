@@ -2,11 +2,12 @@ package progistar.scan.data;
 
 public class Constants {
 	public static final String NAME = "PepQueryHLA";
-	public static final String VERSION = "v1.0.0b++";
+	public static final String VERSION = "v1.0.0";
 	public static final String RELEASE = "October 25, 2024";
 	
 	public static final String MODE_TARGET = "target";
 	public static final String MODE_SCAN = "scan";
+	public static final String MODE_ANNOTATE = "annotate";
 	
 	public static final String SEQUENCE_PEPTIDE = "peptide";
 	/**
@@ -29,28 +30,28 @@ public class Constants {
 	public static final int MAPPED_READS		=	1;
 	public static final int UNMAPPED_READS		=	2;
 	
-	public static final byte EXON = 30;
-	public static final byte CDS = 100;
 	
 	public static final String NULL				=	".";
 	public static final byte NON_CODING_TRANSCRIPT	=	0;
 	public static final byte CODING_TRANSCRIPT		=	1;
 	
-	public static final byte UTR5 = 25;
-	public static final byte UTR3 = 23;
-	public static final byte NCDS = 20;
-	public static final byte INTRON = 0;
-	public static final byte INTERGENIC = -4;
+	public static final byte NCDS = 0;
+	public static final byte CDS = 1;
+	public static final byte UTR5 = 2;
+	public static final byte UTR3 = 3;
+	public static final byte INTRON = 4;
+	public static final byte INTERGENIC = 5;
 	
-	
-	// Regional Character
-	public static final char MARK_CDS 			=	'C';
-	public static final char MARK_5UTR			=	'F';
-	public static final char MARK_3UTR			=	'T';
-	public static final char MARK_NCDS			=	'N';
-	public static final char MARK_INTRON		=	'I';
-	public static final char MARK_INTERGENIC	=	'-';
-	
+	public static final String MARK_PC = "PC";
+	public static final String MARK_FS = "FS";
+	public static final String MARK_NCRNA = "ncRNA";
+	public static final String MARK_UTR5 = "5`-UTR";
+	public static final String MARK_UTR3 = "3`-UTR";
+	public static final String MARK_INTRON = "IR";
+	public static final String MARK_ASRNA = "asRNA";
+	public static final String MARK_INTERGENIC = "IGR";
+	public static final String MARK_AS			=	"AS"; // for alternative splicing form
+	public static final String MARK_UNKNOWN	= "Unknown";
 	
 	// Note that FRAME_X denots NO_FRAME.
 	public static final byte FRAME_0		=	0;
@@ -58,18 +59,25 @@ public class Constants {
 	public static final byte FRAME_2		=	2;
 	public static final byte FRAME_X		=	3;
 	
-	// Alternative Splicing Character
-	public static final char MARK_AS			=	'A'; // for alternative splicing form
-	public static final char MARK_CA			=	'C'; // for canonical form
+	// Penalty
+	public static double PENALTY_AS					=	10;
+	public static double PENALTY_5UTR				=	20;
+	public static double PENALTY_3UTR				=	20;
+	public static double PENALTY_FS					=	20;
+	public static double PENALTY_ncRNA				=	20;
+	public static double PENALTY_IR					=	30;
+	public static double PENALTY_asRNA				=	40;
+	public static double PENALTY_IGR				=	50;
+	public static double PENALTY_UNMAP				=	100;
+	
+	public static final String DEFAULT_BARCODE_ID	=	"Undefined";
+	public static final String NULL_BARCODE_ID		=	"Null";
+	public static final String OTHER_BARCODE_ID		=	"Others";
 	
 	public static final byte SNP			=	0;
 	public static final byte INS			=	1;
 	public static final byte DEL			=	2;
 	public static final byte CLP			=	3;
-	
-	public static final String DEFAULT_BARCODE_ID	=	"Undefined";
-	public static final String NULL_BARCODE_ID		=	"Null";
-	public static final String OTHER_BARCODE_ID		=	"Others";
 	
 	// Strand-specific
 	public static final String NON_STRANDED			=	"non";
@@ -98,7 +106,7 @@ public class Constants {
 	 */
 	public static final String AUTO_STRANDED			=	"auto";
 	
-	// Output fields //
+	// Output fields for target and scan mode //
 	public static final String MATCHED_LOCATION		= "Matched_location";
 	public static final String MATCHED_MUTATIONS	= "Matched_mutations";
 	public static final String MATCHED_STRAND		= "Matched_strand";
@@ -108,6 +116,13 @@ public class Constants {
 	public static final String MATCHED_READ_COUNT	= "Matched_read_count";
 	public static final String MATCHED_RPHM			= "Matched_RPHM";
 	public static final String MATCHED_NUM_LOCATION	= "Matched_num_locations";
+	
+	// Output fields for annotate //
+	public static final String GENE_ID			= "Gene_id";
+	public static final String GENE_NAME		= "Gene_name";
+	public static final String GENE_STRAND		= "Gene_strand";
+	public static final String GENE_TYPE		= "Gene_type";
+	public static final String CLASS_CODE		= "Class_code";
 	
 	public static String getFullNameOfStrandedness (String strandedness) {
 		String fullName = null;

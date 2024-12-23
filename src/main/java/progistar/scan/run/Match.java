@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,87 +21,37 @@ import progistar.scan.data.Codon;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LibraryTable;
 import progistar.scan.data.LocTable;
+import progistar.scan.data.Parameters;
 import progistar.scan.data.ParseRecord;
 import progistar.scan.data.Phred;
 import progistar.scan.data.SequenceRecord;
 import progistar.scan.function.CheckMemory;
 
-public class Scan {
+public class Match {
 
-	//-i test/benchmark/test.tsv -b test/benchmark/test.bam -m scan -s nucleotide -o test/benchmark/test.scan -@ 1
-	//-i test/benchmark/test.tsv -b test/benchmark/C3N-02145.T.Aligned.sortedByCoord.out.bam -m scan -s nucleotide -o test/benchmark/test.scan -@ 4
-	//-i test/benchmark/target_test.tsv -b test/benchmark/C3N-02145.T.Aligned.sortedByCoord.out.bam -m target -s peptide -o test/benchmark/target_test.scan -@ 4
-	//-i test/benchmark/C3N_02145_T_nonreference.tsv -b test/benchmark/C3N-02145.T.Aligned.sortedByCoord.out.bam -m scan -s peptide -o test/benchmark/C3N_02145_T_nonreference.scan -@ 4
-	
-	//-i test/benchmark/C3N_02145_T_nonreference.tsv -b test/benchmark/C3N-02145.T.Aligned.sortedByCoord.out.bam -m target -s peptide -o test/benchmark/C3N_02145_T_nonreference.scan -@ 4
-	
-	
-	
-	public static File inputFile = null;
-	public static File bamFile = null;
-	public static File libFile = null;
-	public static File whitelistFile = null;
-	public static String outputBaseFilePath	= null;
-	public static String mode	=	Constants.MODE_TARGET;
-	public static String sequence	=	Constants.SEQUENCE_PEPTIDE;
-	public static String count	=	Constants.COUNT_PRIMARY;
-	public static String union	=	Constants.UNION_SUM;
-	public static String strandedness = Constants.AUTO_STRANDED;
-	
-	public static boolean isILEqual = false;
-	public static boolean isSingleCellMode = false;
-	public static boolean verbose = false;
-	public static int threadNum = 4;
-	public static int chunkSize = 100;
-	
-	
-	public static int longestSequenceLen = -1;
-	
-	// read quality control ///////////////////
-	/**
-	 * single base cutoff
-	 * @deprecated
-	 */
-	public static int singleBaseThreshold = 20;
-	
-	/**
-	 * ROI base cutoff
-	 */
-	public static double ROIErrorThreshold = 0.05;
-	///////////////////////////////////////////
-	
-	public static String unmmapedMarker = null;
-	
-	
-	public static void main(String[] args) throws IOException, InterruptedException {
-		// performance metrics //
-		long startTime = System.currentTimeMillis();
-		long peakMemory = CheckMemory.checkUsedMemoryMB();
-		/////////////////////////
-		
-		printDescription(args);
-		parseOptions(args);
+	public static void run(String[] args) throws IOException, InterruptedException {
+		parseScanTargetModes(args);
 		Codon.mapping();
 		Phred.loadTable(); // load phred table
 		// single cell barcode
-		if(isSingleCellMode) {
+		if(Parameters.isSingleCellMode) {
 			BarcodeTable.load();
 		}
 		
 		// load library table
-		if(libFile != null) {
-			LibraryTable.loadTable(libFile);
+		if(Parameters.libFile != null) {
+			LibraryTable.loadTable(Parameters.libFile);
 		}
 		
-		ArrayList<SequenceRecord> records = ParseRecord.parse(inputFile);
+		ArrayList<SequenceRecord> records = ParseRecord.parse(Parameters.inputFile);
 		
 		//// Prepare tasks
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		
 		// auto strand detection
-		if(strandedness.equalsIgnoreCase(Constants.AUTO_STRANDED)) {
+		if(Parameters.strandedness.equalsIgnoreCase(Constants.AUTO_STRANDED)) {
 			tasks.addAll(Task.getStrandDetectionTask());
-			ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
+			ExecutorService executorService = Executors.newFixedThreadPool(Parameters.threadNum);
 			List<Worker> callableExList = new ArrayList<>();
 			for(int i=0; i<tasks.size(); i++) {
 				Task task = tasks.get(i);
@@ -110,7 +59,7 @@ public class Scan {
 			}
 			
 			// check peak memory
-			peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
+			Parameters.peakMemory = Math.max(Parameters.peakMemory, CheckMemory.checkUsedMemoryMB());
 			
 			executorService.invokeAll(callableExList);
 			executorService.shutdown();
@@ -128,11 +77,11 @@ public class Scan {
 			}
 			
 			if(R1F*10 < R1R && R2F > R2R*10) {
-				strandedness = Constants.RF_STRANDED;
+				Parameters.strandedness = Constants.RF_STRANDED;
 			} else if(R1F > R1R*10 && R2F*10 < R2R) {
-				strandedness = Constants.FR_STRANDED;
+				Parameters.strandedness = Constants.FR_STRANDED;
 			} else {
-				strandedness = Constants.NON_STRANDED;
+				Parameters.strandedness = Constants.NON_STRANDED;
 			}
 			System.out.println("Estimate strandedness");
 			System.out.println("1F\t1R\t2F\t2R");
@@ -143,7 +92,7 @@ public class Scan {
 				System.out.println("It looks single-end RNA-seq experiement. Please specify strandedness.");
 				System.exit(1);
 			} else {
-				System.out.println("Strandedness: "+strandedness+"-stranded");
+				System.out.println("Strandedness: "+Parameters.strandedness+"-stranded");
 			}
 			
 			tasks.clear();
@@ -151,15 +100,15 @@ public class Scan {
 		/////////////////////////////////////////////////////////////////
 		
 		// core algorithm
-		if(mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
 			// estimate library size
 			if(LibraryTable.isEmpty()) {
 				tasks.addAll(Task.getLibSizeTask());
 			}
 			// target mode
-			chunkSize = (records.size() / (10 * threadNum) ) +1;
-			tasks.addAll(Task.getTargetModeTasks(records, chunkSize));
-		} else if(mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
+			Parameters.chunkSize = (records.size() / (10 * Parameters.threadNum) ) +1;
+			tasks.addAll(Task.getTargetModeTasks(records, Parameters.chunkSize));
+		} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
 			tasks.addAll(Task.getScanModeTasks(records));
 		}
 		//// sort tasks by descending order
@@ -167,7 +116,7 @@ public class Scan {
 		Collections.sort(tasks);
 		
 		//// Enroll tasks on a thread pool
-		ExecutorService executorService = Executors.newFixedThreadPool(threadNum);
+		ExecutorService executorService = Executors.newFixedThreadPool(Parameters.threadNum);
 		List<Worker> callableExList = new ArrayList<>();
 		for(int i=0; i<tasks.size(); i++) {
 			Task task = tasks.get(i);
@@ -175,7 +124,7 @@ public class Scan {
 		}
 		
 		// check peak memory
-		peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
+		Parameters.peakMemory = Math.max(Parameters.peakMemory, CheckMemory.checkUsedMemoryMB());
 		
 		executorService.invokeAll(callableExList);
 		executorService.shutdown();
@@ -183,11 +132,11 @@ public class Scan {
 		
 		System.out.println("Done all tasks!");
 		// check peak memory
-		peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
+		Parameters.peakMemory = Math.max(Parameters.peakMemory, CheckMemory.checkUsedMemoryMB());
 
 		// update peak memory from the tasks.
 		for(Task task : tasks) {
-			peakMemory = Math.max(peakMemory, task.peakMemory);
+			Parameters.peakMemory = Math.max(Parameters.peakMemory, task.peakMemory);
 		}
 		
 		// calculate library size
@@ -216,26 +165,38 @@ public class Scan {
 			});
 		}
 		
-		ParseRecord.writeMainOutput(records, outputBaseFilePath, locTable);
-		ParseRecord.writeLocationLevelOutput(records, outputBaseFilePath, locTable);
-		ParseRecord.writePeptideLevelOutput(records, outputBaseFilePath, locTable);
+		ParseRecord.writeMainOutput(records, Parameters.outputBaseFilePath, locTable);
+		ParseRecord.writeLocationLevelOutput(records, Parameters.outputBaseFilePath, locTable);
+		ParseRecord.writePeptideLevelOutput(records, Parameters.outputBaseFilePath, locTable);
 		
-		// check peak memory
-		peakMemory = Math.max(peakMemory, CheckMemory.checkUsedMemoryMB());
-		
-		long endTime = System.currentTimeMillis();
-		System.out.println("Total Elapsed Time: "+(endTime-startTime)/1000+" sec");
-		System.out.println("Estimated Peak Memory: "+peakMemory +" MB");
 	}
 	
-	
-	
-	/**
-	 * Parse and apply arguments
-	 * 
-	 * @param args
-	 */
-	public static void parseOptions (String[] args) {
+
+	public static void parseScanTargetModes (String[] args) {
+		
+		// select only interesting arguments
+		String[] nArgs = new String[args.length-2];
+		int nIdx = 0;
+		for(int i=0; i<args.length; i++) {
+			if( args[i].equalsIgnoreCase("-i") || args[i].equalsIgnoreCase("--input") ||
+				args[i].equalsIgnoreCase("-b") || args[i].equalsIgnoreCase("--bam") ||
+				args[i].equalsIgnoreCase("-o") || args[i].equalsIgnoreCase("--output") ||
+				args[i].equalsIgnoreCase("-@") || args[i].equalsIgnoreCase("--thread") ||
+				args[i].equalsIgnoreCase("-c") || args[i].equalsIgnoreCase("--count") ||
+				args[i].equalsIgnoreCase("-l") || args[i].equalsIgnoreCase("--lib_size") ||
+				args[i].equalsIgnoreCase("-w") || args[i].equalsIgnoreCase("--white_list") ||
+				args[i].equalsIgnoreCase("-p") || args[i].equalsIgnoreCase("--prob") ||
+				args[i].equalsIgnoreCase("-u") || args[i].equalsIgnoreCase("--union") ||
+				args[i].equalsIgnoreCase("-s") || args[i].equalsIgnoreCase("--strand")) {
+				nArgs[nIdx++] = args[i++];
+				nArgs[nIdx++] = args[i];
+			} 
+			else if( args[i].equalsIgnoreCase("-v") || args[i].equalsIgnoreCase("--verbose") ||
+					 args[i].equalsIgnoreCase("-e") || args[i].equalsIgnoreCase("--equal")) {
+				nArgs[nIdx++] = args[i];
+			}
+		}
+		
 		
 		CommandLine cmd = null;
 		Options options = new Options();
@@ -260,15 +221,6 @@ public class Scan {
 				.hasArg()
 				.required(true)
 				.desc("output prefix path.")
-				.build();
-		
-		Option optionMode = Option.builder("m")
-				.longOpt("mode").argName("scan|target")
-				.hasArg()
-				.required(false)
-				.desc("\"scan-mode\" counts all reads matching a given sequence by traversing all reads and annotates their genomic information. "
-						+ "\n\"target-mode\" counts all reads matching a given sequence in a given genomic region."
-						+ " \"both modes\" require .bai in advance.")
 				.build();
 		
 		Option optionThread = Option.builder("@")
@@ -306,7 +258,7 @@ public class Scan {
 				.build();
 		
 		Option optionWhiteList = Option.builder("w")
-				.longOpt("whitelist").argName("file path")
+				.longOpt("white_list").argName("file path")
 				.hasArg()
 				.required(false)
 				.desc("cell barcode list (tsv).")
@@ -336,7 +288,6 @@ public class Scan {
 		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
-		.addOption(optionMode)
 		.addOption(optionStrandeness)
 		.addOption(optionBam)
 		.addOption(optionThread)
@@ -353,72 +304,63 @@ public class Scan {
 	    boolean isFail = false;
 	    
 		try {
-		    cmd = parser.parse(options, args);
+		    cmd = parser.parse(options, nArgs);
 		    
 		    if(cmd.hasOption("i")) {
-		    	Scan.inputFile = new File(cmd.getOptionValue("i"));
+		    	Parameters.inputFile = new File(cmd.getOptionValue("i"));
 		    }
 		    
 		    if(cmd.hasOption("b")) {
-		    	Scan.bamFile = new File(cmd.getOptionValue("b"));
+		    	Parameters.bamFile = new File(cmd.getOptionValue("b"));
 		    }
 		    
 		    if(cmd.hasOption("o")) {
-		    	Scan.outputBaseFilePath = new File(cmd.getOptionValue("o")).getAbsolutePath();
-		    }
-		    
-		    if(cmd.hasOption("m")) {
-		    	Scan.mode = cmd.getOptionValue("m");
-		    	
-		    	if( !(mode.equalsIgnoreCase(Constants.MODE_SCAN) || 
-		    			Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET)) ) {
-		    		isFail = true;
-		    	}
+		    	Parameters.outputBaseFilePath = new File(cmd.getOptionValue("o")).getAbsolutePath();
 		    }
 		    
 		    if(cmd.hasOption("s")) {
-		    	Scan.strandedness = cmd.getOptionValue("s");
+		    	Parameters.strandedness = cmd.getOptionValue("s");
 		    	// there is no matched option
-		    	if(!Scan.strandedness.equalsIgnoreCase(Constants.AUTO_STRANDED) &&
-		    		!Scan.strandedness.equalsIgnoreCase(Constants.FR_STRANDED) &&
-		    		!Scan.strandedness.equalsIgnoreCase(Constants.RF_STRANDED) &&
-		    		!Scan.strandedness.equalsIgnoreCase(Constants.F_STRANDED) &&
-		    		!Scan.strandedness.equalsIgnoreCase(Constants.R_STRANDED) &&
-		    		!Scan.strandedness.equalsIgnoreCase(Constants.NON_STRANDED) ) {
-		    		System.out.println("Wrong strandedness: "+Scan.strandedness);
+		    	if(!Parameters.strandedness.equalsIgnoreCase(Constants.AUTO_STRANDED) &&
+		    		!Parameters.strandedness.equalsIgnoreCase(Constants.FR_STRANDED) &&
+		    		!Parameters.strandedness.equalsIgnoreCase(Constants.RF_STRANDED) &&
+		    		!Parameters.strandedness.equalsIgnoreCase(Constants.F_STRANDED) &&
+		    		!Parameters.strandedness.equalsIgnoreCase(Constants.R_STRANDED) &&
+		    		!Parameters.strandedness.equalsIgnoreCase(Constants.NON_STRANDED) ) {
+		    		System.out.println("Wrong strandedness: "+Parameters.strandedness);
 		    		isFail = true;
 		    	}
 		    }
 		    
 		    if(cmd.hasOption("e")) {
-		    	Scan.isILEqual = true;
+		    	Parameters.isILEqual = true;
 		    }
 		    
 		    if(cmd.hasOption("@")) {
-		    	Scan.threadNum = Integer.parseInt(cmd.getOptionValue("@"));
+		    	Parameters.threadNum = Integer.parseInt(cmd.getOptionValue("@"));
 		    }
 		    
 		    if(cmd.hasOption("c")) {
-		    	Scan.count = cmd.getOptionValue("c");
+		    	Parameters.count = cmd.getOptionValue("c");
 		    	
-		    	if(Scan.count.equalsIgnoreCase(Constants.COUNT_PRIMARY)) {
-		    		Scan.count = Constants.COUNT_PRIMARY;
+		    	if(Parameters.count.equalsIgnoreCase(Constants.COUNT_PRIMARY)) {
+		    		Parameters.count = Constants.COUNT_PRIMARY;
 		    	} else {
-		    		Scan.count = Constants.COUNT_ALL;
+		    		Parameters.count = Constants.COUNT_ALL;
 		    	}
 		    }
 		    
 		    if(cmd.hasOption("v")) {
-		    	Scan.verbose = true;
+		    	Parameters.verbose = true;
 		    }
 		    
 		    if(cmd.hasOption("l")) {
-		    	Scan.libFile = new File(cmd.getOptionValue("l"));
+		    	Parameters.libFile = new File(cmd.getOptionValue("l"));
 		    }
 		    
 		    if(cmd.hasOption("w")) {
-		    	Scan.whitelistFile = new File(cmd.getOptionValue("w"));
-		    	Scan.isSingleCellMode = true;
+		    	Parameters.whitelistFile = new File(cmd.getOptionValue("w"));
+		    	Parameters.isSingleCellMode = true;
 		    }
 		    
 		    if(cmd.hasOption("p")) {
@@ -427,7 +369,7 @@ public class Scan {
 		    		System.out.println("ROI cutoff is out of range (0,1]: "+roiCutoff);
 		    		isFail = true;
 		    	} else {
-		    		Scan.ROIErrorThreshold = roiCutoff;
+		    		Parameters.ROIErrorThreshold = roiCutoff;
 		    	}
 		    	
 		    }
@@ -435,7 +377,7 @@ public class Scan {
 		    if(cmd.hasOption("u")) {
 		    	// default is max.
 		    	if(cmd.getOptionValue("u").equalsIgnoreCase("sum")) {
-		    		Scan.union = Constants.UNION_SUM;
+		    		Parameters.union = Constants.UNION_SUM;
 		    	}
 		    }
 		    
@@ -448,47 +390,32 @@ public class Scan {
 		    helper.printHelp("Usage:", options);
 		    System.exit(0);
 		} else {
-			System.out.println("Input file name: "+Scan.inputFile.getAbsolutePath());
-			System.out.println("BAM/SAM file name: "+Scan.bamFile.getAbsolutePath());
-			System.out.println("Output file name: "+Scan.outputBaseFilePath);
+			System.out.println("Input file name: "+Parameters.inputFile.getAbsolutePath());
+			System.out.println("BAM/SAM file name: "+Parameters.bamFile.getAbsolutePath());
+			System.out.println("Output file name: "+Parameters.outputBaseFilePath);
 
-			if(whitelistFile != null) {
-				System.out.println("White-list file name: "+Scan.whitelistFile.getName() +" (single-cell mode)");
+			if(Parameters.whitelistFile != null) {
+				System.out.println("White-list file name: "+Parameters.whitelistFile.getName() +" (single-cell mode)");
 			}
 			
-			System.out.println("Strandedness: "+Constants.getFullNameOfStrandedness(Scan.strandedness));
-			System.out.println("Mode: "+Scan.mode);
-			System.out.println("Count: "+Scan.count);
-			System.out.println("Peptide level count: "+Scan.union);
-			System.out.println("ROI cutoff: "+Scan.ROIErrorThreshold);
-			System.out.println("Threads: "+Scan.threadNum);
-			if(Scan.verbose) {
+			System.out.println("Strandedness: "+Constants.getFullNameOfStrandedness(Parameters.strandedness));
+			System.out.println("Mode: "+Parameters.mode);
+			System.out.println("Count: "+Parameters.count);
+			System.out.println("Peptide level count: "+Parameters.union);
+			System.out.println("ROI cutoff: "+Parameters.ROIErrorThreshold);
+			System.out.println("Threads: "+Parameters.threadNum);
+			if(Parameters.verbose) {
 				System.out.println("Verbose messages");
 			}
-			if(Scan.isILEqual) {
-				if(Scan.mode.equalsIgnoreCase(Constants.MODE_SCAN) && Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
+			if(Parameters.isILEqual) {
+				if(Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN) && Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
 					System.out.println("I and L are equivalent!");
 				} else {
 					System.out.println("This is target mode or nucleotide input. IL option is ignored.");
-					Scan.isILEqual = false;
+					Parameters.isILEqual = false;
 				}
 			}
 		}
-		System.out.println();
-	}
-	
-	public static void printDescription (String[] args) {
-		System.out.println(Constants.NAME+" "+Constants.VERSION+" ("+Constants.RELEASE+")");
-		System.out.println("running date: " + java.time.LocalDate.now());
-		StringBuilder optionStr = new StringBuilder();
-		optionStr.append("command line: ");
-		for(int i=0; i<args.length; i++) {
-			if(i != 0) {
-				optionStr.append(" ");
-			}
-			optionStr.append(args[i]);
-		}
-		System.out.println(optionStr.toString());
 		System.out.println();
 	}
 }

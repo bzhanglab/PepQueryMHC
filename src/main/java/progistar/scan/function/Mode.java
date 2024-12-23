@@ -11,7 +11,8 @@ import htsjdk.samtools.SAMRecordIterator;
 import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LocationInformation;
-import progistar.scan.run.Scan;
+import progistar.scan.data.Parameters;
+import progistar.scan.run.Main;
 import progistar.scan.run.Task;
 
 public abstract class Mode {
@@ -22,18 +23,18 @@ public abstract class Mode {
 		boolean isForward = (0x10 & flags) == 0x10 ? false : true;
 		
 		// non-stranded
-		if(Scan.strandedness.equalsIgnoreCase(Constants.NON_STRANDED)) {
+		if(Parameters.strandedness.equalsIgnoreCase(Constants.NON_STRANDED)) {
 			strands.add('+');
 			strands.add('-');
 		}  
 		// Single-end
-		else if(Scan.strandedness.equalsIgnoreCase(Constants.F_STRANDED)) {
+		else if(Parameters.strandedness.equalsIgnoreCase(Constants.F_STRANDED)) {
 			if(isForward) {
 				strands.add('+');
 			} else {
 				strands.add('-');
 			}
-		} else if(Scan.strandedness.equalsIgnoreCase(Constants.R_STRANDED)) {
+		} else if(Parameters.strandedness.equalsIgnoreCase(Constants.R_STRANDED)) {
 			if(isForward) {
 				strands.add('-');
 			} else {
@@ -44,13 +45,13 @@ public abstract class Mode {
 		else {
 			// R1
 			if(isFirstSegment) {
-				if(Scan.strandedness.equalsIgnoreCase(Constants.FR_STRANDED)) {
+				if(Parameters.strandedness.equalsIgnoreCase(Constants.FR_STRANDED)) {
 					if(isForward) {
 						strands.add('+');
 					} else {
 						strands.add('-');
 					}
-				} else if(Scan.strandedness.equalsIgnoreCase(Constants.RF_STRANDED)) {
+				} else if(Parameters.strandedness.equalsIgnoreCase(Constants.RF_STRANDED)) {
 					if(isForward) {
 						strands.add('-');
 					} else {
@@ -60,13 +61,13 @@ public abstract class Mode {
 			} 
 			// R2
 			else {
-				if(Scan.strandedness.equalsIgnoreCase(Constants.FR_STRANDED)) {
+				if(Parameters.strandedness.equalsIgnoreCase(Constants.FR_STRANDED)) {
 					if(isForward) {
 						strands.add('-');
 					} else {
 						strands.add('+');
 					}
-				} else if(Scan.strandedness.equalsIgnoreCase(Constants.RF_STRANDED)) {
+				} else if(Parameters.strandedness.equalsIgnoreCase(Constants.RF_STRANDED)) {
 					if(isForward) {
 						strands.add('+');
 					} else {
@@ -91,7 +92,7 @@ public abstract class Mode {
             // if the task is for mapped reads
             // only reads with below that genomic start are retrieved
             if(task.readType == Constants.MAPPED_READS) {
-            	if(Scan.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
+            	if(Parameters.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
             		isPass = true;
             	}
             	
@@ -139,7 +140,6 @@ public abstract class Mode {
             
             // Process each SAM record
             // determine strand
-            // int insertSize = samRecord.getInferredInsertSize();
             int flags = samRecord.getFlags();
             ArrayList<Character> strands = getStrandedness(flags);
             
@@ -151,7 +151,7 @@ public abstract class Mode {
             		sequence = Translator.getReverseComplement(samRecord.getReadString());
             	}
             	
-            	if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE)) {
+            	if(Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE)) {
             		Collection<Emit> emits = trie.parseText(sequence);
             		
             		for(Emit emit : emits) {
@@ -174,11 +174,11 @@ public abstract class Mode {
         					}
         				}
         			}
-            	} else if(Scan.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
+            	} else if(Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
             		for(int fr=0; fr<3; fr++) {
             			String peptide = Translator.translation(sequence, fr);
             			// if it is il equal mode?
-            			if(Scan.isILEqual) {
+            			if(Parameters.isILEqual) {
             				peptide = peptide.replace("I", "L");
             			}
             			

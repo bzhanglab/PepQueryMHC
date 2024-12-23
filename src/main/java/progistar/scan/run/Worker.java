@@ -3,6 +3,7 @@ package progistar.scan.run;
 import java.util.concurrent.Callable;
 
 import progistar.scan.data.Constants;
+import progistar.scan.data.Parameters;
 import progistar.scan.function.CheckMemory;
 import progistar.scan.function.ScanModeRun;
 import progistar.scan.function.StrandDetection;
@@ -18,7 +19,7 @@ public class Worker implements Callable<String> {
 	}
 	
 	public String call() {
-		if(Scan.verbose) {
+		if(Parameters.verbose) {
 			System.out.println(task.getTaskInfo());
 		}
 		
@@ -28,9 +29,9 @@ public class Worker implements Callable<String> {
 		} 
 		// else: general scan / target modes
 		else {
-			if(Scan.mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
+			if(Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
 				ScanModeRun.runScanMode(task);
-			} else if(Scan.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+			} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
 				TargetModeRun.runTargetMode(task);
 			}
 		}

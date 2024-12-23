@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import progistar.scan.data.Parameters;
 import progistar.scan.data.SequenceRecord;
-import progistar.scan.run.Scan;
 
 public class WriteStatistics {
 
@@ -26,8 +26,8 @@ public class WriteStatistics {
 							  throws IOException {
 		BufferedWriter BW = new BufferedWriter(new FileWriter(fileName));
 		
-		long[] wholeTable = new long[Scan.longestSequenceLen+1];
-		long[] matchTable = new long[Scan.longestSequenceLen+1];
+		long[] wholeTable = new long[Parameters.longestSequenceLen+1];
+		long[] matchTable = new long[Parameters.longestSequenceLen+1];
 		int maxLen = 0;
 		int minLen = Integer.MAX_VALUE;
 		
@@ -35,7 +35,7 @@ public class WriteStatistics {
 		Hashtable<String, Boolean> checkList1 = new Hashtable<String, Boolean>();
 		for(SequenceRecord record : records) {
 			String sequence = record.sequence;
-			if(Scan.isILEqual) {
+			if(Parameters.isILEqual) {
 				sequence = sequence.replace("I", "L");
 			}
 			
@@ -55,7 +55,7 @@ public class WriteStatistics {
 		Hashtable<String, Boolean> checkList2 = new Hashtable<String, Boolean>();
 		// count for input sequences
 		readCountsPeptLevel.forEach((sequence, cnt) -> {
-			if(Scan.isILEqual) {
+			if(Parameters.isILEqual) {
 				sequence = sequence.replace("I", "L");
 			}
 			

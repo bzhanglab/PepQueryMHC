@@ -6,18 +6,17 @@ package progistar.scan.data;
  * @author gistar
  *
  */
-public class ABlock implements Comparable<ABlock>{
+public class Exon implements Comparable<Exon>{
 
-	public int transcriptIndex;
+	public int idx;
 	public int start;
 	public int end;
 	// features:
 	// CDS, UTR5, UTR3, NCDS, INTRON, INTERGENIC in Constants class
 	public byte feature;
-	public boolean strand;
 	
 	@Override
-	public int compareTo(ABlock o) {
+	public int compareTo(Exon o) {
 		if(this.start < o.start) {
 			return -1;
 		}else if(this.start > o.start) {
