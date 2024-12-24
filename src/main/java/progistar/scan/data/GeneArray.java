@@ -2,6 +2,7 @@ package progistar.scan.data;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.LinkedList;
 
 public class GeneArray {
@@ -17,6 +18,23 @@ public class GeneArray {
 		for(Gene gene : genes) {
 			gene.min = gene.start;
 			gene.max = gene.end;
+			
+			// drop cds_end_NF and cds_start_NF
+			Hashtable<String, Boolean> dropList = new Hashtable<String, Boolean>();
+			gene.transcripts.forEach((id, t)->{
+				for(String tag : Parameters.drop_tag_list) {
+					for(String tag_ : t.tags) {
+						if(tag_.equalsIgnoreCase(tag)) {
+							dropList.put(id, true);
+							break;
+						}
+					}
+				}
+			});
+			
+			dropList.forEach((id, nil)->{
+				gene.transcripts.remove(id);
+			});
 		}
 		
 		int lastIdx = genes.size()-1;

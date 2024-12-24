@@ -38,29 +38,55 @@ public class Annotation implements Comparable<Annotation> {
 	}
 	
 	public String key () {
-		String geneId = gene == null ? Constants.NULL : gene.id;
-		String geneName = gene == null ? Constants.NULL : gene.name;
-		String geneType = gene == null ? Constants.NULL : gene.type;
-		String strand = transcript == null ? Constants.NULL : (transcript.strand ? "+" : "-");
+		String geneId = getGeneId();
+		String geneName = getGeneName();
+		String geneType = getGeneType();
+		String strand = getStrand();
 		
-		return geneId + "@" + geneName + "@" + geneType + "@" + strand + "@" + classCode;
+		return geneId + "_" + geneName + "_" + geneType + "_" + strand + "_" + classCode;
 	}
 	
 	public String toString () {
-		String geneId = gene == null ? Constants.NULL : gene.id;
-		String geneName = gene == null ? Constants.NULL : gene.name;
-		String geneType = gene == null ? Constants.NULL : gene.type;
-		String strand = transcript == null ? Constants.NULL : (transcript.strand ? "+" : "-");
-		String tId = transcript == null ? Constants.NULL : transcript.id;
-		
+		String geneId = getGeneId();
+		String geneName = getGeneName();
+		String geneType = getGeneType();
+		String strand = getStrand();
+		String tId = getTranscriptId();
 		
 		return geneId + "(" + geneName + ")" + ", " + tId + ", "+ geneType +", "+ strand +", "+classCode;
+	}
+	
+	public String getGeneName () {
+		return gene == null ? Constants.NULL : gene.name;
+	}
+	
+	public String getGeneId () {
+		return gene == null ? Constants.NULL : gene.id;
+	}
+	
+	public String getGeneType () {
+		return gene == null ? Constants.NULL : gene.type;
+	}
+	
+	public String getStrand () {
+		return transcript == null ? Constants.NULL : (transcript.strand ? "+" : "-");
+	}
+	
+	public String getClassCode () {
+		return classCode;
+	}
+	
+	public String getTranscriptId () {
+		return transcript == null ? Constants.NULL : transcript.id;
 	}
 	
 	public void calPenalty () {
 		this.penalty = 0;
 		if(this.classCode.contains(Constants.MARK_AS)) {
 			this.penalty += Constants.PENALTY_AS;
+		}
+		if(this.classCode.contains(Constants.MARK_FS)) {
+			this.penalty += Constants.PENALTY_FS;
 		}
 		if(this.classCode.contains(Constants.MARK_NCRNA)) {
 			this.penalty += Constants.PENALTY_ncRNA;

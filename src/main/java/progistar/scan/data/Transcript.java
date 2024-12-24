@@ -8,6 +8,7 @@ public class Transcript {
 	public int start;
 	public int end;
 	public String id;
+	public ArrayList<String> tags;
 	public boolean strand = true;
 	public ArrayList<Exon> exons = new ArrayList<Exon>();
 	
@@ -209,13 +210,11 @@ public class Transcript {
 		// Else: ncRNA, UTR5, UTR3, Intron
 		if(isCDS) {
 			// find frame
-			
-			if(getFrameMark(qStarts[0]) == 0) {
+			if(getFrameMark(qStarts[0], qEnds[qEnds.length-1]) == 0) {
 				classCode = Constants.MARK_PC;
 			} else {
 				classCode = Constants.MARK_FS;
 			}
-			
 			
 		} else {
 			// the worse is selected
@@ -245,26 +244,53 @@ public class Transcript {
 		return annotation;
 	}
 	
-	public byte getFrameMark (int pos) {
+	public byte getFrameMark (int start, int end) {
 		byte mark = Constants.FRAME_X;
-
+		int pos = start;
 		int cds = 0;
-		for(Exon exon : this.exons) {
-			// inclusive
-			if(exon.start <= pos && exon.end >= pos) {
-				if(exon.feature == Constants.CDS) {
-					cds += (pos - exon.start);
-					mark = (byte) ( cds % 3);
+		int size = this.exons.size();
+		
+		if(this.strand) {
+			pos = start;
+			for(Exon exon : this.exons) {
+				// inclusive
+				if(exon.start <= pos && exon.end >= pos) {
+					if(exon.feature == Constants.CDS) {
+						cds += (pos - exon.start);
+						mark = (byte) ( cds % 3);
+					}
+					break;
 				}
-				break;
-			}
-			// exclusive
-			else {
-				if(exon.feature == Constants.CDS) {
-					cds += (exon.end - exon.start + 1);
+				// exclusive
+				else {
+					if(exon.feature == Constants.CDS) {
+						cds += (exon.end - exon.start + 1);
+					}
 				}
 			}
 		}
+		
+		else {
+			pos = end;
+			for(int i = size-1; i>=0; i--) {
+				Exon exon = this.exons.get(i);
+				// inclusive
+				if(exon.start <= pos && exon.end >= pos) {
+					if(exon.feature == Constants.CDS) {
+						cds += (exon.end - pos);
+						mark = (byte) ( cds % 3);
+					}
+					break;
+				}
+				// exclusive
+				else {
+					if(exon.feature == Constants.CDS) {
+						cds += (exon.end - exon.start + 1);
+					}
+				}
+			}
+		}
+		
 
 		return mark;
 	}
@@ -325,6 +351,27 @@ public class Transcript {
 		
 
 		return isAS;
+	}
+	
+	
+	public void printExons() {
+		System.out.println(this.id+"\t"+this.strand);
+		exons.forEach((e)->{
+			String feature = ".";
+			if(e.feature == Constants.CDS) {
+				feature = "CDS";
+			} else if(e.feature == Constants.NCDS) {
+				feature = "NCDS";
+			} else if (e.feature == Constants.UTR5) {
+				feature = "5`-UTR";
+			} else if (e.feature == Constants.UTR3) {
+				feature = "3`-UTR";
+			} else if(e.feature == Constants.INTRON) {
+				feature = "IR";
+			}
+			
+			System.out.println(feature+"("+e.start+"-"+e.end+")");
+		});
 	}
 	
 }

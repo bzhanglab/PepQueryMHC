@@ -44,4 +44,8 @@ public class Parameters {
 	///////////////////////////////////////////
 	
 	public static String unmmapedMarker = null;
+	
+	/////////////////// Annotate //////////////
+	// this hinders assigning correct CDS.
+	public static String[] drop_tag_list = {"cds_start_NF", "cds_end_NF"};
 }

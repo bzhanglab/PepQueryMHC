@@ -66,8 +66,8 @@ public class Constants {
 	public static double PENALTY_FS					=	20;
 	public static double PENALTY_ncRNA				=	20;
 	public static double PENALTY_IR					=	30;
-	public static double PENALTY_asRNA				=	40;
-	public static double PENALTY_IGR				=	50;
+	public static double PENALTY_asRNA				=	50;
+	public static double PENALTY_IGR				=	70;
 	public static double PENALTY_UNMAP				=	100;
 	
 	public static final String DEFAULT_BARCODE_ID	=	"Undefined";
@@ -118,11 +118,13 @@ public class Constants {
 	public static final String MATCHED_NUM_LOCATION	= "Matched_num_locations";
 	
 	// Output fields for annotate //
+	public static final String ANNOTATION_COUNT	= "Annotation_count";
 	public static final String GENE_ID			= "Gene_id";
 	public static final String GENE_NAME		= "Gene_name";
 	public static final String GENE_STRAND		= "Gene_strand";
 	public static final String GENE_TYPE		= "Gene_type";
 	public static final String CLASS_CODE		= "Class_code";
+	public static final String UNIQUE_CLASS_CODE= "Unique_class_code";
 	
 	public static String getFullNameOfStrandedness (String strandedness) {
 		String fullName = null;

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.LinkedList;
 
 import org.apache.commons.cli.CommandLine;
@@ -19,11 +20,12 @@ import progistar.scan.data.Constants;
 import progistar.scan.data.Gene;
 import progistar.scan.data.GeneArray;
 import progistar.scan.data.Parameters;
-import progistar.scan.data.ParseRecord;
 import progistar.scan.data.SequenceRecord;
+import progistar.scan.fileIO.ParseGTF;
+import progistar.scan.fileIO.ParseRecord;
+import progistar.scan.fileIO.WriteOutput;
 import progistar.scan.function.CheckMemory;
 import progistar.scan.function.IndexConvertor;
-import progistar.scan.parser.ParseGTF;
 
 public class Annotate {
 
@@ -35,6 +37,7 @@ public class Annotate {
 		
 		Parameters.peakMemory = Math.max(Parameters.peakMemory, CheckMemory.checkUsedMemoryMB());
 		
+		Hashtable<String, LinkedList<Annotation>> allAnnotations = new Hashtable<String, LinkedList<Annotation>>();
 		for(SequenceRecord sRecord : records) {
 			LinkedList<Annotation> annotations = new LinkedList<Annotation>();
 			// If the location is ".", then it is considered as "unknown"
@@ -86,12 +89,11 @@ public class Annotate {
 			// gene level summation
 			annotations = Annotation.removeRedundancy(annotations);
 			
-			annotations.forEach((annotation)->{
-				//System.out.println(annotation.toString());
-			});
-			
+			allAnnotations.put(sRecord.getKey(), annotations);
 			Parameters.peakMemory = Math.max(Parameters.peakMemory, CheckMemory.checkUsedMemoryMB());
 		}
+		
+		WriteOutput.writeAnnotateOutput(records, allAnnotations);
 	}
 	
 	

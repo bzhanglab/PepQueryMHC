@@ -1,9 +1,10 @@
-package progistar.scan.parser;
+package progistar.scan.fileIO;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 import progistar.scan.data.Constants;
@@ -42,6 +43,18 @@ public class ParseGTF {
 		return null;
 	}
 	
+	private static ArrayList<String> getAllTags (String[] attr) {
+		ArrayList<String> tags = new ArrayList<String>();
+		for(String _s : attr){
+			String tag = _s.trim().split("\\s")[0];
+			if(tag.equalsIgnoreCase("tag")) {
+				tags.add(_s.replaceAll("[\"\\s]|(tag)", ""));
+			}
+		}
+		
+		return tags;
+	}
+	
 	public static GeneArray[] parseGTF (File gtfFile) {
 		System.out.println("Build an interval tree: "+gtfFile.getAbsolutePath());
 		long startTime = System.currentTimeMillis();
@@ -75,7 +88,7 @@ public class ParseGTF {
 					String geneName = getGtfAttr(attr, "gene_name");
 					String geneType = getGtfAttr(attr, "gene_type");
 					String transcriptID = getGtfAttr(attr, "transcript_id");
-					
+					ArrayList<String> tags = getAllTags(attr);
 					boolean strand = fields[strandIndex].equalsIgnoreCase("-") ? false : true;
 					
 					String chr = fields[chrIndex];
@@ -105,6 +118,7 @@ public class ParseGTF {
 						transcript.start = start;
 						transcript.end = end;
 						transcript.strand = strand;
+						transcript.tags = tags;
 						gene.transcripts.put(transcriptID, transcript);
 						transcriptTable.put(transcriptID, transcript);
 					} else {

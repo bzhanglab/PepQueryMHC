@@ -22,9 +22,10 @@ import progistar.scan.data.Constants;
 import progistar.scan.data.LibraryTable;
 import progistar.scan.data.LocTable;
 import progistar.scan.data.Parameters;
-import progistar.scan.data.ParseRecord;
 import progistar.scan.data.Phred;
 import progistar.scan.data.SequenceRecord;
+import progistar.scan.fileIO.ParseRecord;
+import progistar.scan.fileIO.WriteOutput;
 import progistar.scan.function.CheckMemory;
 
 public class Match {
@@ -165,9 +166,9 @@ public class Match {
 			});
 		}
 		
-		ParseRecord.writeMainOutput(records, Parameters.outputBaseFilePath, locTable);
-		ParseRecord.writeLocationLevelOutput(records, Parameters.outputBaseFilePath, locTable);
-		ParseRecord.writePeptideLevelOutput(records, Parameters.outputBaseFilePath, locTable);
+		WriteOutput.writeMainOutput(records, Parameters.outputBaseFilePath, locTable);
+		WriteOutput.writeLocationLevelOutput(records, Parameters.outputBaseFilePath, locTable);
+		WriteOutput.writePeptideLevelOutput(records, Parameters.outputBaseFilePath, locTable);
 		
 	}
 	
