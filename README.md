@@ -62,6 +62,6 @@ Y+: mandatory, Y: optional, N: none
 | p/prob  | ignore region of interests with error > p| [0,1] | 0.05 | Y          | Y            | N              |
 | e/equal  | specify isoleucine = leucine | none |  | Y          | Y            | N              |
 | u/union  | specify the unit of the peptide read count | sum\|max | sum | Y          | Y            | N              |
-| s/strand  | specify strandedness. non: non-stranded, fr: fr-second strand, rf: fr-first strand, f: forward strand for single-end, r: reverse strand for single-end, auto: auto-detection. Auto-detection is only available if there is XS tag in a given bam file | non|fr|rf|f|r|auto | auto | Y          | Y            | N              |
+| s/strand  | specify strandedness. non: non-stranded, fr: fr-second strand, rf: fr-first strand, f: forward strand for single-end, r: reverse strand for single-end, auto: auto-detection. Auto-detection is only available if there is XS tag in a given bam file | non\|fr\|rf\|f\|r\|auto | auto | Y          | Y            | N              |
 | s/stretch  | output single line per annotation | none |  | N          | N            | Y              |
 | v/verbose  | print every messages being processed | none |  | Y          | Y            | Y              |
