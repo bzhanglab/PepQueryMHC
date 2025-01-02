@@ -47,7 +47,14 @@ java -Xmx2G -jar PepQueryHLA.jar \
 ```
 
 ### Parameters
-|Option    | Description    | Value   | Scan mode   | Target mode   | Annotate mode   |
-| :---:    | :---:          | :---:   | :---:       | :---:         | :---:           |
-| m/mode   | mode to use| scan\|target\|annotate\|  | YY          | YY            | YY              |
-| i/input  | input file path| string  | YY          | YY            | YY              |
+Y+: mandatory, Y: optional, N: none
+|Option    | Description    | Type   | Default | Scan mode   | Target mode   | Annotate mode   |
+| :---:    | :---:          | :---:   | :---:       | :---:       | :---:         | :---:           |
+| m/mode   | mode to use| scan\|target\|annotate\|  | | Y+          | Y+            | Y+              |
+| i/input  | input file path| string  || Y+          | Y+            | Y+             |
+| o/output  | output base name path| string  || Y+          | Y+           | Y+             |
+| b/bam  | sorted bam/sam file path. | bam\|sam  || Y+          | Y+            | N              |
+| @/thread  | the number of threads. | int  |4| Y          | Y            | N              |
+| c/count  | tpye of reads to be considered | primary\|all  | primary | Y          | Y            | N              |
+| e/equal  | I and L are equivalently treated | none |  | Y          | Y            | N              |
+| l/lib_size  | library size file path | string |  | Y          | Y            | N              |
