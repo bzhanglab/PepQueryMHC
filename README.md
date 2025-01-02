@@ -30,7 +30,7 @@ java -Xmx2G -jar PepQueryHLA.jar \
 ```
 Target mode
 ```bash
-java -Xmx1G -jar PepQueryHLA.jar \
+java -Xmx2G -jar PepQueryHLA.jar \
 --mode target \
 --input peptides_locations_strands.tsv \
 --bam sample.sorted.bam \
@@ -50,7 +50,7 @@ java -Xmx2G -jar PepQueryHLA.jar \
 Y+: mandatory, Y: optional, N: none
 |Option    | Description    | Type   | Default | Scan mode   | Target mode   | Annotate mode   |
 | :---:    | :---:          | :---:   | :---:       | :---:       | :---:         | :---:           |
-| m/mode   | mode to use| scan\|target\|annotate\|  | | Y+          | Y+            | Y+              |
+| m/mode   | mode to use| scan\|target\|annotate  | | Y+          | Y+            | Y+              |
 | i/input  | input file path| string  || Y+          | Y+            | Y+             |
 | o/output  | output base name path| string  || Y+          | Y+           | Y+             |
 | b/bam  | sorted bam/sam file path | bam\|sam  || Y+          | Y+            | N              |
@@ -65,3 +65,21 @@ Y+: mandatory, Y: optional, N: none
 | s/strand  | specify strandedness. non: non-stranded, fr: fr-second strand, rf: fr-first strand, f: forward strand for single-end, r: reverse strand for single-end, auto: auto-detection. Auto-detection is only available if there is XS tag in a given bam file | non\|fr\|rf\|f\|r\|auto | auto | Y          | Y            | N              |
 | s/stretch  | output single line per annotation | none |  | N          | N            | Y              |
 | v/verbose  | print every messages being processed | none |  | Y          | Y            | Y              |
+
+
+### Scan mode
+Input format
+|Sequence| User-defined column 1| ...   | User-defined column N |
+| :---:    | :---:          | :---:   | :---:   |
+|AACTKLAKKM| any value | ... | any value |
+
+
+### Target mode
+Input format
+|Sequence| Location | Strand |User-defined column 1| ...   | User-defined column N |
+| :---:    | :---:          | :---:          | :---:          | :---:   | :---:   |
+|AACTKLAKKM| chr1:1-30 | + |  | any value | ... | any value |
+|TKMQEPPALY| chr1:31-50\|chr1:81-90 | - |  | any value | ... | any value |
+|KEKRKAPPR| . | . |  | any value | ... | any value |
+
+
