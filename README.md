@@ -78,9 +78,9 @@ Y+: mandatory, Y: optional, N: none
 **Input format**
 |Sequence| Location | Strand |User-defined column 1| ...   | User-defined column N |
 | :---:    | :---:          | :---:          | :---:          | :---:   | :---:   |
-|AACTKLAKKM| chr1:1-30 | + |  | any value | ... | any value |
-|TKMQEPPALY| chr1:31-50\|chr1:81-90 | - |  | any value | ... | any value |
-|KEKRKAPPR| . | . |  | any value | ... | any value |
+|AACTKLAKKM| chr1:1-30 | + | any value | ... | any value |
+|TKMQEPPALY| chr1:31-50\|chr1:81-90 | - | any value | ... | any value |
+|KEKRKAPPR| . | . |  any value | ... | any value |
 
 * Sequence: 
 
@@ -88,6 +88,6 @@ Y+: mandatory, Y: optional, N: none
 **Input format**
 | Location | Strand |User-defined column 1| ...   | User-defined column N |
 | :---:          | :---:          | :---:          | :---:   | :---:   |
-| chr1:1-30 | + |  | any value | ... | any value |
-| chr1:31-50\|chr1:81-90 | - |  | any value | ... | any value |
-| . | . |  | any value | ... | any value |
+| chr1:1-30 | + |  any value | ... | any value |
+| chr1:31-50\|chr1:81-90 | -  | any value | ... | any value |
+| . | .  | any value | ... | any value |
