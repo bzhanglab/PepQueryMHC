@@ -56,12 +56,14 @@ public class Match {
 			List<Worker> callableExList = new ArrayList<>();
 			for(int i=0; i<tasks.size(); i++) {
 				Task task = tasks.get(i);
-				callableExList.add(new Worker(task));
+				callableExList.add(new Worker(task, tasks.size()));
 			}
 			
 			// check peak memory
 			Parameters.peakMemory = Math.max(Parameters.peakMemory, CheckMemory.checkUsedMemoryMB());
 			
+			// reset done count
+			Worker.resetDoneCount();
 			executorService.invokeAll(callableExList);
 			executorService.shutdown();
 			
@@ -121,12 +123,14 @@ public class Match {
 		List<Worker> callableExList = new ArrayList<>();
 		for(int i=0; i<tasks.size(); i++) {
 			Task task = tasks.get(i);
-			callableExList.add(new Worker(task));
+			callableExList.add(new Worker(task, tasks.size()));
 		}
 		
 		// check peak memory
 		Parameters.peakMemory = Math.max(Parameters.peakMemory, CheckMemory.checkUsedMemoryMB());
 		
+		// reset done count
+		Worker.resetDoneCount();
 		executorService.invokeAll(callableExList);
 		executorService.shutdown();
 		//// End of tasks

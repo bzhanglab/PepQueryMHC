@@ -11,11 +11,22 @@ import progistar.scan.function.TargetModeRun;
 
 public class Worker implements Callable<String> {
 
+	private static int done = 0;
+	private static int totalTasks = 0;
 	private Task task;
 	
-	public Worker (Task task) {
+	/**
+	 * Use it when new job gets started.
+	 * 
+	 */
+	public static void resetDoneCount () {
+		Worker.done = 0;
+	}
+	
+	public Worker (Task task, int totalTasks) {
 		super();
 		this.task = task;
+		Worker.totalTasks = totalTasks;
 	}
 	
 	public String call() {
@@ -39,7 +50,15 @@ public class Worker implements Callable<String> {
 		
 		// call once
 		this.task.peakMemory = CheckMemory.checkUsedMemoryMB();
+		countTasks();
 		
 		return task.getTaskInfo();
 	}
+	
+	private static synchronized void countTasks () {
+		done++;
+		System.out.println(done+"/"+totalTasks);
+	}
+	
+	
 }
