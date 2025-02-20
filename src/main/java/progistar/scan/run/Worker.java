@@ -11,7 +11,8 @@ import progistar.scan.function.TargetModeRun;
 
 public class Worker implements Callable<String> {
 
-	private static int done = 0;
+	private static double done = 0;
+	private static double progress = 0;
 	private static int totalTasks = 0;
 	private Task task;
 	
@@ -21,6 +22,7 @@ public class Worker implements Callable<String> {
 	 */
 	public static void resetDoneCount () {
 		Worker.done = 0;
+		Worker.progress = 0;
 	}
 	
 	public Worker (Task task, int totalTasks) {
@@ -57,7 +59,14 @@ public class Worker implements Callable<String> {
 	
 	private static synchronized void countTasks () {
 		done++;
-		System.out.println(done+"/"+totalTasks);
+		double currentProgress = (100*done)/totalTasks;
+		if(currentProgress >= progress) {
+			System.out.println((int) done+"/"+totalTasks+" ("+String.format("%.3f",currentProgress)+"%)");
+			progress = currentProgress+5;
+			if(progress > 100) {
+				progress = 100;
+			}
+		}
 	}
 	
 	
