@@ -115,7 +115,8 @@ public class Annotate {
 				nArgs[nIdx++] = args[i++];
 				nArgs[nIdx++] = args[i];
 			} 
-			else if( args[i].equalsIgnoreCase("-v") || args[i].equalsIgnoreCase("--verbose")) {
+			else if( args[i].equalsIgnoreCase("-v") || args[i].equalsIgnoreCase("--verbose") ||
+					 args[i].equalsIgnoreCase("-s") || args[i].equalsIgnoreCase("--stretch")) {
 				nArgs[nIdx++] = args[i];
 			}
 		}
@@ -145,6 +146,12 @@ public class Annotate {
 				.desc("specify a GTF file to annotate a given genomic region.")
 				.build();
 		
+		Option optionStretch = Option.builder("s")
+				.longOpt("stretch").argName("")
+				.required(false)
+				.desc("enable to output single line per annotation.")
+				.build();
+		
 		Option optionVerbose = Option.builder("v")
 				.longOpt("verbose").argName("")
 				.required(false)
@@ -154,6 +161,7 @@ public class Annotate {
 		options.addOption(optionInput)
 		.addOption(optionOutput)
 		.addOption(optionVerbose)
+		.addOption(optionStretch)
 		.addOption(optionGTF);
 		
 		CommandLineParser parser = new DefaultParser();
@@ -174,6 +182,10 @@ public class Annotate {
 		    	Parameters.gtfFile = new File(cmd.getOptionValue("g"));
 		    }
 		    
+		    if(cmd.hasOption("s")) {
+		    	Parameters.stretch = true;
+		    }
+		    
 		    if(cmd.hasOption("v")) {
 		    	Parameters.verbose = true;
 		    }
@@ -192,6 +204,9 @@ public class Annotate {
 			System.out.println("GTF file name: "+Parameters.gtfFile.getAbsolutePath());
 
 			System.out.println("Mode: "+Parameters.mode);
+			if(Parameters.stretch) {
+				System.out.println("Stretch output");
+			}
 			if(Parameters.verbose) {
 				System.out.println("Verbose messages");
 			}

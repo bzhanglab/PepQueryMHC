@@ -33,7 +33,6 @@ public class Phred {
 		for(int i=0; i<len; i++) {
 			int phred = (int)phredStr.charAt(i);
 			phred -= 33; // Phred33
-			
 			sumOfCorrectPhreds += CORRECT_PHRED_TABLE[phred];
 		}
 		

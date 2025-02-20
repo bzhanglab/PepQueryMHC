@@ -60,7 +60,7 @@ public class Constants {
 	public static final byte FRAME_X		=	3;
 	
 	// Penalty
-	public static double PENALTY_AS					=	10;
+	public static double PENALTY_AS					=	5;
 	public static double PENALTY_5UTR				=	20;
 	public static double PENALTY_3UTR				=	20;
 	public static double PENALTY_FS					=	20;

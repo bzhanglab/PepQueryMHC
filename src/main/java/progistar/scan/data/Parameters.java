@@ -24,6 +24,7 @@ public class Parameters {
 	public static boolean isILEqual = false;
 	public static boolean isSingleCellMode = false;
 	public static boolean verbose = false;
+	public static boolean stretch = false;
 	public static int threadNum = 4;
 	public static int chunkSize = 100;
 	

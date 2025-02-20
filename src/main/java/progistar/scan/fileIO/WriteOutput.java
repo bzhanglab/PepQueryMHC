@@ -348,59 +348,73 @@ public class WriteOutput {
 			assert annotations != null;
 			
 			for(String record : sRecord.records) {
-				BW.append(record);
-				Hashtable<String, Boolean> uniqueClassCode = new Hashtable<String, Boolean>();
 				
-				for(Annotation annotation : annotations) {
-					// build gene ids
-					if(geneIds.length() > 0) {
-						geneIds.append("|");
+				if(Parameters.stretch) {
+					for(Annotation annotation : annotations) {
+						BW.append(record);
+						BW.append("\t"+annotations.size());
+						BW.append("\t").append(annotation.getGeneId());
+						BW.append("\t").append(annotation.getGeneName());
+						BW.append("\t").append(annotation.getStrand());
+						BW.append("\t").append(annotation.getGeneType());
+						BW.append("\t").append(annotation.getClassCode());
+						BW.append("\t").append(annotation.getClassCode());
+						BW.newLine();
 					}
-					geneIds.append(annotation.getGeneId());
+				} else {
+					Hashtable<String, Boolean> uniqueClassCode = new Hashtable<String, Boolean>();
 					
-					// build gene names
-					if(geneNames.length() > 0) {
-						geneNames.append("|");
-					}
-					geneNames.append(annotation.getGeneName());
-					
-					// build strands
-					if(strands.length() > 0) {
-						strands.append("|");
-					}
-					strands.append(annotation.getStrand());
-					
-					// build gene names
-					if(geneTypes.length() > 0) {
-						geneTypes.append("|");
-					}
-					geneTypes.append(annotation.getGeneType());
-					
-					// build gene names
-					if(geneClassCodes.length() > 0) {
-						geneClassCodes.append("|");
-					}
-					geneClassCodes.append(annotation.getClassCode());
-					
-					// build unique class code
-					if(uniqueClassCode.get(annotation.getClassCode()) == null) {
-						if(uniqueClassCodes.length() > 0) {
-							uniqueClassCodes.append("|");
+					for(Annotation annotation : annotations) {
+						// build gene ids
+						if(geneIds.length() > 0) {
+							geneIds.append("|");
 						}
-						uniqueClassCodes.append(annotation.getClassCode());
-						uniqueClassCode.put(annotation.getClassCode(), true);
+						geneIds.append(annotation.getGeneId());
+						
+						// build gene names
+						if(geneNames.length() > 0) {
+							geneNames.append("|");
+						}
+						geneNames.append(annotation.getGeneName());
+						
+						// build strands
+						if(strands.length() > 0) {
+							strands.append("|");
+						}
+						strands.append(annotation.getStrand());
+						
+						// build gene names
+						if(geneTypes.length() > 0) {
+							geneTypes.append("|");
+						}
+						geneTypes.append(annotation.getGeneType());
+						
+						// build gene names
+						if(geneClassCodes.length() > 0) {
+							geneClassCodes.append("|");
+						}
+						geneClassCodes.append(annotation.getClassCode());
+						
+						// build unique class code
+						if(uniqueClassCode.get(annotation.getClassCode()) == null) {
+							if(uniqueClassCodes.length() > 0) {
+								uniqueClassCodes.append("|");
+							}
+							uniqueClassCodes.append(annotation.getClassCode());
+							uniqueClassCode.put(annotation.getClassCode(), true);
+						}
 					}
+					BW.append(record);
+					BW.append("\t"+annotations.size());
+					BW.append("\t").append(geneIds.toString()); geneIds.setLength(0);
+					BW.append("\t").append(geneNames.toString()); geneNames.setLength(0);
+					BW.append("\t").append(strands.toString()); strands.setLength(0);
+					BW.append("\t").append(geneTypes.toString()); geneTypes.setLength(0);
+					BW.append("\t").append(geneClassCodes.toString()); geneClassCodes.setLength(0);
+					BW.append("\t").append(uniqueClassCodes.toString()); uniqueClassCodes.setLength(0);
+					BW.newLine();
 				}
 				
-				BW.append("\t"+annotations.size());
-				BW.append("\t").append(geneIds.toString()); geneIds.setLength(0);
-				BW.append("\t").append(geneNames.toString()); geneNames.setLength(0);
-				BW.append("\t").append(strands.toString()); strands.setLength(0);
-				BW.append("\t").append(geneTypes.toString()); geneTypes.setLength(0);
-				BW.append("\t").append(geneClassCodes.toString()); geneClassCodes.setLength(0);
-				BW.append("\t").append(uniqueClassCodes.toString()); uniqueClassCodes.setLength(0);
-				
-				BW.newLine();
 				
 			}
 		}

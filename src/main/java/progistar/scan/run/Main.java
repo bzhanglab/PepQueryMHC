@@ -8,7 +8,6 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
 
 import progistar.scan.data.Constants;
 import progistar.scan.data.Parameters;
@@ -94,8 +93,7 @@ public class Main {
 		    	}
 		    }
 		    
-		} catch (ParseException e) {
-			System.out.println(e.getMessage());
+		} catch (Exception e) {
 			isFail = true;
 		}
 		
