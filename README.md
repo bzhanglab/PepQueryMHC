@@ -1,4 +1,4 @@
-# PepQueryHLA
+# PepQueryMHC
 
 ---
 - [About](#about)
