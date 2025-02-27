@@ -8,20 +8,21 @@
   - [Scan mode](#scan-mode)
   - [Target mode](#target-mode)
   - [Annotate mode](#annotate-mode)
+- [License]($license)
 ---
 
 ## About
 
-The accurate prioritization of tumor antigens, including aberrant translational products, is critical for the development of personalized cancer immunotherapies. PepQueryHLA estimates a comprehensive repertoire of local RNA expression of tumor antigens within minutes per sample.
+The accurate prioritization of tumor antigens, including aberrant translational products, is critical for the development of personalized cancer immunotherapies. PepQueryMHC estimates a comprehensive repertoire of local RNA expression of tumor antigens within minutes per sample.
 <br>
 
 ## Usage
-PepQueryHLA provides three main functions such as 1) scan mode, 2) target mode and 3) annotate mode.
+PepQueryMHC provides three main functions such as 1) scan mode, 2) target mode and 3) annotate mode.
 
 ### Quick start
 Scan mode
 ```bash
-java -Xmx2G -jar PepQueryHLA.jar \
+java -Xmx2G -jar PepQueryMHC.jar \
 --mode scan \
 --input peptides.tsv \
 --bam sample.sorted.bam \
@@ -30,7 +31,7 @@ java -Xmx2G -jar PepQueryHLA.jar \
 ```
 Target mode
 ```bash
-java -Xmx2G -jar PepQueryHLA.jar \
+java -Xmx2G -jar PepQueryMHC.jar \
 --mode target \
 --input peptides_locations_strands.tsv \
 --bam sample.sorted.bam \
@@ -39,7 +40,7 @@ java -Xmx2G -jar PepQueryHLA.jar \
 ```
 Annotate mode
 ```bash
-java -Xmx2G -jar PepQueryHLA.jar \
+java -Xmx2G -jar PepQueryMHC.jar \
 --mode annotate \
 --input locations_strands.tsv \
 --gtf reference_annotation.gtf \
@@ -91,3 +92,6 @@ Y+: mandatory, Y: optional, N: none
 | chr1:1-30 | + |  any value | ... | any value |
 | chr1:31-50\|chr1:81-90 | -  | any value | ... | any value |
 | . | .  | any value | ... | any value |
+
+## License
+All code is available as under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial (CC BY-NC) 4.0 license</a>.
