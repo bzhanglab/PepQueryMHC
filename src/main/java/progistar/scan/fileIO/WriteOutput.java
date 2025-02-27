@@ -357,8 +357,8 @@ public class WriteOutput {
 						BW.append("\t").append(annotation.getGeneName());
 						BW.append("\t").append(annotation.getStrand());
 						BW.append("\t").append(annotation.getGeneType());
-						BW.append("\t").append(annotation.getClassCode());
-						BW.append("\t").append(annotation.getClassCode());
+						BW.append("\t").append(annotation.getClassCode()); // class_code
+						BW.append("\t").append(annotation.getClassCode()); // unique_class_code
 						BW.newLine();
 					}
 				} else {

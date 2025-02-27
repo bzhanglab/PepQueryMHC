@@ -91,7 +91,7 @@ Y+: mandatory, Y: optional, N: none
 | :---:          | :---:          | :---:          | :---:   | :---:   |
 | chr1:1-30 | + |  any value | ... | any value |
 | chr1:31-50\|chr1:81-90 | -  | any value | ... | any value |
-| . | .  | any value | ... | any value |
+| chr1:21-40\|chr1:87-90 | .  | any value | ... | any value |
 
 ## License
 All code is available as under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial (CC BY-NC) 4.0 license</a>.
