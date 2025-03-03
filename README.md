@@ -7,6 +7,7 @@
   - [Parameters](#parameters)
   - [Scan mode](#scan-mode)
   - [Target mode](#target-mode)
+  - [FASTQ mode](#fastq-mode)
   - [Annotate mode](#annotate-mode)
 - [License]($license)
 ---
@@ -36,6 +37,27 @@ java -Xmx2G -jar PepQueryMHC.jar \
 --input peptides_locations_strands.tsv \
 --bam sample.sorted.bam \
 --output sample \
+--thread 16
+```
+FASTQ mode (for single-end)
+```bash
+java -Xmx2G -jar PepQueryMHC.jar \
+--mode fastq \
+--input peptides.tsv \
+--0 sample.fastq.gz \
+--output sample \
+--strand f \
+--thread 16
+```
+FASTQ mode (for paired-end)
+```bash
+java -Xmx2G -jar PepQueryMHC.jar \
+--mode fastq \
+--input peptides.tsv \
+--1 sample.fastq.1.gz \
+--2 sample.fastq.2.gz \
+--output sample \
+--strand rf \
 --thread 16
 ```
 Annotate mode
@@ -83,7 +105,12 @@ Y+: mandatory, Y: optional, N: none
 |TKMQEPPALY| chr1:31-50\|chr1:81-90 | - | any value | ... | any value |
 |KEKRKAPPR| . | . |  any value | ... | any value |
 
-* Sequence: 
+### FASTQ mode
+**Input format**
+|Sequence| User-defined column 1| ...   | User-defined column N |
+| :---:    | :---:          | :---:   | :---:   |
+|AACTKLAKKM| any value | ... | any value |
+* input format is exactly the same as what used in scan mode.
 
 ### Annotate mode
 **Input format**
