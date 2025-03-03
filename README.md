@@ -92,7 +92,6 @@ Y+: mandatory, Y: optional, N: none
 | s/stretch  | output single line per annotation | none |  | N          | N            | N            | Y              |
 | v/verbose  | print every messages being processed | none |  | Y          | Y            | Y              | Y              |
 
-
 ### Scan mode
 **Input format**
 |Sequence| User-defined column 1| ...   | User-defined column N |
