@@ -50,7 +50,6 @@ public class FASTQModeRun extends Mode {
 		try(FastqReader reader = new FastqReader(file)) {
 			int maxSize = 10000;
 			int curSize = 0;
-			int debugTotal = 1000000;
 			
 			ArrayList<FastqRecord> records = new ArrayList<FastqRecord>();
 			for(FastqRecord fastqRecord : reader) {
@@ -83,11 +82,6 @@ public class FASTQModeRun extends Mode {
 							task.locTable.putLocation(linfo);
 						});
 					});
-				}
-				
-				debugTotal --;
-				if(debugTotal == 0) {
-					break;
 				}
 			}
 		} catch (Exception e) {
