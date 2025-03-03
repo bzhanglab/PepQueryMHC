@@ -8,6 +8,7 @@ import org.ahocorasick.trie.Trie;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMRecordIterator;
+import htsjdk.samtools.fastq.FastqRecord;
 import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Constants;
 import progistar.scan.data.LocationInformation;
@@ -213,8 +214,70 @@ public abstract class Mode {
         iterator.close();
 	}
 	
-	private static void find (String sequence, Trie trie, Task task) {
+	public static void find (ArrayList<FastqRecord> records, Trie trie, Task task) {
+		// Reads from a FASTQ file must be forwarded.
+		int flags = 0x00;
+		if(task.start == 0 || task.start == 1) {
+			flags |= 0x40; // first segment
+		} else if(task.start == 2) {
+			flags |= 0x80; // last segment
+		}
+        ArrayList<Character> strands = getStrandedness(flags);
 		
-		
+        for(FastqRecord fastqRecord : records) {
+        	String barcodeId = BarcodeTable.getBarcodeFromFASTQ(fastqRecord);
+    		
+    		// increase processed reads
+        	Double pReads = task.processedReads.get(barcodeId);
+        	if(pReads == null) {
+        		pReads = .0;
+        	}
+        	pReads++;
+        	task.processedReads.put(barcodeId, pReads);
+        	
+        	for(Character strand : strands) {
+            	String sequence = null;
+            	if(strand == '+') {
+            		sequence = fastqRecord.getReadString();
+            	} else {
+            		sequence = Translator.getReverseComplement(fastqRecord.getReadString());
+            	}
+            	
+            	if(Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE)) {
+            		Collection<Emit> emits = trie.parseText(sequence);
+            		
+            		for(Emit emit : emits) {
+        				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(fastqRecord, emit, 0, strand);
+        				if(matchedLocation != null) {
+        					matchedLocation.inputSequence = emit.getKeyword();
+        					if(task.locTable.putLocation(matchedLocation)) {
+        						matchedLocation.calMetaInfo();
+        					}
+        				}
+        			}
+            	} else if(Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
+            		for(int fr=0; fr<3; fr++) {
+            			String peptide = Translator.translation(sequence, fr);
+            			// if it is il equal mode?
+            			if(Parameters.isILEqual) {
+            				peptide = peptide.replace("I", "L");
+            			}
+            			
+            			Collection<Emit> emits = trie.parseText(peptide);
+            			
+            			for(Emit emit : emits) {
+            				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(fastqRecord, emit, fr, strand);
+            				if(matchedLocation != null) {
+            					matchedLocation.inputSequence = emit.getKeyword();
+            					if(task.locTable.putLocation(matchedLocation)) {
+            						matchedLocation.calMetaInfo();
+            					}
+            				}
+            			}
+            		}
+            	}
+            }
+        }
+        
 	}
 }

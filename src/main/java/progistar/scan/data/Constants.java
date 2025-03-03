@@ -26,6 +26,7 @@ public class Constants {
 	public static final int TYPE_TARGET_MODE_LIBRARY_ESTIMATION_TASK 	= 2;
 	public static final int TYPE_SCAN_MODE_TASK							= 3;
 	public static final int	TYPE_STRAND_DETECTION_TASK					= 4;
+	public static final int TYPE_FASTQ_MODE_TASK						= 5;
 	
 	// sequencing read file
 	public static final byte SEQ_BAM			=	0b1;

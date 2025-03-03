@@ -259,6 +259,38 @@ public class Task implements Comparable<Task> {
 		return tasks;
 	}
 	
+	public static ArrayList<Task> getFASTQModeTasks (ArrayList<SequenceRecord> records) {
+		ArrayList<Task> tasks = new ArrayList<Task>();
+		
+		// build global trie
+		System.out.println("Build Trie");
+		Task.allTrie = SequenceRecord.getTrie(records);
+		System.out.println("Complete building Trie");
+			
+		
+		if(Parameters.sequencingFileType == Constants.SEQ_FASTQ_SINGLE) {
+			Task task = new Task(Constants.TYPE_FASTQ_MODE_TASK);
+			task.start = 0;
+			tasks.add(task);
+		} else if(Parameters.sequencingFileType == Constants.SEQ_FASTQ_PAIRED) {
+			// first fastq
+			Task task = new Task(Constants.TYPE_FASTQ_MODE_TASK);
+			task.start = 1;
+			tasks.add(task);
+			// second fastq
+			task = new Task(Constants.TYPE_FASTQ_MODE_TASK);
+			task.start = 2;
+			tasks.add(task);
+		}
+		
+		// assign idx
+		for(int i=0; i<tasks.size(); i++) {
+			tasks.get(i).taskIdx = (i+1);
+		}
+		
+		return tasks;
+	}
+	
 	public static ArrayList<Task> getStrandDetectionTask () {
 		ArrayList<Task> tasks = new ArrayList<Task>();
 		

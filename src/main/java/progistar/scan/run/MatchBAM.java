@@ -86,6 +86,7 @@ public class MatchBAM {
 			} else {
 				Parameters.strandedness = Constants.NON_STRANDED;
 			}
+			
 			System.out.println("Estimate strandedness");
 			System.out.println("1F\t1R\t2F\t2R");
 			System.out.println(R1F+"\t"+R1R+"\t"+R2F+"\t"+R2R);
@@ -185,9 +186,6 @@ public class MatchBAM {
 		for(int i=0; i<args.length; i++) {
 			if( args[i].equalsIgnoreCase("-i") || args[i].equalsIgnoreCase("--input") ||
 				args[i].equalsIgnoreCase("-b") || args[i].equalsIgnoreCase("--bam") ||
-				args[i].equalsIgnoreCase("-0") || args[i].equalsIgnoreCase("--fastq_single") ||
-				args[i].equalsIgnoreCase("-1") || args[i].equalsIgnoreCase("--fastq_paired_1") ||
-				args[i].equalsIgnoreCase("-2") || args[i].equalsIgnoreCase("--fastq_paired_2") ||
 				args[i].equalsIgnoreCase("-o") || args[i].equalsIgnoreCase("--output") ||
 				args[i].equalsIgnoreCase("-@") || args[i].equalsIgnoreCase("--thread") ||
 				args[i].equalsIgnoreCase("-c") || args[i].equalsIgnoreCase("--count") ||
@@ -226,29 +224,8 @@ public class MatchBAM {
 		Option optionBam = Option.builder("b")
 				.longOpt("bam").argName("bam|sam")
 				.hasArg()
-				.required(false)
+				.required(true)
 				.desc("bam or sam file.")
-				.build();
-		
-		Option optionFastq0 = Option.builder("0")
-				.longOpt("fastq_single").argName("fastq|fastq.gz")
-				.hasArg()
-				.required(false)
-				.desc("First-end FASTQ file.")
-				.build();
-		
-		Option optionFastq1 = Option.builder("1")
-				.longOpt("fastq_paired_1").argName("fastq|fastq.gz")
-				.hasArg()
-				.required(false)
-				.desc("First-end FASTQ file.")
-				.build();
-		
-		Option optionFastq2 = Option.builder("2")
-				.longOpt("fastq_paired_2").argName("fastq|fastq.gz")
-				.hasArg()
-				.required(false)
-				.desc("Second-end FASTQ file.")
 				.build();
 		////////////////////////////////
 		
@@ -326,9 +303,6 @@ public class MatchBAM {
 		.addOption(optionOutput)
 		.addOption(optionStrandeness)
 		.addOption(optionBam)
-		.addOption(optionFastq0)
-		.addOption(optionFastq1)
-		.addOption(optionFastq2)
 		.addOption(optionThread)
 		.addOption(optionPrimary)
 		.addOption(optionIL)
@@ -354,21 +328,6 @@ public class MatchBAM {
 		    if(cmd.hasOption("b")) {
 		    	Parameters.bamFile = new File(cmd.getOptionValue("b"));
 		    	Parameters.sequencingFileType |= Constants.SEQ_BAM;
-		    }
-		    
-		    if(cmd.hasOption("0")) {
-		    	Parameters.fastq0File = new File(cmd.getOptionValue("0"));
-		    	Parameters.sequencingFileType |= Constants.SEQ_FASTQ_SINGLE;
-		    }
-		    
-		    if(cmd.hasOption("1")) {
-		    	Parameters.fastq1File = new File(cmd.getOptionValue("1"));
-		    	Parameters.sequencingFileType |= 0b100;
-		    }
-		    
-		    if(cmd.hasOption("2")) {
-		    	Parameters.fastq2File = new File(cmd.getOptionValue("2"));
-		    	Parameters.sequencingFileType |= 0b1000;
 		    }
 		    /////////////////////////////////////
 		    
@@ -441,13 +400,6 @@ public class MatchBAM {
 		    
 		} catch (ParseException e) {
 			System.out.println(e.getMessage());
-			isFail = true;
-		}
-		
-		// at least one sequencing read option should provide.
-		if( !(	Parameters.sequencingFileType == Constants.SEQ_BAM || 
-				Parameters.sequencingFileType == Constants.SEQ_FASTQ_SINGLE || 
-				Parameters.sequencingFileType == Constants.SEQ_FASTQ_PAIRED) ) {
 			isFail = true;
 		}
 		

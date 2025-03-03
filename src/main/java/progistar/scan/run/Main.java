@@ -35,6 +35,8 @@ public class Main {
 			MatchBAM.run(args);
 		} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_ANNOTATE)) {
 			Annotate.run(args);
+		} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_FASTQ)) {
+			MatchFASTQ.run(args);
 		}
 		
 		// check peak memory

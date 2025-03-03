@@ -1,14 +1,19 @@
 package progistar.scan.function;
 
 import htsjdk.samtools.SAMRecord;
+import htsjdk.samtools.fastq.FastqRecord;
 import progistar.scan.data.Parameters;
 import progistar.scan.data.Phred;
-import progistar.scan.run.Main;
 
 public class PhredQualityCheck {
 
 	
 	public static boolean isPass (SAMRecord record, int start, int end) {
+		String phredStr = record.getBaseQualityString().substring(start, end);
+		return testByROI(phredStr);
+	}
+	
+	public static boolean isPass (FastqRecord record, int start, int end) {
 		String phredStr = record.getBaseQualityString().substring(start, end);
 		return testByROI(phredStr);
 	}

@@ -10,7 +10,7 @@ import progistar.scan.data.Constants;
 import progistar.scan.data.Parameters;
 import progistar.scan.run.Task;
 
-public class ScanModeRun extends Mode{
+public class ScanModeRun extends Mode {
 	
 	public static void runScanMode (Task task) {
 		if(task.type == Constants.TYPE_SCAN_MODE_TASK) {

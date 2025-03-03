@@ -161,7 +161,7 @@ public class ParseRecord {
 				}
 				indexedRecord.records.add(line);
 			}
-		} else if (Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN)){
+		} else if (Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN) || Parameters.mode.equalsIgnoreCase(Constants.MODE_FASTQ)){
 			while((line = BR.readLine()) != null) {
 				String[] fields = line.split("\t");
 				String sequence = fields[inputSeqIdx];
@@ -188,7 +188,9 @@ public class ParseRecord {
 			}
 		}
 		
-		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) || Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
+		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) || 
+			Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN) ||
+			Parameters.mode.equalsIgnoreCase(Constants.MODE_FASTQ)){
 			// set longestLengthOfInputSequences
 			for(SequenceRecord record : records) {
 				Parameters.longestSequenceLen = Math.max(record.sequence.length(), Parameters.longestSequenceLen);

@@ -9,6 +9,7 @@ import org.ahocorasick.trie.Emit;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMTag;
+import htsjdk.samtools.fastq.FastqRecord;
 import progistar.scan.function.PhredQualityCheck;
 import progistar.scan.function.Translator;
 import progistar.scan.function.Utils;
@@ -335,6 +336,52 @@ public class LocationInformation {
 		return lInfo;
 	}
 	
+	public static LocationInformation getMatchedLocation (FastqRecord fastqRecord, Emit emit, int frame, char strand) {
+		String barcodeId = BarcodeTable.getBarcodeFromFASTQ(fastqRecord);
+		
+		LocationInformation lInfo = new LocationInformation();
+		lInfo.strand = strand;
+		lInfo.readCounts.put(barcodeId, 1L);
+		
+		String nucleotide = fastqRecord.getReadString();
+		
+		int startPos = emit.getStart();
+		int endPos = emit.getEnd()+1;
+		
+		if(Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
+			startPos = (startPos) * 3 + frame;
+			endPos = (endPos) * 3 + frame;
+		}
+		
+		if(strand == '-') {
+			int len = nucleotide.length();
+			int tmp = len - startPos;
+			startPos = len - endPos;
+			endPos = tmp;
+		}
+		
+		// [startPos, endPos) zero-based
+		
+		// check quality
+		boolean isPass = PhredQualityCheck.isPass(fastqRecord, startPos, endPos);
+		if(!isPass) {
+			return null;
+		}
+		
+		// 
+		lInfo.location = Constants.NULL;
+		lInfo.strand = Constants.NULL.charAt(0);
+		lInfo.obsNucleotide = nucleotide.substring(startPos, endPos);
+		lInfo.refNucleotide = Constants.NULL;
+		
+		if(strand == '-') {
+			lInfo.obsNucleotide = Translator.getReverseComplement(lInfo.obsNucleotide);
+			lInfo.refNucleotide = Translator.getReverseComplement(lInfo.refNucleotide);
+		}
+		
+		return lInfo;
+
+	}
 
 	private static String getRefSequence (SAMRecord samRecord) {
 		StringBuilder refSequence = new StringBuilder();

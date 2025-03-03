@@ -8,6 +8,7 @@ import java.util.Hashtable;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMTag;
+import htsjdk.samtools.fastq.FastqRecord;
 
 public class BarcodeTable {
 
@@ -75,4 +76,26 @@ public class BarcodeTable {
 		
 		return barcodeId;
 	}
+	
+	public static String getBarcodeFromFASTQ (FastqRecord fastqRecord) {
+		String barcodeId = Constants.DEFAULT_BARCODE_ID;
+		
+		// single cell mode?
+		if(Parameters.isSingleCellMode) {
+			String[] splitReadName = fastqRecord.getReadName().split(Parameters.barcodeSeparatorInReadName); 
+			Object cbTag = splitReadName[splitReadName.length-1];
+			if(cbTag == null) {
+				barcodeId = Constants.NULL_BARCODE_ID;
+			} else {
+				barcodeId = (String) cbTag;
+				// check whitelist
+				if(BarcodeTable.hasBarcode.get(barcodeId) == null) {
+					barcodeId = Constants.OTHER_BARCODE_ID;
+				}
+			}
+ 		}
+		
+		return barcodeId;
+	}
+	
 }

@@ -5,6 +5,7 @@ import java.util.concurrent.Callable;
 import progistar.scan.data.Constants;
 import progistar.scan.data.Parameters;
 import progistar.scan.function.CheckMemory;
+import progistar.scan.function.FASTQModeRun;
 import progistar.scan.function.ScanModeRun;
 import progistar.scan.function.StrandDetection;
 import progistar.scan.function.TargetModeRun;
@@ -46,6 +47,8 @@ public class Worker implements Callable<String> {
 				ScanModeRun.runScanMode(task);
 			} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
 				TargetModeRun.runTargetMode(task);
+			} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_FASTQ)) {
+				FASTQModeRun.runFASTQMode(task);
 			}
 		}
 		

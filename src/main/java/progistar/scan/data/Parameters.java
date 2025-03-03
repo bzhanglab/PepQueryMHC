@@ -40,6 +40,7 @@ public class Parameters {
 	
 	public static int longestSequenceLen = -1;
 	
+	
 	// read quality control ///////////////////
 	/**
 	 * single base cutoff
@@ -58,4 +59,10 @@ public class Parameters {
 	/////////////////// Annotate //////////////
 	// this hinders assigning correct CDS.
 	public static String[] drop_tag_list = {"cds_start_NF", "cds_end_NF"};
+	
+	// barcode separator in a read name
+	public static String barcodeSeparatorInReadName = "_";
+	
+	
+	
 }
