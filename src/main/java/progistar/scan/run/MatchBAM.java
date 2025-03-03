@@ -28,7 +28,7 @@ import progistar.scan.fileIO.ParseRecord;
 import progistar.scan.fileIO.WriteOutput;
 import progistar.scan.function.CheckMemory;
 
-public class Match {
+public class MatchBAM {
 
 	public static void run(String[] args) throws IOException, InterruptedException {
 		parseScanTargetModes(args);

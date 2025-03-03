@@ -7,6 +7,7 @@ public class Constants {
 	
 	public static final String MODE_TARGET = "target";
 	public static final String MODE_SCAN = "scan";
+	public static final String MODE_FASTQ = "fastq";
 	public static final String MODE_ANNOTATE = "annotate";
 	
 	public static final String SEQUENCE_PEPTIDE = "peptide";

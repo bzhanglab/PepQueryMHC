@@ -212,4 +212,9 @@ public abstract class Mode {
         }
         iterator.close();
 	}
+	
+	private static void find (String sequence, Trie trie, Task task) {
+		
+		
+	}
 }

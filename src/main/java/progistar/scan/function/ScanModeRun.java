@@ -5,6 +5,7 @@ import java.io.File;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
+import htsjdk.samtools.fastq.FastqReader;
 import progistar.scan.data.Constants;
 import progistar.scan.data.Parameters;
 import progistar.scan.run.Task;
@@ -25,6 +26,8 @@ public class ScanModeRun extends Mode{
 		// to prevent racing
 		File file = new File(Parameters.bamFile.getAbsolutePath());
 		
+		
+		
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			SAMRecordIterator iterator = null;
 			if(task.readType == Constants.MAPPED_READS) {
@@ -37,6 +40,7 @@ public class ScanModeRun extends Mode{
 			e.printStackTrace();
 			System.exit(1);
 		}
+		
 		
 		long endTime = System.currentTimeMillis();
 		if(Parameters.verbose) {
