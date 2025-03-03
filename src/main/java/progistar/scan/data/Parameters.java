@@ -9,7 +9,16 @@ public class Parameters {
 	public static long peakMemory = CheckMemory.checkUsedMemoryMB();
 	
 	public static File inputFile = null;
+	
+	public static byte sequencingFile = 0b0;
+	// bam/sam file
 	public static File bamFile = null;
+	// for single-end fastq file
+	public static File fastq0File = null;
+	// for paired-ends fastq files
+	public static File fastq1File = null;
+	public static File fastq2File = null;
+	
 	public static File libFile = null;
 	public static File whitelistFile = null;
 	public static File gtfFile = null;

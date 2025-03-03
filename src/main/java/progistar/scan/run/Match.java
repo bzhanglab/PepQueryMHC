@@ -185,6 +185,9 @@ public class Match {
 		for(int i=0; i<args.length; i++) {
 			if( args[i].equalsIgnoreCase("-i") || args[i].equalsIgnoreCase("--input") ||
 				args[i].equalsIgnoreCase("-b") || args[i].equalsIgnoreCase("--bam") ||
+				args[i].equalsIgnoreCase("-0") || args[i].equalsIgnoreCase("--fastq_single") ||
+				args[i].equalsIgnoreCase("-1") || args[i].equalsIgnoreCase("--fastq_paired_1") ||
+				args[i].equalsIgnoreCase("-2") || args[i].equalsIgnoreCase("--fastq_paired_2") ||
 				args[i].equalsIgnoreCase("-o") || args[i].equalsIgnoreCase("--output") ||
 				args[i].equalsIgnoreCase("-@") || args[i].equalsIgnoreCase("--thread") ||
 				args[i].equalsIgnoreCase("-c") || args[i].equalsIgnoreCase("--count") ||
@@ -214,12 +217,40 @@ public class Match {
 				.desc("input path.")
 				.build();
 		
+		//////////////// Sequencing reads /////////////////
+		/**
+		 * Sequencing reads must be provided!
+		 * 
+		 *
+		 */
 		Option optionBam = Option.builder("b")
 				.longOpt("bam").argName("bam|sam")
 				.hasArg()
-				.required(true)
+				.required(false)
 				.desc("bam or sam file.")
 				.build();
+		
+		Option optionFastq0 = Option.builder("0")
+				.longOpt("fastq_single").argName("fastq|fastq.gz")
+				.hasArg()
+				.required(false)
+				.desc("First-end FASTQ file.")
+				.build();
+		
+		Option optionFastq1 = Option.builder("1")
+				.longOpt("fastq_paired_1").argName("fastq|fastq.gz")
+				.hasArg()
+				.required(false)
+				.desc("First-end FASTQ file.")
+				.build();
+		
+		Option optionFastq2 = Option.builder("2")
+				.longOpt("fastq_paired_2").argName("fastq|fastq.gz")
+				.hasArg()
+				.required(false)
+				.desc("Second-end FASTQ file.")
+				.build();
+		////////////////////////////////
 		
 		Option optionOutput = Option.builder("o")
 				.longOpt("output").argName("file path")
@@ -295,6 +326,9 @@ public class Match {
 		.addOption(optionOutput)
 		.addOption(optionStrandeness)
 		.addOption(optionBam)
+		.addOption(optionFastq0)
+		.addOption(optionFastq1)
+		.addOption(optionFastq2)
 		.addOption(optionThread)
 		.addOption(optionPrimary)
 		.addOption(optionIL)
@@ -307,6 +341,7 @@ public class Match {
 		CommandLineParser parser = new DefaultParser();
 	    HelpFormatter helper = new HelpFormatter();
 	    boolean isFail = false;
+	    Parameters.sequencingFile = 0b0;
 	    
 		try {
 		    cmd = parser.parse(options, nArgs);
@@ -315,9 +350,27 @@ public class Match {
 		    	Parameters.inputFile = new File(cmd.getOptionValue("i"));
 		    }
 		    
+		    ///////// input sequencing reads /////////
 		    if(cmd.hasOption("b")) {
 		    	Parameters.bamFile = new File(cmd.getOptionValue("b"));
+		    	Parameters.sequencingFile |= Constants.SEQ_BAM;
 		    }
+		    
+		    if(cmd.hasOption("0")) {
+		    	Parameters.fastq0File = new File(cmd.getOptionValue("0"));
+		    	Parameters.sequencingFile |= Constants.SEQ_FASTQ_SINGLE;
+		    }
+		    
+		    if(cmd.hasOption("1")) {
+		    	Parameters.fastq1File = new File(cmd.getOptionValue("1"));
+		    	Parameters.sequencingFile |= 0b100;
+		    }
+		    
+		    if(cmd.hasOption("2")) {
+		    	Parameters.fastq2File = new File(cmd.getOptionValue("2"));
+		    	Parameters.sequencingFile |= 0b1000;
+		    }
+		    /////////////////////////////////////
 		    
 		    if(cmd.hasOption("o")) {
 		    	Parameters.outputBaseFilePath = new File(cmd.getOptionValue("o")).getAbsolutePath();
@@ -388,6 +441,13 @@ public class Match {
 		    
 		} catch (ParseException e) {
 			System.out.println(e.getMessage());
+			isFail = true;
+		}
+		
+		// at least one sequencing read option should provide.
+		if( !(	Parameters.sequencingFile == Constants.SEQ_BAM || 
+				Parameters.sequencingFile == Constants.SEQ_FASTQ_SINGLE || 
+				Parameters.sequencingFile == Constants.SEQ_FASTQ_PAIRED) ) {
 			isFail = true;
 		}
 		

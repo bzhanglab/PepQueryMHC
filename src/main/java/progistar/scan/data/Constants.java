@@ -26,6 +26,11 @@ public class Constants {
 	public static final int TYPE_SCAN_MODE_TASK							= 3;
 	public static final int	TYPE_STRAND_DETECTION_TASK					= 4;
 	
+	// sequencing read file
+	public static final byte SEQ_BAM			=	0b1;
+	public static final byte SEQ_FASTQ_SINGLE	=	0b10;
+	public static final byte SEQ_FASTQ_PAIRED	=	0b1100;
+	
 	//
 	public static final int MAPPED_READS		=	1;
 	public static final int UNMAPPED_READS		=	2;
