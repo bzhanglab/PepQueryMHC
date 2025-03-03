@@ -11,6 +11,7 @@ import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.fastq.FastqRecord;
 import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Constants;
+import progistar.scan.data.LocTable;
 import progistar.scan.data.LocationInformation;
 import progistar.scan.data.Parameters;
 import progistar.scan.run.Main;
@@ -83,6 +84,15 @@ public abstract class Mode {
 		return strands;
 	}
 	
+	/**
+	 * For SCAN/TARGET modes.
+	 * Task is an independent job, one thread takes only one task.
+	 * Plus, task is not shared between threads.
+	 * 
+	 * @param iterator
+	 * @param trie
+	 * @param task
+	 */
 	public static void find (SAMRecordIterator iterator, Trie trie, Task task) {
 		int count = 0;
 		while (iterator.hasNext()) {
@@ -214,7 +224,17 @@ public abstract class Mode {
         iterator.close();
 	}
 	
-	public static void find (ArrayList<FastqRecord> records, Trie trie, Task task) {
+	/**
+	 * For FASTQ mode.
+	 * Note that, task is a shared object between threads.
+	 * Do not implement an operation using a task object that may cause concurrence between threads.
+	 * 
+	 * @param records
+	 * @param trie
+	 * @param task
+	 * @return
+	 */
+	public static LocTable find (ArrayList<FastqRecord> records, Trie trie, Task task) {
 		// Reads from a FASTQ file must be forwarded.
 		int flags = 0x00;
 		if(task.start == 0 || task.start == 1) {
@@ -223,18 +243,9 @@ public abstract class Mode {
 			flags |= 0x80; // last segment
 		}
         ArrayList<Character> strands = getStrandedness(flags);
-		
+        LocTable locTable = new LocTable();
+        
         for(FastqRecord fastqRecord : records) {
-        	String barcodeId = BarcodeTable.getBarcodeFromFASTQ(fastqRecord);
-    		
-    		// increase processed reads
-        	Double pReads = task.processedReads.get(barcodeId);
-        	if(pReads == null) {
-        		pReads = .0;
-        	}
-        	pReads++;
-        	task.processedReads.put(barcodeId, pReads);
-        	
         	for(Character strand : strands) {
             	String sequence = null;
             	if(strand == '+') {
@@ -250,7 +261,7 @@ public abstract class Mode {
         				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(fastqRecord, emit, 0, strand);
         				if(matchedLocation != null) {
         					matchedLocation.inputSequence = emit.getKeyword();
-        					if(task.locTable.putLocation(matchedLocation)) {
+        					if(locTable.putLocation(matchedLocation)) {
         						matchedLocation.calMetaInfo();
         					}
         				}
@@ -269,7 +280,7 @@ public abstract class Mode {
             				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(fastqRecord, emit, fr, strand);
             				if(matchedLocation != null) {
             					matchedLocation.inputSequence = emit.getKeyword();
-            					if(task.locTable.putLocation(matchedLocation)) {
+            					if(locTable.putLocation(matchedLocation)) {
             						matchedLocation.calMetaInfo();
             					}
             				}
@@ -279,5 +290,6 @@ public abstract class Mode {
             }
         }
         
+        return locTable;
 	}
 }

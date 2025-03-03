@@ -4,10 +4,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import htsjdk.samtools.fastq.FastqReader;
 import htsjdk.samtools.fastq.FastqRecord;
+import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Constants;
+import progistar.scan.data.LocTable;
 import progistar.scan.data.Parameters;
 import progistar.scan.run.Task;
 
@@ -48,17 +51,38 @@ public class FASTQModeRun extends Mode {
 			int maxSize = 10000;
 			int curSize = 0;
 			int debugTotal = 1000000;
+			
 			ArrayList<FastqRecord> records = new ArrayList<FastqRecord>();
-			for(FastqRecord record : reader) {
-				records.add(record);
+			for(FastqRecord fastqRecord : reader) {
+				String barcodeId = BarcodeTable.getBarcodeFromFASTQ(fastqRecord);
+	    		
+	    		// increase processed reads
+	        	Double pReads = task.processedReads.get(barcodeId);
+	        	if(pReads == null) {
+	        		pReads = .0;
+	        	}
+	        	pReads++;
+	        	task.processedReads.put(barcodeId, pReads);
+				
+	        	// 
+				records.add(fastqRecord);
 				curSize++;
 				
 				if(curSize == maxSize || !reader.hasNext()) {
 					final ArrayList<FastqRecord> copies = records;
-					//Future<?> future = 
-					executorService.submit(() -> find(copies, Task.allTrie, task));
+					 
+					// note that if you process something inside "find" function, 
+					// you are care about concurrence, conflicts. 
+					Future<LocTable> future = executorService.submit(() -> find(copies, Task.allTrie, task));
 					records = new ArrayList<FastqRecord>();
 					curSize = 0;
+					
+					LocTable locTable = future.get();
+					locTable.table.forEach((key, subTable)->{
+						subTable.forEach((key_, linfo)->{
+							task.locTable.putLocation(linfo);
+						});
+					});
 				}
 				
 				debugTotal --;
