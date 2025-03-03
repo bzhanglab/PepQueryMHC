@@ -18,7 +18,7 @@ The accurate prioritization of tumor antigens, including aberrant translational 
 <br>
 
 ## Usage
-PepQueryMHC provides three main functions such as 1) scan mode, 2) target mode and 3) annotate mode.
+PepQueryMHC provides three main functions such as 1) scan mode, 2) target mode 3) FASTQ mode and 4) annotate mode.
 
 ### Quick start
 Scan mode
