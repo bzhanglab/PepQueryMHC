@@ -341,7 +341,7 @@ public class Match {
 		CommandLineParser parser = new DefaultParser();
 	    HelpFormatter helper = new HelpFormatter();
 	    boolean isFail = false;
-	    Parameters.sequencingFile = 0b0;
+	    Parameters.sequencingFileType = 0b0;
 	    
 		try {
 		    cmd = parser.parse(options, nArgs);
@@ -353,22 +353,22 @@ public class Match {
 		    ///////// input sequencing reads /////////
 		    if(cmd.hasOption("b")) {
 		    	Parameters.bamFile = new File(cmd.getOptionValue("b"));
-		    	Parameters.sequencingFile |= Constants.SEQ_BAM;
+		    	Parameters.sequencingFileType |= Constants.SEQ_BAM;
 		    }
 		    
 		    if(cmd.hasOption("0")) {
 		    	Parameters.fastq0File = new File(cmd.getOptionValue("0"));
-		    	Parameters.sequencingFile |= Constants.SEQ_FASTQ_SINGLE;
+		    	Parameters.sequencingFileType |= Constants.SEQ_FASTQ_SINGLE;
 		    }
 		    
 		    if(cmd.hasOption("1")) {
 		    	Parameters.fastq1File = new File(cmd.getOptionValue("1"));
-		    	Parameters.sequencingFile |= 0b100;
+		    	Parameters.sequencingFileType |= 0b100;
 		    }
 		    
 		    if(cmd.hasOption("2")) {
 		    	Parameters.fastq2File = new File(cmd.getOptionValue("2"));
-		    	Parameters.sequencingFile |= 0b1000;
+		    	Parameters.sequencingFileType |= 0b1000;
 		    }
 		    /////////////////////////////////////
 		    
@@ -445,9 +445,9 @@ public class Match {
 		}
 		
 		// at least one sequencing read option should provide.
-		if( !(	Parameters.sequencingFile == Constants.SEQ_BAM || 
-				Parameters.sequencingFile == Constants.SEQ_FASTQ_SINGLE || 
-				Parameters.sequencingFile == Constants.SEQ_FASTQ_PAIRED) ) {
+		if( !(	Parameters.sequencingFileType == Constants.SEQ_BAM || 
+				Parameters.sequencingFileType == Constants.SEQ_FASTQ_SINGLE || 
+				Parameters.sequencingFileType == Constants.SEQ_FASTQ_PAIRED) ) {
 			isFail = true;
 		}
 		

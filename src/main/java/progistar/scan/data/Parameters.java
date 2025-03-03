@@ -10,7 +10,7 @@ public class Parameters {
 	
 	public static File inputFile = null;
 	
-	public static byte sequencingFile = 0b0;
+	public static byte sequencingFileType = 0b0;
 	// bam/sam file
 	public static File bamFile = null;
 	// for single-end fastq file

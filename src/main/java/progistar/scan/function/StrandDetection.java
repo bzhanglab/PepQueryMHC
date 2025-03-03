@@ -22,6 +22,11 @@ public class StrandDetection {
 	}
 	
 	private static void detect (Task task) {
+		if(Parameters.sequencingFileType != Constants.SEQ_BAM) {
+			System.out.println("Please specify strandedness for fastq files.");
+			return;
+		}
+		
 		long startTime = System.currentTimeMillis();
 		// to prevent racing
 		File file = new File(Parameters.bamFile.getAbsolutePath());
