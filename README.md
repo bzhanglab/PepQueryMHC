@@ -18,7 +18,8 @@ The accurate prioritization of tumor antigens, including aberrant translational 
 <br>
 
 ## Usage
-PepQueryMHC provides three main functions such as 1) scan mode, 2) target mode 3) FASTQ mode and 4) annotate mode.
+PepQueryMHC provides three main functions such as 1) scan mode, 2) target mode 3) FASTQ mode and 4) annotate mode. <br>
+When you use FASTQ mode, please make sure that FASTQ files do not contain artifical sequences such as adaptors, barcodes and so on.
 
 ### Quick start
 Scan mode
@@ -44,7 +45,7 @@ FASTQ mode (for single-end)
 java -Xmx2G -jar PepQueryMHC.jar \
 --mode fastq \
 --input peptides.tsv \
---0 sample.fastq.gz \
+--0 sample.trimmed.fastq.gz \
 --output sample \
 --strand f \
 --thread 16
@@ -54,8 +55,8 @@ FASTQ mode (for paired-end)
 java -Xmx2G -jar PepQueryMHC.jar \
 --mode fastq \
 --input peptides.tsv \
---1 sample.fastq.1.gz \
---2 sample.fastq.2.gz \
+--1 sample.trimmed.fastq.1.gz \
+--2 sample.trimmed.fastq.2.gz \
 --output sample \
 --strand rf \
 --thread 16
