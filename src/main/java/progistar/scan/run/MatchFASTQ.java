@@ -102,7 +102,7 @@ public class MatchFASTQ {
 		}
 		WriteOutput.writeMainOutput(records, Parameters.outputBaseFilePath, locTable);
 		//WriteOutput.writeLocationLevelOutput(records, Parameters.outputBaseFilePath, locTable);
-		//WriteOutput.writePeptideLevelOutput(records, Parameters.outputBaseFilePath, locTable);
+		WriteOutput.writePeptideLevelOutput(records, Parameters.outputBaseFilePath, locTable);
 		
 	}
 	
