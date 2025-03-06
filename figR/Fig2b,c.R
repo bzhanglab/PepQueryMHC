@@ -52,8 +52,8 @@ total_annotation_count_per_sample <- cell_annotations %>% count(Annotation, Samp
 colnames(total_annotation_count_per_sample) <- c("Annotation", "Sample", "Total")
 
 ## load MHC_I/_II annotations
-MHC_I_annotations <- read_excel("TableS1.xlsx", sheet = "LUAD_MHC-I")
-MHC_II_annotations <- read_excel("TableS1.xlsx", sheet = "LUAD_MHC-II")
+MHC_I_annotations <- read_excel("SupplementaryTable1.xlsx", sheet = "LUAD_MHC-I")
+MHC_II_annotations <- read_excel("SupplementaryTable1.xlsx", sheet = "LUAD_MHC-II")
 
 ## refine the fields
 MHC_I_annotations <- MHC_I_annotations[, c("Sequence", "Gene", "Type")]

@@ -9,7 +9,7 @@ source("Color.R")
 
 
 ########## ExtFig. 2a: The number of reads across 10 LUAD and 10 NAT samples ##########
-libSize <- read_excel(path ="TableS1.xlsx", sheet = "Reads")
+libSize <- read_excel(path ="SupplementaryTable1.xlsx", sheet = "Reads")
 ## reads indicate the number of both primary and unmapped reads
 libSize <- libSize[order(libSize$Reads), ]
 libSize$Sample <- factor(libSize$Sample, levels = libSize$Sample)
@@ -46,7 +46,7 @@ func_count <- function(data, label) {
   return(category_count)
 }
 
-data_MHC_I <- read_excel("TableS1.xlsx", sheet = "LUAD_MHC-I")
+data_MHC_I <- read_excel("SupplementaryTable1.xlsx", sheet = "LUAD_MHC-I")
 MHC_I <- func_count(data_MHC_I, "LUAD pMHC-I")
 
 plot <- ggplot(MHC_I, aes(x = as.factor(Length), y = n, fill = n)) + 
@@ -70,7 +70,7 @@ plot
 ggsave(filename = "ExtFig2b.png", plot = plot, height = 4, width = 3, dpi = 600)
 
 ########## ExtFig. 2c: The number of MHC-II peptides according to lengths ##########
-data_MHC_II <- read_excel("TableS1.xlsx", sheet = "LUAD_MHC-II")
+data_MHC_II <- read_excel("SupplementaryTable1.xlsx", sheet = "LUAD_MHC-II")
 MHC_II <- func_count(data_MHC_II, "LUAD pMHC-II")
 
 plot <- ggplot(MHC_II, aes(x = Length, y = n, fill = n)) + 

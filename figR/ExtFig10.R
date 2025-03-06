@@ -5,7 +5,7 @@ library(htmlwidgets)
 ## deconvolution of locations
 # after removing values below cutoff
 # run annotate function in PepQueryMHC
-annotations <- read_excel("TableS5.xlsx", sheet = "C1R_Top_annotation")
+annotations <- read_excel("SupplementaryTable5.xlsx", sheet = "C1R_Top_annotation")
 
 # drop null
 annotations <- annotations[annotations$Comparison != "Not found", ]

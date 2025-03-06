@@ -154,7 +154,7 @@ dev.off()
 
 
 ########## ExtFig. 5c: Matched read types ##########
-percentMapping <- read_excel("TableS2.xlsx", sheet = "40k 9mers read type")
+percentMapping <- read_excel("SupplementaryTable2.xlsx", sheet = "40k 9mers read type")
 
 long_data <- pivot_longer(percentMapping, cols = c("Wildtype", "Variant", "Unmapped"))
 long_data$value <- as.numeric(long_data$value)

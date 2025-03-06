@@ -5,9 +5,9 @@ library(ggpubr)
 library(RColorBrewer)
 source("Color.R")
 
-reads_9mers <- read_excel("TableS2.xlsx", sheet = "40k 9mers (log2_RPHM+1)")
+reads_9mers <- read_excel("SupplementaryTable2.xlsx", sheet = "40k 9mers (log2_RPHM+1)")
 ########## Fig. 1b: Performance measurement ##########
-data <- read_excel("TableS2.xlsx", sheet = "Performance")
+data <- read_excel("SupplementaryTable2.xlsx", sheet = "Performance")
 data_mem <- data %>% subset(select = c(Tool, Size, `Memory (GB)`))
 data_run <- data %>% subset(select = c(Tool, Size, `Time (hour)`))
 data_mem$Type <- "Memory usage"
@@ -51,7 +51,7 @@ ggsave("Fig1b.png", plot_time_top, width = 8, height = 6, dpi = 600)
 
 
 ########## Fig. 1c: Estimated performance ##########
-data <- read_excel("TableS2.xlsx", sheet = "Estimation")
+data <- read_excel("SupplementaryTable2.xlsx", sheet = "Estimation")
 data <- data %>% subset(select = c(Tool, Size, `Time (min)`))
 colnames(data) <- c("Tool", "Size", "Estimate")
 data[data$Size == "MHC-I (8-12-mers)", ]$Size <- "MHC-I\n(8-12-mers)"

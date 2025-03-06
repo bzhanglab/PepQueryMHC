@@ -9,7 +9,7 @@ library(tidyr)
 source("Color.R")
 
 ########## Fig. 2d: Proportion of type ##########
-annotations <- read_excel("TableS5.xlsx", sheet = "C1R_Top_annotation")
+annotations <- read_excel("SupplementaryTable5.xlsx", sheet = "C1R_Top_annotation")
 
 annotations$Category <- "Reference"
 annotations[annotations$`PepQueryMHC:Unique_class_code` != "PC", ]$Category <- "Non-reference"
@@ -53,10 +53,10 @@ ggsave(filename = "Fig2d.png", plot = plot_time_top, height = 7, width = 1.8, dp
 
 
 ########## Fig.2e: RPHM value per each peptide ##########
-pepquerymhc <- read_excel("TableS5.xlsx", sheet = "PepQueryMHC")
-bamquery <- read_excel("TableS5.xlsx", sheet = "BamQuery")
-cutoffs <- read_excel("TableS3.xlsx", sheet = "p-value cutoff (log2(RPHM+1))")
-input_data <- read_excel("TableS1.xlsx", sheet = "Spliced-MHC-I")
+pepquerymhc <- read_excel("SupplementaryTable5.xlsx", sheet = "PepQueryMHC")
+bamquery <- read_excel("SupplementaryTable5.xlsx", sheet = "BamQuery")
+cutoffs <- read_excel("SupplementaryTable3.xlsx", sheet = "p-value cutoff (log2(RPHM+1))")
+input_data <- read_excel("SupplementaryTable1.xlsx", sheet = "Spliced-MHC-I")
 names(input_data)[names(input_data) == 'Sequence'] <- "DeNovoSequence"
 
 ## set length

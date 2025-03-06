@@ -10,8 +10,8 @@ source("Color.R")
 
 
 ########## ExtFig. 7,8: Overall expression across the tumor antigens ##########
-tumor_antigens <- read_excel(path = "TableS3.xlsx", sheet = "final tumor antigens (PQM)")
-cutoff_1p <-read_excel(path = "TableS3.xlsx", sheet = "p-value cutoff (log2(RPHM+1))")
+tumor_antigens <- read_excel(path = "SupplementaryTable3.xlsx", sheet = "final tumor antigens (PQM)")
+cutoff_1p <-read_excel(path = "SupplementaryTable3.xlsx", sheet = "p-value cutoff (log2(RPHM+1))")
 
 
 ### Extend version

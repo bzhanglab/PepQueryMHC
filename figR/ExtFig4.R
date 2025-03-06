@@ -6,7 +6,7 @@ library(RColorBrewer)
 source("Color.R")
 
 ########## ExtFig. 4: Correlation plots ##########
-reads_9mers <- read_excel("TableS2.xlsx", sheet = "40k 9mers (log2_RPHM+1)")
+reads_9mers <- read_excel("SupplementaryTable2.xlsx", sheet = "40k 9mers (log2_RPHM+1)")
 ## calculate correlation for all samples
 sample_list <- unique(reads_9mers$Sample)
 plot_list <- list()

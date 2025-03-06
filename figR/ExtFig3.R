@@ -32,14 +32,14 @@ eunmerate <- function(sequence) {
   return(sum)
 }
 
-data_MHC_I_1k <- read_excel("TableS1.xlsx", sheet = "9-mers 1 k")
-data_MHC_I_5k <- read_excel("TableS1.xlsx", sheet = "9-mers 5 k")
-data_MHC_I_10k <- read_excel("TableS1.xlsx", sheet = "9-mers 10 k")
-data_MHC_I_20k <- read_excel("TableS1.xlsx", sheet = "9-mers 20 k")
-data_MHC_I_30k <- read_excel("TableS1.xlsx", sheet = "9-mers 30 k")
-data_MHC_I_40k <- read_excel("TableS1.xlsx", sheet = "9-mers 40 k")
-data_MHC_I_all <- read_excel("TableS1.xlsx", sheet = "LUAD_MHC-I")
-data_MHC_II_all <- read_excel("TableS1.xlsx", sheet = "LUAD_MHC-II")
+data_MHC_I_1k <- read_excel("SupplementaryTable1.xlsx", sheet = "9-mers 1 k")
+data_MHC_I_5k <- read_excel("SupplementaryTable1.xlsx", sheet = "9-mers 5 k")
+data_MHC_I_10k <- read_excel("SupplementaryTable1.xlsx", sheet = "9-mers 10 k")
+data_MHC_I_20k <- read_excel("SupplementaryTable1.xlsx", sheet = "9-mers 20 k")
+data_MHC_I_30k <- read_excel("SupplementaryTable1.xlsx", sheet = "9-mers 30 k")
+data_MHC_I_40k <- read_excel("SupplementaryTable1.xlsx", sheet = "9-mers 40 k")
+data_MHC_I_all <- read_excel("SupplementaryTable1.xlsx", sheet = "LUAD_MHC-I")
+data_MHC_II_all <- read_excel("SupplementaryTable1.xlsx", sheet = "LUAD_MHC-II")
 
 data_MHC_I_1k$LogN <- sapply(data_MHC_I_1k$Sequence, eunmerate)
 data_MHC_I_1k$Size <- "1k"
@@ -118,7 +118,7 @@ fancy_scientific <- function(l) {
   return(parse(text=l))
 }
 
-data_real_comparison <- read_excel(path = "TableS2.xlsx", sheet = "Performance", na = "-")
+data_real_comparison <- read_excel(path = "SupplementaryTable2.xlsx", sheet = "Performance", na = "-")
 
 data_real_comparison$Size <- factor(data_real_comparison$Size, levels = c("1k", "5k", "10k", "20k", "30k", "40k"))
 
