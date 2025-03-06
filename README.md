@@ -9,6 +9,7 @@
   - [Target mode](#target-mode)
   - [FASTQ mode](#fastq-mode)
   - [Annotate mode](#annotate-mode)
+- [Paper](#paper)
 - [License]($license)
 ---
 
@@ -122,6 +123,9 @@ Y+: mandatory, Y: optional, N: none
 | chr1:1-30 | + |  any value | ... | any value |
 | chr1:31-50\|chr1:81-90 | -  | any value | ... | any value |
 | chr1:21-40\|chr1:87-90 | .  | any value | ... | any value |
+
+## Paper
+Figures in the paper can be generated using: 1) R code in figR folder, 2) Supplementary Tables S1,S2,S3, and S5, and 3) the meta dataset available at https://doi.org/10.5281/zenodo.14984543. 
 
 ## License
 All code is available as under the <a href="https://creativecommons.org/licenses/by-nc/4.0/">Attribution-NonCommercial (CC BY-NC) 4.0 license</a>.
