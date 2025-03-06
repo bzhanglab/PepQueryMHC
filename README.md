@@ -9,7 +9,7 @@
   - [Target mode](#target-mode)
   - [FASTQ mode](#fastq-mode)
   - [Annotate mode](#annotate-mode)
-- [Figures (for the reviewer)](#figures-\(for-the-reviewer\))
+- [Figures for the reviewers](#figures-for-the-reviewers)
 - [License]($license)
 ---
 
