@@ -10,7 +10,6 @@ source("Color.R")
 
 pepquerymhc_tumor_antigens <- read_excel(path = "SupplementaryTable3.xlsx", sheet = "final tumor antigens (PQM)")
 bamquery_tumor_antigens <- read_excel(path = "SupplementaryTable3.xlsx", sheet = "final tumor antigens (BQ)")
-cutoff_1p <-read_excel(path = "SupplementaryTable3.xlsx", sheet = "p-value cutoff (log2(RPHM+1))")
 
 ########## Fig. 2a: Tumor antigen heatmap ##########
 dev.off()

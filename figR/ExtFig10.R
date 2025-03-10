@@ -1,11 +1,11 @@
 library(networkD3)
 library(htmlwidgets)
 
-########## ExtFig. 10: Reannotation of previously reported cis- and trans-spliced pMHC-I peptides ##########
+########## ExtFig. 10: Reannotation of previously reported cis- and trans-spliced pMHC-I sequences ##########
 ## deconvolution of locations
 # after removing values below cutoff
 # run annotate function in PepQueryMHC
-annotations <- read_excel("SupplementaryTable5.xlsx", sheet = "C1R_Top_annotation")
+annotations <- read_excel("SupplementaryTable5.xlsx", sheet = "Top annotation")
 
 # drop null
 annotations <- annotations[annotations$Comparison != "Not found", ]
