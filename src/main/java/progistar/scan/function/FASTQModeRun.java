@@ -28,7 +28,7 @@ public class FASTQModeRun extends Mode {
 	private static void scanReads (Task task) {
 		long startTime = System.currentTimeMillis();
 		File file = null;
-		int threadNum = Parameters.threadNum;
+		int threadNum = Parameters.threadNum+1;
 		
 		// single-end
 		if(task.start == 0) {
