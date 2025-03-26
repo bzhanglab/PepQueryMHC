@@ -202,7 +202,7 @@ plot <- ggplot(data_long[data_long$count > 0, ], aes(x = Present, y = variable))
         title = element_text(color = "black", size = 12),
         legend.title = element_text(size = 10), legend.position = "right",
         panel.spacing.y = unit(1, "lines")) +
-  labs(x = "Peptides", y = "Cell types", color = expression("Log"[10]("scSize")), size = "scPercent")
+  labs(x = "Peptides", y = "Cell types", color = expression("Log"[10]("scSize")), size = "scProportion")
 plot
 
 ## for size 50
@@ -256,7 +256,7 @@ for(idx in c(1:length(example_peptides))) {
                  aes(x = UMAP_1, y = UMAP_2)) + 
     geom_point(size = tmp$size, stroke = tmp$stroke, 
                aes(fill = cell_annotation, color = cell_annotation, alpha = alpha)) + 
-    labs(title = paste(peptide," (",gene,")", sep = ""), x = "tSNE-1", y = "tSNE-2") + 
+    labs(title = paste(peptide," (",gene,")", sep = ""), x = "UMAP-1", y = "UMAP-2") + 
     theme_classic() + 
     scale_x_continuous(limits = c(-16, 16)) +
     scale_y_continuous(limits = c(-16, 16)) +
