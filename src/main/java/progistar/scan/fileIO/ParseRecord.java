@@ -65,6 +65,7 @@ public class ParseRecord {
 			} 
 		}
 		
+		
 		// fail to find fields
 		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
 			if(inputSeqIdx == -1 || genomicLociIdx == -1 || strandIdx == -1) {
