@@ -23,7 +23,8 @@ heat_data <- pepquerymhc_tumor_antigens
 
 heat_data$MHC <- factor(heat_data$MHC, 
                         levels = c("MHC-I", "MHC-II"))
-heat_data$Label <- factor(heat_data$Label, levels = c("TSA", "TAA"))
+heat_data$Class <- heat_data$Label
+heat_data$Class <- factor(heat_data$Class, levels = c("TSA", "TAA"))
 
 category_count <- heat_data %>% dplyr::count(MHC)
 group <- rep(unique(category_count$MHC), times = category_count$n)
@@ -35,19 +36,19 @@ tools <- factor(tools, levels = c("PepQueryMHC", "BamQuery"))
 heat_data <- 
   heat_data %>% mutate(across(grep("(GTEX)|(LUAD)|(Avg)|(mTEC)|(Max)|(Count)", colnames(heat_data)), ~ if_else(. == 0, NA_real_, .)))
 
-heat_data <- heat_data %>% mutate(across(Label, ~ if_else(. == "TSA", 1, 0)))
+heat_data <- heat_data %>% mutate(across(Class, ~ if_else(. == "TSA", 1, 0)))
 heat_data <- heat_data %>% mutate(across(IEDB_MHC, ~ if_else(. == "Yes", 1, 0)))
 heat_data <- heat_data %>% mutate(across(HLA_LIGAND_ATLAS, ~ if_else(. == "Yes", 1, 0)))
 heat_data <- heat_data %>% mutate(across(IEAtlas_normal, ~ if_else(. == "Yes", 1, 0)))
 heat_data <- heat_data %>% mutate(across(IEAtlas_cancer, ~ if_else(. == "Yes", 1, 0)))
 heat_data <- heat_data %>% mutate(across(caAtlas_CT_antigen, ~ if_else(. == "Yes", 1, 0)))
 heat_data <- heat_data %>% mutate(across(caAtlas_CA_antigen, ~ if_else(. == "Yes", 1, 0)))
-heat_data$Report <- rowSums(heat_data[, grepl("(IEDB_MHC)|(HLA_LIGAND)|(IEAtlas)|(caAtlas)", colnames(heat_data))])
-heat_data <- heat_data %>% mutate(across(Report, ~ if_else(. > 0, 1, 0)))
+heat_data$`Prior report` <- rowSums(heat_data[, grepl("(IEDB_MHC)|(HLA_LIGAND)|(IEAtlas)|(caAtlas)", colnames(heat_data))])
+heat_data <- heat_data %>% mutate(across(`Prior report`, ~ if_else(. > 0, 1, 0)))
 
-column_ha = HeatmapAnnotation(Label = anno_simple(heat_data$Label, col = c(`1` = "black", `0` = "white"), 
+column_ha = HeatmapAnnotation(Class = anno_simple(heat_data$Class, col = c(`1` = "black", `0` = "white"), 
                                                   height = unit(3, "mm"), border = T),
-                              Report = anno_simple(heat_data$Report, col = c(`1` = "black", `0` = "white"), 
+                              `Prior report` = anno_simple(heat_data$`Prior report`, col = c(`1` = "black", `0` = "white"), 
                                                    height = unit(3, "mm"), border = T),
                               show_legend = F, 
                               show_annotation_name = T, 
@@ -141,23 +142,23 @@ draw(lgd, x = unit(0.95, "npc"), y = unit(0.4, "npc"), just = c("right", "top"))
 
 lgd_label <- Legend(legend_width = unit(0.8, "in"), grid_height = unit(0.1, "in"),
                     direction = "horizontal",
-                    title_position = "topcenter",
+                    title_position = "topleft",
                     labels = c("TSA", "TAA"),
                     legend_gp = gpar(fill = c("TSA" = "black", "TAA" = "white")), border = "black",
                     labels_gp = gpar(fontsize = 8, color = "black"),
                     title_gp = gpar(fontsize = 8, color = "black", fontface = "bold"),
-                    title = "Label")
+                    title = "Class")
 
 report_label <- Legend(legend_width = unit(0.8, "in"), grid_height = unit(0.1, "in"),
                        direction = "horizontal",
-                       title_position = "topcenter",
+                       title_position = "topleft",
                        labels = c("Yes", "No"),
                        legend_gp = gpar(fill = c("Yes" = "black", "No" = "white")), border = "black",
                        labels_gp = gpar(fontsize = 8, color = "black"),
                        title_gp = gpar(fontsize = 8, color = "black", fontface = "bold"),
-                       title = "Report")
+                       title = "Prior report")
 
 draw(lgd_label, x = unit(0.945, "npc"), y = unit(0.8, "npc"), just = c("right", "top"))
-draw(report_label, x = unit(0.94, "npc"), y = unit(0.62, "npc"), just = c("right", "top"))
+draw(report_label, x = unit(0.9785, "npc"), y = unit(0.62, "npc"), just = c("right", "top"))
 
 dev.off()
