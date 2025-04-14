@@ -76,6 +76,7 @@ public class Constants {
 	public static double PENALTY_asRNA				=	50;
 	public static double PENALTY_IGR				=	70;
 	public static double PENALTY_UNMAP				=	100;
+	public static double PENALTY_WARNING			=	Double.MAX_VALUE;
 	
 	public static final String DEFAULT_BARCODE_ID	=	"Undefined";
 	public static final String NULL_BARCODE_ID		=	"Null";
@@ -132,6 +133,7 @@ public class Constants {
 	public static final String GENE_TYPE		= "Gene_type";
 	public static final String CLASS_CODE		= "Class_code";
 	public static final String UNIQUE_CLASS_CODE= "Unique_class_code";
+	public static final String WARNING_TAG		= "Warning_tag";
 	
 	public static String getFullNameOfStrandedness (String strandedness) {
 		String fullName = null;

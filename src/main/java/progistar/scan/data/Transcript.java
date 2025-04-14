@@ -10,6 +10,7 @@ public class Transcript {
 	public String id;
 	public ArrayList<String> tags;
 	public boolean strand = true;
+	public String warningTag = Constants.NULL;
 	public ArrayList<Exon> exons = new ArrayList<Exon>();
 	
 	public void refine () {

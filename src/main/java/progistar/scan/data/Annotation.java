@@ -6,7 +6,7 @@ import java.util.LinkedList;
 public class Annotation implements Comparable<Annotation> {
 
 	public String classCode;
-	public int penalty;
+	public double penalty;
 	public Transcript transcript;
 	public Gene gene;
 	
@@ -80,6 +80,10 @@ public class Annotation implements Comparable<Annotation> {
 		return transcript == null ? Constants.NULL : transcript.id;
 	}
 	
+	public String getWarningTag () {
+		return transcript == null ? Constants.NULL : transcript.warningTag;
+	}
+	
 	public void calPenalty () {
 		this.penalty = 0;
 		if(this.classCode.contains(Constants.MARK_AS)) {
@@ -108,6 +112,16 @@ public class Annotation implements Comparable<Annotation> {
 		}
 		if(this.classCode.contains(Constants.MARK_UNKNOWN)) {
 			this.penalty += Constants.PENALTY_UNMAP;
+		}
+		
+		// check warning code
+		if(!this.transcript.warningTag.equalsIgnoreCase(Constants.NULL)) {
+			this.penalty = Constants.PENALTY_WARNING;
+			
+			if(Parameters.verbose) {
+				System.out.println("Detect warning tags: "+this.transcript.warningTag +" in "+this.transcript.id);
+				System.out.println("This annotation will get the maximum penalty.");
+			}
 		}
 	}
 	

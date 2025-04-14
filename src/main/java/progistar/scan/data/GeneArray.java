@@ -26,15 +26,20 @@ public class GeneArray {
 					for(String tag_ : t.tags) {
 						if(tag_.equalsIgnoreCase(tag)) {
 							dropList.put(id, true);
+							t.warningTag = tag_; // assign warning tag.
 							break;
 						}
 					}
 				}
 			});
 			
+			/** @Deprecated
 			dropList.forEach((id, nil)->{
 				gene.transcripts.remove(id);
 			});
+			**/
+			
+			// If transcript has a warning tag, then it gets very low priority.
 		}
 		
 		int lastIdx = genes.size()-1;

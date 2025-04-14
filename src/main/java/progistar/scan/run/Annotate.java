@@ -75,7 +75,7 @@ public class Annotate {
 			Collections.sort(annotations);
 			
 			// select annotations with the lowest penalty
-			int minPenalty = annotations.peekFirst().penalty;
+			double minPenalty = annotations.peekFirst().penalty;
 			while(true) {
 				Annotation annotation = annotations.peekLast();
 				if(annotation.penalty == minPenalty) {

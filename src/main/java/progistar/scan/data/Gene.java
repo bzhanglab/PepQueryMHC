@@ -43,6 +43,7 @@ public class Gene implements Comparable<Gene> {
 	public Annotation[] annotate (SequenceRecord sRecord) {
 		int size = transcripts.size();
 		Annotation[] annotates = new Annotation[size];
+		
 		Iterator<String> iterators = (Iterator<String>) transcripts.keys();
 		
 		int idx = 0;

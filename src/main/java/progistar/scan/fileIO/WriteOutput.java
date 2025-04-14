@@ -332,7 +332,8 @@ public class WriteOutput {
 		.append("\t").append(Constants.GENE_STRAND)
 		.append("\t").append(Constants.GENE_TYPE)
 		.append("\t").append(Constants.CLASS_CODE)
-		.append("\t").append(Constants.UNIQUE_CLASS_CODE);
+		.append("\t").append(Constants.UNIQUE_CLASS_CODE)
+		.append("\t").append(Constants.WARNING_TAG);
 		BW.newLine();
 		
 		
@@ -342,6 +343,7 @@ public class WriteOutput {
 		StringBuilder geneTypes				= new StringBuilder();
 		StringBuilder geneClassCodes		= new StringBuilder();
 		StringBuilder uniqueClassCodes		= new StringBuilder();
+		StringBuilder warningTags			= new StringBuilder();
 		
 		for(SequenceRecord sRecord : records) {
 			LinkedList<Annotation> annotations = allAnnotations.get(sRecord.getKey());
@@ -359,6 +361,7 @@ public class WriteOutput {
 						BW.append("\t").append(annotation.getGeneType());
 						BW.append("\t").append(annotation.getClassCode()); // class_code
 						BW.append("\t").append(annotation.getClassCode()); // unique_class_code
+						BW.append("\t").append(annotation.getWarningTag());
 						BW.newLine();
 					}
 				} else {
@@ -403,6 +406,12 @@ public class WriteOutput {
 							uniqueClassCodes.append(annotation.getClassCode());
 							uniqueClassCode.put(annotation.getClassCode(), true);
 						}
+						
+						// build warning tags
+						if(warningTags.length() > 0) {
+							warningTags.append("|");
+						}
+						warningTags.append(annotation.getWarningTag());
 					}
 					BW.append(record);
 					BW.append("\t"+annotations.size());
@@ -412,6 +421,7 @@ public class WriteOutput {
 					BW.append("\t").append(geneTypes.toString()); geneTypes.setLength(0);
 					BW.append("\t").append(geneClassCodes.toString()); geneClassCodes.setLength(0);
 					BW.append("\t").append(uniqueClassCodes.toString()); uniqueClassCodes.setLength(0);
+					BW.append("\t").append(warningTags.toString()); warningTags.setLength(0);
 					BW.newLine();
 				}
 				
