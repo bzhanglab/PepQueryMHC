@@ -126,7 +126,7 @@ Y+: mandatory, Y: optional, N: none
 | chr1:21-40\|chr1:87-90 | .  | any value | ... | any value |
 
 ### White list
-A white list is a set of barcodes selected for inclusion in the analysis of single-cell RNA-seq data.
+A white list is a set of barcodes selected for inclusion in the analysis of single-cell RNA-seq data.<br>
 **Input format**
 | Barcode | 
 | :---:   |
