@@ -24,20 +24,33 @@ public class BarcodeTable {
 			String line = null;
 			
 			/**
-			 * deprecated
+			 * @deprecated
 			 * Proportion of null and undefined barcodes is small, and they barely give a good information.
 			 * 
 			 */
-			barcodeIds.add(Constants.NULL_BARCODE_ID);
-			barcodeIds.add(Constants.OTHER_BARCODE_ID);
+			// barcodeIds.add(Constants.NULL_BARCODE_ID);
+			// barcodeIds.add(Constants.OTHER_BARCODE_ID);
 			
-			//BR.readLine(); // skip header
+			String[] header = BR.readLine().split("\t"); // skip header
+			int barcodeIdx = -1;
+			
+			for(int i=0; i<header.length; i++) {
+				if(header[i].equalsIgnoreCase("Barcode")) {
+					barcodeIdx = i;
+				}
+			}
+			if(barcodeIdx == -1) {
+				System.out.println("Fail to find barcode field in the white list");
+				System.exit(1);
+			}
+			
+			
 			while((line = BR.readLine()) != null) {
 				String[] fields = line.split("\t");
 				
-				if(hasBarcode.get(fields[0]) == null) {
-					hasBarcode.put(fields[0], true);
-					barcodeIds.add(fields[0]);
+				if(hasBarcode.get(fields[barcodeIdx]) == null) {
+					hasBarcode.put(fields[barcodeIdx], true);
+					barcodeIds.add(fields[barcodeIdx]);
 				}
 			}
 			
