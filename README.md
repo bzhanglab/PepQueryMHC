@@ -9,6 +9,7 @@
   - [Target mode](#target-mode)
   - [FASTQ mode](#fastq-mode)
   - [Annotate mode](#annotate-mode)
+  - [White list](#white-list)
 - [Figures for the reviewers](#figures-for-the-reviewers)
 - [License]($license)
 ---
@@ -123,6 +124,21 @@ Y+: mandatory, Y: optional, N: none
 | chr1:1-30 | + |  any value | ... | any value |
 | chr1:31-50\|chr1:81-90 | -  | any value | ... | any value |
 | chr1:21-40\|chr1:87-90 | .  | any value | ... | any value |
+
+### White list
+A white list is a set of barcodes selected for inclusion in the analysis of single-cell RNA-seq data.
+**Input format**
+| Barcode | 
+| :---:   |
+| AAACCTGAGCAATCTC-1 |
+| AAACCTGAGCGTTTAC-1 |
+| AAACCTGAGCTGCAAG-1 |
+| AAACCTGCAAACGTGG-1 |
+| AAACCTGCAAACTGCT-1 |
+| AAACCTGCAACTGGCC-1 |
+| AAACCTGCAAGCCCAC-1 |
+| AAACCTGCACTTAAGC-1 |
+| AAACCTGCAGCCACCA-1 |
 
 ## Figures for the reviewers
 Figures in the paper can be generated using: 1) R code in figR folder, 2) Supplementary Tables 1,2,3, and 5, and 3) the meta dataset available at https://doi.org/10.5281/zenodo.14984543. 
