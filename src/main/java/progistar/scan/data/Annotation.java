@@ -8,6 +8,16 @@ public class Annotation implements Comparable<Annotation> {
 	public String classCode;
 	public double penalty;
 	public Transcript transcript;
+	/**
+	 * Warning tag is changed under the conditions:
+	 * 1) If there is no transcript information:
+	 * 	a) No location information provided.
+	 * 	b) No matched reference name provided.
+	 * 
+	 * 2) If there is a matched transcript information:
+	 * 	a) borrow a warning tag from transcript class.
+	 */
+	public String warningTag = Constants.NULL;
 	public Gene gene;
 	
 	public static LinkedList<Annotation> removeRedundancy (LinkedList<Annotation> annotations) {
@@ -81,7 +91,7 @@ public class Annotation implements Comparable<Annotation> {
 	}
 	
 	public String getWarningTag () {
-		return transcript == null ? Constants.NULL : transcript.warningTag;
+		return this.warningTag;
 	}
 	
 	public void calPenalty () {
@@ -115,7 +125,7 @@ public class Annotation implements Comparable<Annotation> {
 		}
 		
 		// check warning code
-		if(!this.transcript.warningTag.equalsIgnoreCase(Constants.NULL)) {
+		if(!this.getWarningTag().equalsIgnoreCase(Constants.NULL)) {
 			this.penalty = Constants.PENALTY_WARNING;
 			
 			if(Parameters.verbose) {

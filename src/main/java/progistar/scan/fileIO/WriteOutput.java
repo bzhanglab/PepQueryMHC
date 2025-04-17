@@ -366,6 +366,7 @@ public class WriteOutput {
 					}
 				} else {
 					Hashtable<String, Boolean> uniqueClassCode = new Hashtable<String, Boolean>();
+					Hashtable<String, Boolean> uniqueWarningCode = new Hashtable<String, Boolean>();
 					
 					for(Annotation annotation : annotations) {
 						// build gene ids
@@ -408,10 +409,13 @@ public class WriteOutput {
 						}
 						
 						// build warning tags
-						if(warningTags.length() > 0) {
-							warningTags.append("|");
+						if(uniqueWarningCode.get(annotation.getWarningTag()) == null) {
+							if(warningTags.length() > 0) {
+								warningTags.append("|");
+							}
+							warningTags.append(annotation.getWarningTag());
+							uniqueWarningCode.put(annotation.getWarningTag(), true);
 						}
-						warningTags.append(annotation.getWarningTag());
 					}
 					BW.append(record);
 					BW.append("\t"+annotations.size());

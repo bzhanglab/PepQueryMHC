@@ -124,6 +124,7 @@ public class Transcript {
 	public Annotation getClassCode (SequenceRecord sRecord) {
 		Annotation annotation	= new Annotation();
 		annotation.transcript = this;
+		annotation.warningTag = this.warningTag;
 		
 		String classCode = "Undefined";
 		

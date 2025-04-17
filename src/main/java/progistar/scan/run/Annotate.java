@@ -40,17 +40,27 @@ public class Annotate {
 		Hashtable<String, LinkedList<Annotation>> allAnnotations = new Hashtable<String, LinkedList<Annotation>>();
 		for(SequenceRecord sRecord : records) {
 			LinkedList<Annotation> annotations = new LinkedList<Annotation>();
+			int chrIdx = IndexConvertor.chrToIndex(sRecord.chr);
+			
 			// If the location is ".", then it is considered as "unknown"
-			if(sRecord.location.equalsIgnoreCase(Constants.NULL)) {
+			// or
+			// no chr index found
+			if(sRecord.location.equalsIgnoreCase(Constants.NULL) || chrIdx == -1) {
 				// unmapped reads, unidentified region (.)
 				Annotation annotation = new Annotation();
 				annotation.classCode = Constants.MARK_UNKNOWN;
+				
+				// set warning tag
+				if(sRecord.location.equalsIgnoreCase(Constants.NULL)) {
+					annotation.warningTag = Constants.WARNING_TAG_NO_LOCATION;
+				} else if(chrIdx == -1) {
+					annotation.warningTag = Constants.WARNING_TAG_NO_CHR;
+				}
+				
 				annotations.add(annotation);
 			} 
 			// location is given
 			else {
-				// TODO: what if there is no chrIdx?
-				int chrIdx = IndexConvertor.chrToIndex(sRecord.chr);
 				ArrayList<Gene> genes = geneArrays[chrIdx].findOverlap(sRecord.start, sRecord.end);
 				if(genes.size() == 0) {
 					// intergenic

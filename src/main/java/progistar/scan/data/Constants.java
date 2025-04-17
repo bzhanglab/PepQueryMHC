@@ -135,6 +135,10 @@ public class Constants {
 	public static final String UNIQUE_CLASS_CODE= "Unique_class_code";
 	public static final String WARNING_TAG		= "Warning_tag";
 	
+	// For annotation mode, no matched chr warning tag
+	public static final String WARNING_TAG_NO_CHR	= "No_matched_reference_name";
+	public static final String WARNING_TAG_NO_LOCATION	= "No_location_information";
+	
 	public static String getFullNameOfStrandedness (String strandedness) {
 		String fullName = null;
 		
