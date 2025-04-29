@@ -263,7 +263,7 @@ public class Transcript {
 		}
 		
 		// sort
-		Collections.sort(sortedClassCode);
+		annotation.classCode = "";
 		for(int i=0; i<sortedClassCode.size(); i++) {
 			if(i != 0) {
 				annotation.classCode += ";";
