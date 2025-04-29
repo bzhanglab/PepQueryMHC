@@ -165,7 +165,6 @@ public class Transcript {
 		boolean isES		= false;
 		boolean isEE		= false;
 		
-		ArrayList<Exon> matchedExonIntrons = new ArrayList<Exon>();
 		int exonCnt = 0; // only count exon (not intron)
 		int matchedExonCnt = -1;
 		for(Exon exon : exons) {
@@ -181,7 +180,6 @@ public class Transcript {
 				if( !((exon.start > qEnd) || (exon.end < qStart)) ) {
 					// check ES/EE
 					if(exon.feature != Constants.INTRON) {
-						matchedExonIntrons.add(exon);
 						if(matchedExonCnt == -1) {
 							matchedExonCnt = exonCnt;
 						} else {
@@ -195,6 +193,14 @@ public class Transcript {
 						// EE
 						else if(matchedExonCnt > exonCnt) {
 							isEE = true;
+						}
+						
+						
+						if(locations.length > 1) {
+							if( ((i%2 == 0) && (qEnds[i] < exon.end)) || 
+								((i%2 == 1) && (qStarts[i] > exon.start))) {
+								isEE = true;
+							} 
 						}
 					}
 					
@@ -215,20 +221,14 @@ public class Transcript {
 			}
 		}
 		
-		if(locations.length != 1) {
-			for(int i=0; i<locations.length; i++) {
-				if( ((i%2 == 0) && (qEnds[i] < matchedExonIntrons.get(i).end)) || 
-					((i%2 == 1) && (qStarts[i] > matchedExonIntrons.get(i).start))) {
-					isEE = true;
-					break;
-				} 
-				
-			}
-		}
-		
 		// If CDS: In-frame? FS?
 		// Else: ncRNA, UTR5, UTR3, Intron
-		if(isCDS) {
+		
+		// if different strand?
+		if(this.strand != (sRecord.strand.charAt(0) == '+') ) {
+			classCode = Parameters.MARK_ASRNA;
+		} 
+		else if(isCDS) {
 			// find frame
 			if(getFrameMark(qStarts[0], qEnds[qEnds.length-1]) == 0) {
 				classCode = Parameters.MARK_IF;
@@ -237,19 +237,29 @@ public class Transcript {
 			}
 			
 		} else {
+			classCode = "";
+			
 			if(isUTR5) {
-				classCode = Parameters.MARK_UTR5;
-			} else if(isUTR3) {
-				classCode = Parameters.MARK_UTR3;
-			} else if(isNCDS) {
-				classCode = Parameters.MARK_NCRNA;
+				classCode += ";" + Parameters.MARK_UTR5;
+			} 
+			if(isUTR3) {
+				classCode += ";" + Parameters.MARK_UTR3;
+			} 
+			if(isNCDS) {
+				classCode += ";" + Parameters.MARK_NCRNA;
+			}
+			if(isIntron) {
+				classCode += ";" + Parameters.MARK_INTRON;
+			} 
+			
+			if(classCode.length() > 0) {
+				classCode = classCode.substring(1);
+			} else {
+				classCode = "Undefined";
 			}
 		}
 		
-		// if different strand?
-		if(this.strand != (sRecord.strand.charAt(0) == '+') ) {
-			classCode = Parameters.MARK_ASRNA;
-		} 
+		
 		
 		// AS check
 		if(isES) {
@@ -258,9 +268,7 @@ public class Transcript {
 		if(isEE) {
 			classCode += ";" + Parameters.MARK_EE;
 		}
-		if(isIntron) {
-			classCode += ";" + Parameters.MARK_INTRON;
-		}
+		
 		
 		annotation.classCode = classCode;
 		

@@ -82,14 +82,14 @@ public class Constants {
 	// Penalty
 	public static double PENALTY_ES					=	10;
 	public static double PENALTY_EE					=	10;
-	public static double PENALTY_IR					=	10;
 	public static double PENALTY_5UTR				=	20;
 	public static double PENALTY_3UTR				=	20;
 	public static double PENALTY_FS					=	20;
 	public static double PENALTY_ncRNA				=	20;
-	public static double PENALTY_asRNA				=	40;
+	public static double PENALTY_IR					=	40;
+	public static double PENALTY_asRNA				=	60;
 	public static double PENALTY_IGR				=	80;
-	public static double PENALTY_UNMAP				=	160;
+	public static double PENALTY_UNMAP				=	100;
 	public static double PENALTY_WARNING			=	Double.MAX_VALUE;
 	
 	public static final String DEFAULT_BARCODE_ID	=	"Undefined";
