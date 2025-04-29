@@ -151,7 +151,7 @@ public class Transcript {
 		}
 		
 		if(isIGR) {
-			classCode = Constants.MARK_INTERGENIC;
+			classCode = Parameters.MARK_INTERGENIC;
 			annotation.classCode = classCode;
 			return annotation;
 		}
@@ -165,8 +165,9 @@ public class Transcript {
 		boolean isES		= false;
 		boolean isEE		= false;
 		
+		ArrayList<Exon> matchedExonIntrons = new ArrayList<Exon>();
 		int exonCnt = 0; // only count exon (not intron)
-		int curExonCnt = -1;
+		int matchedExonCnt = -1;
 		for(Exon exon : exons) {
 			if(exon.feature != Constants.INTRON) {
 				exonCnt ++;
@@ -178,17 +179,21 @@ public class Transcript {
 				int qEnd	= qEnds[i];
 				// included in the location boundary
 				if( !((exon.start > qEnd) || (exon.end < qStart)) ) {
-					// check ES
+					// check ES/EE
 					if(exon.feature != Constants.INTRON) {
-						if(curExonCnt == -1) {
-							curExonCnt = exonCnt;
+						matchedExonIntrons.add(exon);
+						if(matchedExonCnt == -1) {
+							matchedExonCnt = exonCnt;
 						} else {
-							curExonCnt++;
+							matchedExonCnt++;
 						}
 						
-						if(curExonCnt < exonCnt) {
+						// ES
+						if(matchedExonCnt < exonCnt) {
 							isES = true;
-						} else if(curExonCnt > exonCnt) {
+						} 
+						// EE
+						else if(matchedExonCnt > exonCnt) {
 							isEE = true;
 						}
 					}
@@ -210,40 +215,51 @@ public class Transcript {
 			}
 		}
 		
+		if(locations.length != 1) {
+			for(int i=0; i<locations.length; i++) {
+				if( ((i%2 == 0) && (qEnds[i] < matchedExonIntrons.get(i).end)) || 
+					((i%2 == 1) && (qStarts[i] > matchedExonIntrons.get(i).start))) {
+					isEE = true;
+					break;
+				} 
+				
+			}
+		}
+		
 		// If CDS: In-frame? FS?
 		// Else: ncRNA, UTR5, UTR3, Intron
 		if(isCDS) {
 			// find frame
 			if(getFrameMark(qStarts[0], qEnds[qEnds.length-1]) == 0) {
-				classCode = Constants.MARK_PC;
+				classCode = Parameters.MARK_IF;
 			} else {
-				classCode = Constants.MARK_FS;
+				classCode = Parameters.MARK_OOF;
 			}
 			
 		} else {
-			// the worse is selected
-			if(isIntron) {
-				classCode = Constants.MARK_INTRON;
-			} else if(isNCDS) {
-				classCode = Constants.MARK_NCRNA;
-			} else if(isUTR5) {
-				classCode = Constants.MARK_UTR5;
+			if(isUTR5) {
+				classCode = Parameters.MARK_UTR5;
 			} else if(isUTR3) {
-				classCode = Constants.MARK_UTR3;
+				classCode = Parameters.MARK_UTR3;
+			} else if(isNCDS) {
+				classCode = Parameters.MARK_NCRNA;
 			}
 		}
 		
 		// if different strand?
 		if(this.strand != (sRecord.strand.charAt(0) == '+') ) {
-			classCode = Constants.MARK_ASRNA;
-		}
+			classCode = Parameters.MARK_ASRNA;
+		} 
 		
-		// ES check
+		// AS check
 		if(isES) {
-			classCode += ";" + Constants.MARK_ES;
+			classCode += ";" + Parameters.MARK_ES;
 		}
 		if(isEE) {
-			classCode += ";" + Constants.MARK_EE;
+			classCode += ";" + Parameters.MARK_EE;
+		}
+		if(isIntron) {
+			classCode += ";" + Parameters.MARK_INTRON;
 		}
 		
 		annotation.classCode = classCode;

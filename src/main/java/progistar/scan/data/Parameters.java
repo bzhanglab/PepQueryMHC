@@ -34,6 +34,7 @@ public class Parameters {
 	public static boolean isSingleCellMode = false;
 	public static boolean verbose = false;
 	public static boolean stretch = false;
+	public static boolean fullName = false;
 	public static int threadNum = 4;
 	public static int chunkSize = 100;
 	
@@ -63,6 +64,34 @@ public class Parameters {
 	// barcode separator in a read name
 	public static String barcodeSeparatorInReadName = "_";
 	
+	
+	public static String MARK_IF = Constants.MARK_SHORT_IF;
+	public static String MARK_OOF = Constants.MARK_SHORT_OOF;
+	public static String MARK_NCRNA = Constants.MARK_SHORT_NCRNA;
+	public static String MARK_UTR5 = Constants.MARK_SHORT_UTR5;
+	public static String MARK_UTR3 = Constants.MARK_SHORT_UTR3;
+	public static String MARK_INTRON = Constants.MARK_SHORT_INTRON;
+	public static String MARK_ASRNA = Constants.MARK_SHORT_ASRNA;
+	public static String MARK_INTERGENIC = Constants.MARK_SHORT_INTERGENIC;
+	public static String MARK_ES			=	Constants.MARK_SHORT_ES;
+	public static String MARK_EE			=	Constants.MARK_SHORT_EE;
+	public static String MARK_UNKNOWN	= Constants.MARK_SHORT_UNKNOWN;
+	
+	public static void setFullName () {
+		if(Parameters.fullName) {
+			MARK_IF = Constants.MARK_FULL_IF;
+			MARK_OOF = Constants.MARK_FULL_OOF;
+			MARK_NCRNA = Constants.MARK_FULL_NCRNA;
+			MARK_UTR5 = Constants.MARK_FULL_UTR5;
+			MARK_UTR3 = Constants.MARK_FULL_UTR3;
+			MARK_INTRON = Constants.MARK_FULL_INTRON;
+			MARK_ASRNA = Constants.MARK_FULL_ASRNA;
+			MARK_INTERGENIC = Constants.MARK_FULL_INTERGENIC;
+			MARK_ES			=	Constants.MARK_FULL_ES;
+			MARK_EE			=	Constants.MARK_FULL_EE;
+			MARK_UNKNOWN	= Constants.MARK_FULL_UNKNOWN;
+		}
+ 	}
 	
 	
 }

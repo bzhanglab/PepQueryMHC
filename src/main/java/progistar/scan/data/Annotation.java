@@ -96,34 +96,34 @@ public class Annotation implements Comparable<Annotation> {
 	
 	public void calPenalty () {
 		this.penalty = 0;
-		if(this.classCode.contains(Constants.MARK_ES)) {
+		if(this.classCode.contains(Parameters.MARK_ES)) {
 			this.penalty += Constants.PENALTY_ES;
 		}
-		if(this.classCode.contains(Constants.MARK_EE)) {
+		if(this.classCode.contains(Parameters.MARK_EE)) {
 			this.penalty += Constants.PENALTY_EE;
 		}
-		if(this.classCode.contains(Constants.MARK_FS)) {
+		if(this.classCode.contains(Parameters.MARK_OOF)) {
 			this.penalty += Constants.PENALTY_FS;
 		}
-		if(this.classCode.contains(Constants.MARK_NCRNA)) {
+		if(this.classCode.contains(Parameters.MARK_NCRNA)) {
 			this.penalty += Constants.PENALTY_ncRNA;
 		}
-		if(this.classCode.contains(Constants.MARK_ASRNA)) {
+		if(this.classCode.contains(Parameters.MARK_ASRNA)) {
 			this.penalty += Constants.PENALTY_asRNA;
 		}
-		if(this.classCode.contains(Constants.MARK_INTRON)) {
+		if(this.classCode.contains(Parameters.MARK_INTRON)) {
 			this.penalty += Constants.PENALTY_IR;
 		}
-		if(this.classCode.contains(Constants.MARK_INTERGENIC)) {
+		if(this.classCode.contains(Parameters.MARK_INTERGENIC)) {
 			this.penalty += Constants.PENALTY_IGR;
 		}
-		if(this.classCode.contains(Constants.MARK_UTR3)) {
+		if(this.classCode.contains(Parameters.MARK_UTR3)) {
 			this.penalty += Constants.PENALTY_3UTR;
 		}
-		if(this.classCode.contains(Constants.MARK_UTR5)) {
+		if(this.classCode.contains(Parameters.MARK_UTR5)) {
 			this.penalty += Constants.PENALTY_5UTR;
 		}
-		if(this.classCode.contains(Constants.MARK_UNKNOWN)) {
+		if(this.classCode.contains(Parameters.MARK_UNKNOWN)) {
 			this.penalty += Constants.PENALTY_UNMAP;
 		}
 		

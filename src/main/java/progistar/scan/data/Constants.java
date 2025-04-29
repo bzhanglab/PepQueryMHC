@@ -49,17 +49,29 @@ public class Constants {
 	public static final byte INTRON = 4;
 	public static final byte INTERGENIC = 5;
 	
-	public static final String MARK_PC = "PC";
-	public static final String MARK_FS = "FS";
-	public static final String MARK_NCRNA = "ncRNA";
-	public static final String MARK_UTR5 = "5`-UTR";
-	public static final String MARK_UTR3 = "3`-UTR";
-	public static final String MARK_INTRON = "IR";
-	public static final String MARK_ASRNA = "asRNA";
-	public static final String MARK_INTERGENIC = "IGR";
-	public static final String MARK_ES			=	"ES"; // for exon-skipping
-	public static final String MARK_EE			=	"EE"; // for exon-exclusion
-	public static final String MARK_UNKNOWN	= "Unknown";
+	public static final String MARK_FULL_IF = "In-frame";
+	public static final String MARK_FULL_OOF = "Out-of-frame";
+	public static final String MARK_FULL_NCRNA = "Non-coding RNA";
+	public static final String MARK_FULL_UTR5 = "5`-untranslated region";
+	public static final String MARK_FULL_UTR3 = "3`-untranslated region";
+	public static final String MARK_FULL_INTRON = "intron retention";
+	public static final String MARK_FULL_ASRNA = "Antisense RNA";
+	public static final String MARK_FULL_INTERGENIC = "Intergenic region";
+	public static final String MARK_FULL_ES			=	"Exon-skipping"; // for exon-skipping
+	public static final String MARK_FULL_EE			=	"Exon-exclusion"; // for exon-exclusion
+	public static final String MARK_FULL_UNKNOWN	= "Unknown";
+	
+	public static final String MARK_SHORT_IF = "IF";
+	public static final String MARK_SHORT_OOF = "OOF";
+	public static final String MARK_SHORT_NCRNA = "ncRNA";
+	public static final String MARK_SHORT_UTR5 = "5`-UTR";
+	public static final String MARK_SHORT_UTR3 = "3`-UTR";
+	public static final String MARK_SHORT_INTRON = "IR";
+	public static final String MARK_SHORT_ASRNA = "asRNA";
+	public static final String MARK_SHORT_INTERGENIC = "IGR";
+	public static final String MARK_SHORT_ES			=	"ES"; // for exon-skipping
+	public static final String MARK_SHORT_EE			=	"EE"; // for exon-exclusion
+	public static final String MARK_SHORT_UNKNOWN	= "Unknown";
 	
 	// Note that FRAME_X denots NO_FRAME.
 	public static final byte FRAME_0		=	0;
@@ -68,16 +80,16 @@ public class Constants {
 	public static final byte FRAME_X		=	3;
 	
 	// Penalty
-	public static double PENALTY_ES					=	5;
-	public static double PENALTY_EE					=	5;
+	public static double PENALTY_ES					=	10;
+	public static double PENALTY_EE					=	10;
+	public static double PENALTY_IR					=	10;
 	public static double PENALTY_5UTR				=	20;
 	public static double PENALTY_3UTR				=	20;
 	public static double PENALTY_FS					=	20;
 	public static double PENALTY_ncRNA				=	20;
-	public static double PENALTY_IR					=	30;
-	public static double PENALTY_asRNA				=	50;
-	public static double PENALTY_IGR				=	70;
-	public static double PENALTY_UNMAP				=	100;
+	public static double PENALTY_asRNA				=	40;
+	public static double PENALTY_IGR				=	80;
+	public static double PENALTY_UNMAP				=	160;
 	public static double PENALTY_WARNING			=	Double.MAX_VALUE;
 	
 	public static final String DEFAULT_BARCODE_ID	=	"Undefined";

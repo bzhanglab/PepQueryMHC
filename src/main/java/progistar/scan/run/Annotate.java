@@ -32,6 +32,11 @@ public class Annotate {
 	public static void run(String[] args) throws IOException {
 		parseAnnotate(args);
 		
+		// short or full names?
+		if(Parameters.fullName) {
+			Parameters.setFullName();
+		}
+		
 		ArrayList<SequenceRecord> records = ParseRecord.parse(Parameters.inputFile);
 		GeneArray[] geneArrays = ParseGTF.parseGTF(Parameters.gtfFile);
 		
@@ -48,7 +53,7 @@ public class Annotate {
 			if(sRecord.location.equalsIgnoreCase(Constants.NULL) || chrIdx == -1) {
 				// unmapped reads, unidentified region (.)
 				Annotation annotation = new Annotation();
-				annotation.classCode = Constants.MARK_UNKNOWN;
+				annotation.classCode = Parameters.MARK_UNKNOWN;
 				
 				// set warning tag
 				if(sRecord.location.equalsIgnoreCase(Constants.NULL)) {
@@ -65,7 +70,7 @@ public class Annotate {
 				if(genes.size() == 0) {
 					// intergenic
 					Annotation annotation = new Annotation();
-					annotation.classCode = Constants.MARK_INTERGENIC;
+					annotation.classCode = Parameters.MARK_INTERGENIC;
 					annotations.add(annotation);
 				} else {
 					for(Gene gene : genes) {
@@ -126,7 +131,8 @@ public class Annotate {
 				nArgs[nIdx++] = args[i];
 			} 
 			else if( args[i].equalsIgnoreCase("-v") || args[i].equalsIgnoreCase("--verbose") ||
-					 args[i].equalsIgnoreCase("-s") || args[i].equalsIgnoreCase("--stretch")) {
+					 args[i].equalsIgnoreCase("-s") || args[i].equalsIgnoreCase("--stretch") ||
+					 args[i].equalsIgnoreCase("-f") || args[i].equalsIgnoreCase("--full")) {
 				nArgs[nIdx++] = args[i];
 			}
 		}
@@ -168,11 +174,18 @@ public class Annotate {
 				.desc("print every messages being processed.")
 				.build();
 		
+		Option optionFullName = Option.builder("f")
+				.longOpt("full").argName("")
+				.required(false)
+				.desc("print category full name.")
+				.build();
+		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
 		.addOption(optionVerbose)
 		.addOption(optionStretch)
-		.addOption(optionGTF);
+		.addOption(optionGTF)
+		.addOption(optionFullName);
 		
 		CommandLineParser parser = new DefaultParser();
 	    HelpFormatter helper = new HelpFormatter();
@@ -200,6 +213,10 @@ public class Annotate {
 		    	Parameters.verbose = true;
 		    }
 		    
+		    if(cmd.hasOption("f")) {
+		    	Parameters.fullName = true;
+		    }
+		    
 		} catch (ParseException e) {
 			System.out.println(e.getMessage());
 			isFail = true;
@@ -219,6 +236,9 @@ public class Annotate {
 			}
 			if(Parameters.verbose) {
 				System.out.println("Verbose messages");
+			}
+			if(Parameters.fullName) {
+				System.out.println("Print full name of category");
 			}
 		}
 		System.out.println();
