@@ -225,37 +225,30 @@ public class Transcript {
 		// Else: ncRNA, UTR5, UTR3, Intron
 		
 		// if different strand?
+		ArrayList<String> sortedClassCode = new ArrayList<String>();
 		if(this.strand != (sRecord.strand.charAt(0) == '+') ) {
-			classCode = Parameters.MARK_ASRNA;
+			sortedClassCode.add(Parameters.MARK_ASRNA);
 		} 
 		else if(isCDS) {
 			// find frame
 			if(getFrameMark(qStarts[0], qEnds[qEnds.length-1]) == 0) {
-				classCode = Parameters.MARK_IF;
+				sortedClassCode.add(Parameters.MARK_IF);
 			} else {
-				classCode = Parameters.MARK_OOF;
+				sortedClassCode.add(Parameters.MARK_OOF);
 			}
 			
 		} else {
-			classCode = "";
-			
 			if(isUTR5) {
-				classCode += ";" + Parameters.MARK_UTR5;
+				sortedClassCode.add(Parameters.MARK_UTR5);
 			} 
 			if(isUTR3) {
-				classCode += ";" + Parameters.MARK_UTR3;
+				sortedClassCode.add(Parameters.MARK_UTR3);
 			} 
 			if(isNCDS) {
-				classCode += ";" + Parameters.MARK_NCRNA;
+				sortedClassCode.add(Parameters.MARK_NCRNA);
 			}
 			if(isIntron) {
-				classCode += ";" + Parameters.MARK_INTRON;
-			} 
-			
-			if(classCode.length() > 0) {
-				classCode = classCode.substring(1);
-			} else {
-				classCode = "Undefined";
+				sortedClassCode.add(Parameters.MARK_INTRON);
 			}
 		}
 		
@@ -263,14 +256,20 @@ public class Transcript {
 		
 		// AS check
 		if(isES) {
-			classCode += ";" + Parameters.MARK_ES;
+			sortedClassCode.add(Parameters.MARK_ES);
 		}
 		if(isEE) {
-			classCode += ";" + Parameters.MARK_EE;
+			sortedClassCode.add(Parameters.MARK_EE);
 		}
 		
-		
-		annotation.classCode = classCode;
+		// sort
+		Collections.sort(sortedClassCode);
+		for(int i=0; i<sortedClassCode.size(); i++) {
+			if(i != 0) {
+				annotation.classCode += ";";
+			}
+			annotation.classCode += sortedClassCode.get(i);
+		}
 		
 		return annotation;
 	}
