@@ -57,7 +57,8 @@ public class Constants {
 	public static final String MARK_INTRON = "IR";
 	public static final String MARK_ASRNA = "asRNA";
 	public static final String MARK_INTERGENIC = "IGR";
-	public static final String MARK_ES			=	"ES"; // for alternative splicing form
+	public static final String MARK_ES			=	"ES"; // for exon-skipping
+	public static final String MARK_EE			=	"EE"; // for exon-exclusion
 	public static final String MARK_UNKNOWN	= "Unknown";
 	
 	// Note that FRAME_X denots NO_FRAME.
@@ -68,6 +69,7 @@ public class Constants {
 	
 	// Penalty
 	public static double PENALTY_ES					=	5;
+	public static double PENALTY_EE					=	5;
 	public static double PENALTY_5UTR				=	20;
 	public static double PENALTY_3UTR				=	20;
 	public static double PENALTY_FS					=	20;

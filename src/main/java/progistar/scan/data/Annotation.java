@@ -99,6 +99,9 @@ public class Annotation implements Comparable<Annotation> {
 		if(this.classCode.contains(Constants.MARK_ES)) {
 			this.penalty += Constants.PENALTY_ES;
 		}
+		if(this.classCode.contains(Constants.MARK_EE)) {
+			this.penalty += Constants.PENALTY_EE;
+		}
 		if(this.classCode.contains(Constants.MARK_FS)) {
 			this.penalty += Constants.PENALTY_FS;
 		}

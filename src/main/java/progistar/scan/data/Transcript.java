@@ -163,6 +163,7 @@ public class Transcript {
 		boolean isNCDS		= false;
 		boolean isIntron	= false;
 		boolean isES		= false;
+		boolean isEE		= false;
 		
 		int exonCnt = 0; // only count exon (not intron)
 		int curExonCnt = -1;
@@ -185,8 +186,10 @@ public class Transcript {
 							curExonCnt++;
 						}
 						
-						if(curExonCnt != exonCnt) {
+						if(curExonCnt < exonCnt) {
 							isES = true;
+						} else if(curExonCnt > exonCnt) {
+							isEE = true;
 						}
 					}
 					
@@ -238,6 +241,9 @@ public class Transcript {
 		// ES check
 		if(isES) {
 			classCode += ";" + Constants.MARK_ES;
+		}
+		if(isEE) {
+			classCode += ";" + Constants.MARK_EE;
 		}
 		
 		annotation.classCode = classCode;
