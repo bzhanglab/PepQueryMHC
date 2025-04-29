@@ -96,8 +96,8 @@ public class Annotation implements Comparable<Annotation> {
 	
 	public void calPenalty () {
 		this.penalty = 0;
-		if(this.classCode.contains(Constants.MARK_AS)) {
-			this.penalty += Constants.PENALTY_AS;
+		if(this.classCode.contains(Constants.MARK_ES)) {
+			this.penalty += Constants.PENALTY_ES;
 		}
 		if(this.classCode.contains(Constants.MARK_FS)) {
 			this.penalty += Constants.PENALTY_FS;

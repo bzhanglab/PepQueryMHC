@@ -157,21 +157,40 @@ public class Transcript {
 		}
 		
 		// NCDS, CDS, UTR5, UTR3, and Intron
-		ArrayList<Exon> matchedExons = new ArrayList<Exon>();
 		boolean isCDS		= true;
 		boolean isUTR5		= false;
 		boolean isUTR3		= false;
 		boolean isNCDS		= false;
 		boolean isIntron	= false;
-		boolean isAS		= false;
-		//System.out.println(sRecord.toString());
+		boolean isES		= false;
+		
+		int exonCnt = 0; // only count exon (not intron)
+		int curExonCnt = -1;
 		for(Exon exon : exons) {
+			if(exon.feature != Constants.INTRON) {
+				exonCnt ++;
+			}
+			
 			// overlap
 			for(int i=0; i<locations.length; i++) {
 				int qStart	= qStarts[i];
 				int qEnd	= qEnds[i];
+				// included in the location boundary
 				if( !((exon.start > qEnd) || (exon.end < qStart)) ) {
-					matchedExons.add(exon);
+					// check ES
+					if(exon.feature != Constants.INTRON) {
+						if(curExonCnt == -1) {
+							curExonCnt = exonCnt;
+						} else {
+							curExonCnt++;
+						}
+						
+						if(curExonCnt != exonCnt) {
+							isES = true;
+						}
+					}
+					
+					
 					//System.out.println(this.id+": "+exon.feature+", "+exon.start+"-"+exon.end);
 					if(exon.feature != Constants.CDS) {
 						isCDS = false;
@@ -183,26 +202,6 @@ public class Transcript {
 							case Constants.INTRON: isIntron = true; break;
 							default: break;
 						}
-					}
-				}
-			}
-		}
-		
-		// check AS
-		if(locations.length != 1) {
-			// if the number of reference exons is different from the size of locations
-			// it implies that it should be mis-spliced.
-			if(locations.length != matchedExons.size()) {
-				isAS = true;
-			} else {
-				for(int i=0; i<locations.length; i++) {
-					if( ((i%2 == 0) && (qEnds[i] == matchedExons.get(i).end)) || 
-						((i%2 == 1) && (qStarts[i] == matchedExons.get(i).start))) {
-						// match well
-					} 
-					else {
-						isAS = true;
-						break;
 					}
 				}
 			}
@@ -236,9 +235,9 @@ public class Transcript {
 			classCode = Constants.MARK_ASRNA;
 		}
 		
-		// AS check
-		if(isAS) {
-			classCode += ";" + Constants.MARK_AS;
+		// ES check
+		if(isES) {
+			classCode += ";" + Constants.MARK_ES;
 		}
 		
 		annotation.classCode = classCode;
