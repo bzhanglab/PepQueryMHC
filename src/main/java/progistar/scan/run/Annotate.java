@@ -82,18 +82,18 @@ public class Annotate {
 				}
 			}
 			
-			// calculate penalty
+			// calculate penalty and set final annotation
 			annotations.forEach((annotation)->{
-				annotation.calPenalty();
+				annotation.complete();
 			});
 			
 			Collections.sort(annotations);
 			
 			// select annotations with the lowest penalty
-			double minPenalty = annotations.peekFirst().penalty;
+			double minPenalty = annotations.peekFirst().totalPenalty;
 			while(true) {
 				Annotation annotation = annotations.peekLast();
-				if(annotation.penalty == minPenalty) {
+				if(annotation.totalPenalty == minPenalty) {
 					break;
 				} else {
 					// remove

@@ -252,8 +252,6 @@ public class Transcript {
 			}
 		}
 		
-		
-		
 		// AS check
 		if(isES) {
 			sortedClassCode.add(Parameters.MARK_ES);
@@ -263,6 +261,7 @@ public class Transcript {
 		}
 		
 		// sort
+		// build naive class code
 		annotation.classCode = "";
 		for(int i=0; i<sortedClassCode.size(); i++) {
 			if(i != 0) {

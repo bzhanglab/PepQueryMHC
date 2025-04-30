@@ -80,17 +80,34 @@ public class Constants {
 	public static final byte FRAME_X		=	3;
 	
 	// Penalty
-	public static double PENALTY_ES					=	10;
-	public static double PENALTY_EE					=	10;
-	public static double PENALTY_5UTR				=	20;
-	public static double PENALTY_3UTR				=	20;
-	public static double PENALTY_FS					=	20;
-	public static double PENALTY_ncRNA				=	20;
-	public static double PENALTY_IR					=	40;
-	public static double PENALTY_asRNA				=	60;
-	public static double PENALTY_IGR				=	80;
-	public static double PENALTY_UNMAP				=	100;
-	public static double PENALTY_WARNING			=	Double.MAX_VALUE;
+	//// Use between transcripts
+	public static int PENALTY_ES				=	15;
+	public static int PENALTY_EE				=	15;
+	public static int PENALTY_5UTR				=	20;
+	public static int PENALTY_3UTR				=	20;
+	public static int PENALTY_OOF				=	20;
+	public static int PENALTY_NCRNA				=	30;
+	public static int PENALTY_IR				=	60;
+	public static int PENALTY_ASRNA				=	120;
+	public static int PENALTY_IGR				=	240;
+	public static int PENALTY_UNMAP				=	480;
+	public static int PENALTY_WARNING			=	1000;
+	
+	// Annotation priority: Select lower values as a representative.
+	/// Use to present annotation for each transcript
+	//// For regional variations
+	public static int ANNOTATION_PRIORITY_IF		=	7;
+	public static int ANNOTATION_PRIORITY_OOF		=	6;
+	public static int ANNOTATION_PRIORITY_5UTR		=	5;
+	public static int ANNOTATION_PRIORITY_3UTR		=	5;
+	public static int ANNOTATION_PRIORITY_NCRNA		=	5;
+	public static int ANNOTATION_PRIORITY_IR		=	4;
+	public static int ANNOTATION_PRIORITY_ASRNA		=	3;
+	public static int ANNOTATION_PRIORITY_IGR		=	2;
+	public static int ANNOTATION_PRIORITY_UNMAP		=	1;
+	//// For structural variations
+	public static int ANNOTATION_PRIORITY_ES	=	1;
+	public static int ANNOTATION_PRIORITY_EE	=	1;
 	
 	public static final String DEFAULT_BARCODE_ID	=	"Undefined";
 	public static final String NULL_BARCODE_ID		=	"Null";
