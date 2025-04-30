@@ -146,22 +146,22 @@ public class Annotation implements Comparable<Annotation> {
 				currentPriority = Constants.ANNOTATION_PRIORITY_IR;
 			}
 		}
-		// Class III: IGR
-		if(this.classCode.contains(Parameters.MARK_INTERGENIC)) {
-			if(Constants.ANNOTATION_PRIORITY_IGR < currentPriority) {
-				representative = Parameters.MARK_INTERGENIC;
-				currentPriority = Constants.ANNOTATION_PRIORITY_IGR;
-			}
-		}
-		// Class IV: asRNA
+		// Class III: asRNA
 		if(this.classCode.contains(Parameters.MARK_ASRNA)) {
 			if(Constants.ANNOTATION_PRIORITY_ASRNA < currentPriority) {
 				representative = Parameters.MARK_ASRNA;
 				currentPriority = Constants.ANNOTATION_PRIORITY_ASRNA;
 			}
 		}
+		// Class IV: IGR
+		if(this.classCode.contains(Parameters.MARK_INTERGENIC)) {
+			if(Constants.ANNOTATION_PRIORITY_IGR < currentPriority) {
+				representative = Parameters.MARK_INTERGENIC;
+				currentPriority = Constants.ANNOTATION_PRIORITY_IGR;
+			}
+		}
 		
-		// Structural annotation
+		// Class V: Structural annotation
 		if(this.classCode.contains(Parameters.MARK_ES)) {
 			if(structuralAnnotations.length() > 0) {
 				structuralAnnotations += ";";
@@ -215,16 +215,17 @@ public class Annotation implements Comparable<Annotation> {
 		if(this.classCode.contains(Parameters.MARK_INTRON)) {
 			pClassII = Constants.PENALTY_IR;
 		}
-		// Class III: IGR
-		if(this.classCode.contains(Parameters.MARK_INTERGENIC)) {
-			pClassIII = Constants.PENALTY_IGR;
-		}
-		// Class IV: asRNA
+		// Class III: asRNA
 		if(this.classCode.contains(Parameters.MARK_ASRNA)) {
 			pClassIV = Constants.PENALTY_ASRNA;
 		}
+		// Class IV: IGR
+		if(this.classCode.contains(Parameters.MARK_INTERGENIC)) {
+			pClassIII = Constants.PENALTY_IGR;
+		}
 		
-		// SV
+		
+		// Class V: SV
 		if(this.classCode.contains(Parameters.MARK_ES)) {
 			pClassV += Constants.PENALTY_ES;
 		}
