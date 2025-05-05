@@ -58,7 +58,7 @@ public class Constants {
 	public static final String MARK_FULL_ASRNA = "Antisense RNA";
 	public static final String MARK_FULL_INTERGENIC = "Intergenic region";
 	public static final String MARK_FULL_ES			=	"Exon-skipping"; // for exon-skipping
-	public static final String MARK_FULL_EE			=	"Exon-exclusion"; // for exon-exclusion
+	public static final String MARK_FULL_EE			=	"Alternative-splicing-site"; // for ASS
 	public static final String MARK_FULL_UNKNOWN	= "Unknown";
 	
 	public static final String MARK_SHORT_IF = "IF";
@@ -70,7 +70,7 @@ public class Constants {
 	public static final String MARK_SHORT_ASRNA = "asRNA";
 	public static final String MARK_SHORT_INTERGENIC = "IGR";
 	public static final String MARK_SHORT_ES			=	"ES"; // for exon-skipping
-	public static final String MARK_SHORT_EE			=	"EE"; // for exon-exclusion
+	public static final String MARK_SHORT_EE			=	"ASS"; // for exon-exclusion
 	public static final String MARK_SHORT_UNKNOWN	= "Unknown";
 	
 	// Note that FRAME_X denots NO_FRAME.
