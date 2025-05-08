@@ -52,11 +52,11 @@ public class Constants {
 	public static final String MARK_FULL_IF = "In-frame";
 	public static final String MARK_FULL_OOF = "Out-of-frame";
 	public static final String MARK_FULL_NCRNA = "Non-coding RNA";
-	public static final String MARK_FULL_UTR5 = "5`-untranslated region";
-	public static final String MARK_FULL_UTR3 = "3`-untranslated region";
-	public static final String MARK_FULL_INTRON = "intron retention";
+	public static final String MARK_FULL_UTR5 = "5`-untranslated-region";
+	public static final String MARK_FULL_UTR3 = "3`-untranslated-region";
+	public static final String MARK_FULL_INTRON = "intron-retention";
 	public static final String MARK_FULL_ASRNA = "Antisense RNA";
-	public static final String MARK_FULL_INTERGENIC = "Intergenic region";
+	public static final String MARK_FULL_INTERGENIC = "Intergenic-region";
 	public static final String MARK_FULL_ES			=	"Exon-skipping"; // for exon-skipping
 	public static final String MARK_FULL_EE			=	"Alternative-splicing-site"; // for ASS
 	public static final String MARK_FULL_UNKNOWN	= "Unknown";
@@ -70,7 +70,7 @@ public class Constants {
 	public static final String MARK_SHORT_ASRNA = "asRNA";
 	public static final String MARK_SHORT_INTERGENIC = "IGR";
 	public static final String MARK_SHORT_ES			=	"ES"; // for exon-skipping
-	public static final String MARK_SHORT_EE			=	"ASS"; // for exon-exclusion
+	public static final String MARK_SHORT_ASS			=	"ASS"; // for exon-exclusion
 	public static final String MARK_SHORT_UNKNOWN	= "Unknown";
 	
 	// Note that FRAME_X denots NO_FRAME.
@@ -82,7 +82,7 @@ public class Constants {
 	// Penalty
 	//// Use between transcripts
 	public static int PENALTY_ES				=	15;
-	public static int PENALTY_EE				=	15;
+	public static int PENALTY_ASS				=	15;
 	public static int PENALTY_5UTR				=	20;
 	public static int PENALTY_3UTR				=	20;
 	public static int PENALTY_OOF				=	20;

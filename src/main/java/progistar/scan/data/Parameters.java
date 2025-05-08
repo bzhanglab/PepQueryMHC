@@ -74,7 +74,7 @@ public class Parameters {
 	public static String MARK_ASRNA = Constants.MARK_SHORT_ASRNA;
 	public static String MARK_INTERGENIC = Constants.MARK_SHORT_INTERGENIC;
 	public static String MARK_ES			=	Constants.MARK_SHORT_ES;
-	public static String MARK_EE			=	Constants.MARK_SHORT_EE;
+	public static String MARK_EE			=	Constants.MARK_SHORT_ASS;
 	public static String MARK_UNKNOWN	= Constants.MARK_SHORT_UNKNOWN;
 	
 	public static void setFullName () {

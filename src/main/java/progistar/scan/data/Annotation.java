@@ -230,7 +230,7 @@ public class Annotation implements Comparable<Annotation> {
 			pClassV += Constants.PENALTY_ES;
 		}
 		if(this.classCode.contains(Parameters.MARK_EE)) {
-			pClassV += Constants.PENALTY_EE;
+			pClassV += Constants.PENALTY_ASS;
 		}
 		
 		
