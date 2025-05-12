@@ -73,7 +73,7 @@ public class Constants {
 	public static final String MARK_SHORT_ASS			=	"ASS"; // for exon-exclusion
 	public static final String MARK_SHORT_UNKNOWN	= "Unknown";
 	
-	// Note that FRAME_X denots NO_FRAME.
+	// Note that FRAME_X denotes NO_FRAME.
 	public static final byte FRAME_0		=	0;
 	public static final byte FARME_1		=	1;
 	public static final byte FRAME_2		=	2;
@@ -150,6 +150,9 @@ public class Constants {
 	public static final String MATCHED_MUTATIONS	= "Matched_mutations";
 	public static final String MATCHED_STRAND		= "Matched_strand";
 	public static final String MATCHED_PEPTIDE		= "Matched_peptide";
+	public static final String MATCHED_ABUNDANT_LOCATION	= "Abundant_location";
+	public static final String MATCHED_ABUNDANT_STRAND		= "Abundant_strand";
+	public static final String MATCHED_PROPORTION	= "Proportion";
 	public static final String MATCHED_NUCLEOTIDE	= "Matched_nucleotide";
 	public static final String MATCHED_REFNUCLEOTIDE= "Matched_reference_nucleotide";
 	public static final String MATCHED_READ_COUNT	= "Matched_read_count";

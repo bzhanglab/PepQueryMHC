@@ -192,7 +192,10 @@ public class WriteOutput {
 		
 		// define field index
 		BW.append(Constants.MATCHED_PEPTIDE + "(" + Parameters.union + ")" +
-				"\t" + Constants.MATCHED_NUM_LOCATION);
+				"\t" + Constants.MATCHED_ABUNDANT_LOCATION +
+				"\t" + Constants.MATCHED_ABUNDANT_STRAND +
+				"\t" + Constants.MATCHED_PROPORTION +
+				Constants.MATCHED_NUM_LOCATION);
 		if(Parameters.isSingleCellMode) {
 			// append barcode ids in whitelist
 			// write a header for raw read count
@@ -213,7 +216,7 @@ public class WriteOutput {
 		// write records
 		// unique observed sequence.
 		Hashtable<String, Hashtable<String, Long>> readCountsPeptLevel = new Hashtable<String, Hashtable<String, Long>>();
-		Hashtable<String, Hashtable<String, Boolean>> locationsPeptLevel = new Hashtable<String, Hashtable<String, Boolean>>();
+		Hashtable<String, Hashtable<String, Long>> locationsPeptLevel = new Hashtable<String, Hashtable<String, Long>>();
 		
 		for(int i=0; i<records.size(); i++) {
 			SequenceRecord record = records.get(i);
@@ -236,6 +239,7 @@ public class WriteOutput {
 				}
 				
 				Iterator<String> keys = (Iterator<String>) readCounts.keys();
+				long sumOfReadsAcrossBarcodes = 0;
 				while(keys.hasNext()) {
 					String barcodeId = keys.next();
 					Long val = unionReads.get(barcodeId);
@@ -247,25 +251,56 @@ public class WriteOutput {
 					} else if(Parameters.union.equalsIgnoreCase(Constants.UNION_SUM)){
 						unionReads.put(barcodeId, (readCounts.get(barcodeId) + val));
 					}
+					
+					sumOfReadsAcrossBarcodes += val;
 				}
 				
 				readCountsPeptLevel.put(location.obsPeptide, unionReads);
 				
-				Hashtable<String, Boolean> gLocationMap = locationsPeptLevel.get(location.obsPeptide);
+				Hashtable<String, Long> gLocationMap = locationsPeptLevel.get(location.obsPeptide);
 				if(gLocationMap == null) {
-					gLocationMap = new Hashtable<String, Boolean>();
+					gLocationMap = new Hashtable<String, Long>();
 					locationsPeptLevel.put(location.obsPeptide, gLocationMap);
 				}
-				
-				gLocationMap.put(location.location, true);
+				// location with strand
+				gLocationMap.put(location.location+"\t"+location.strand, sumOfReadsAcrossBarcodes);
 			}
 			
 		}
 
 		readCountsPeptLevel.forEach((sequence, reads)->{
 			try {
+				Hashtable<String, Long> locations = locationsPeptLevel.get(sequence);
+				// find most abundant location and its proportion
+				double proportion = 0;
+				long max = 0;
+				String abundantLocation = null;
+				
+				Iterator<String> keys = (Iterator<String>) locations.keys();
+				while(keys.hasNext()) {
+					String key = keys.next();
+					
+					long thisValue = locations.get(key);
+					if(thisValue > max) {
+						max = thisValue;
+						abundantLocation = key;
+					}
+					
+					proportion += thisValue;
+				}
+				
+				// calculate proportion
+				proportion = max/proportion;
+				
+				String location = Constants.NULL;
+				String strand = Constants.NULL;
+				if(abundantLocation != null) {
+					location = abundantLocation.split("\t")[0];
+					strand = abundantLocation.split("\t")[1];
+				}
+				BW.append(sequence+"\t"+location+"\t"+strand+"\t"+proportion+"\t"+locationsPeptLevel.get(sequence).size());
 				if(Parameters.isSingleCellMode) {
-					BW.append(sequence+"\t"+locationsPeptLevel.get(sequence).size());
+					
 					// write raw read counts
 					for(String barcodeId : BarcodeTable.barcodeIds) {
 						Long read = reads.get(barcodeId);
@@ -284,7 +319,7 @@ public class WriteOutput {
 					}
 				} else {
 					Long read = reads.get(Constants.DEFAULT_BARCODE_ID);
-					BW.append(sequence+"\t"+locationsPeptLevel.get(sequence).size()+"\t"+read+"\t"+Utils.getRPHM((double)read, Constants.DEFAULT_BARCODE_ID));
+					BW.append("\t"+read+"\t"+Utils.getRPHM((double)read, Constants.DEFAULT_BARCODE_ID));
 				}
 				BW.newLine();
 			}catch(IOException ioe) {
