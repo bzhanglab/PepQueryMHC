@@ -93,5 +93,10 @@ public class Parameters {
 		}
  	}
 	
+	// input-columns
+	public static String sequenceColumnName = "sequence";
+	public static String locationColumnName = "location";
+	public static String strandColumnName = "strand";
 	
+			
 }

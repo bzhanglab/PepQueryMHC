@@ -126,7 +126,9 @@ public class Annotate {
 		for(int i=0; i<args.length; i++) {
 			if( args[i].equalsIgnoreCase("-i") || args[i].equalsIgnoreCase("--input") ||
 				args[i].equalsIgnoreCase("-g") || args[i].equalsIgnoreCase("--gtf") ||
-				args[i].equalsIgnoreCase("-o") || args[i].equalsIgnoreCase("--output")) {
+				args[i].equalsIgnoreCase("-o") || args[i].equalsIgnoreCase("--output") ||
+				args[i].equalsIgnoreCase("-lc") || args[i].equalsIgnoreCase("--location_column_name") ||
+				args[i].equalsIgnoreCase("-sc") || args[i].equalsIgnoreCase("--strand_column_name")) {
 				nArgs[nIdx++] = args[i++];
 				nArgs[nIdx++] = args[i];
 			} 
@@ -162,6 +164,20 @@ public class Annotate {
 				.desc("specify a GTF file to annotate a given genomic region.")
 				.build();
 		
+		Option optionLocationColumnName = Option.builder("lc")
+				.longOpt("location_column_name").argName("string")
+				.hasArg()
+				.required(false)
+				.desc("specify the name of location column. Default is `location`")
+				.build();
+		
+		Option optionStrandColumnName = Option.builder("sc")
+				.longOpt("strand_column_name").argName("string")
+				.hasArg()
+				.required(false)
+				.desc("specify the name of the strand column. Default is `strand`")
+				.build();
+		
 		Option optionStretch = Option.builder("s")
 				.longOpt("stretch").argName("")
 				.required(false)
@@ -182,6 +198,8 @@ public class Annotate {
 		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
+		.addOption(optionLocationColumnName)
+		.addOption(optionStrandColumnName)
 		.addOption(optionVerbose)
 		.addOption(optionStretch)
 		.addOption(optionGTF)
@@ -203,6 +221,14 @@ public class Annotate {
 		    
 		    if(cmd.hasOption("g")) {
 		    	Parameters.gtfFile = new File(cmd.getOptionValue("g"));
+		    }
+		    
+		    if(cmd.hasOption("lc")) {
+		    	Parameters.locationColumnName = cmd.getOptionValue("lc");
+		    }
+		    
+		    if(cmd.hasOption("sc")) {
+		    	Parameters.strandColumnName = cmd.getOptionValue("sc");
 		    }
 		    
 		    if(cmd.hasOption("s")) {
@@ -239,6 +265,12 @@ public class Annotate {
 			}
 			if(Parameters.fullName) {
 				System.out.println("Print full name of category");
+			}
+			if(cmd.hasOption("lc")) {
+				System.out.println("The name of the location column: "+Parameters.locationColumnName);
+			}
+			if(cmd.hasOption("sc")) {
+				System.out.println("The name of the strand column: "+Parameters.strandColumnName);
 			}
 		}
 		System.out.println();

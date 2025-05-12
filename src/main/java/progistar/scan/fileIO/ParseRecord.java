@@ -53,14 +53,14 @@ public class ParseRecord {
 		
 		for(int i=0; i<headerSplit.length; i++) {
 			if(Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE) && 
-					headerSplit[i].equalsIgnoreCase("sequence")) {
+					headerSplit[i].equalsIgnoreCase(Parameters.sequenceColumnName)) {
 				inputSeqIdx = i;
 			} else if(Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE) && 
-					headerSplit[i].equalsIgnoreCase("sequence")) {
+					headerSplit[i].equalsIgnoreCase(Parameters.sequenceColumnName)) {
 				inputSeqIdx = i;
-			} else if(headerSplit[i].equalsIgnoreCase("location")) {
+			} else if(headerSplit[i].equalsIgnoreCase(Parameters.locationColumnName)) {
 				genomicLociIdx = i;
-			} else if(headerSplit[i].equalsIgnoreCase("strand")) {
+			} else if(headerSplit[i].equalsIgnoreCase(Parameters.strandColumnName)) {
 				strandIdx = i;
 			} 
 		}
