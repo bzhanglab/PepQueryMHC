@@ -263,7 +263,13 @@ public class WriteOutput {
 					locationsPeptLevel.put(location.obsPeptide, gLocationMap);
 				}
 				// location with strand
-				gLocationMap.put(location.location+"\t"+location.strand, sumOfReadsAcrossBarcodes);
+				// sum reads at location level (with strand)
+				String key = location.location+"\t"+location.strand;
+				Long sumOfReads = gLocationMap.get(key);
+				if(sumOfReads == null) {
+					sumOfReads = 0L;
+				}
+				gLocationMap.put(key, sumOfReadsAcrossBarcodes + sumOfReads);
 			}
 			
 		}
