@@ -252,7 +252,7 @@ public class WriteOutput {
 						unionReads.put(barcodeId, (readCounts.get(barcodeId) + val));
 					}
 					
-					sumOfReadsAcrossBarcodes += val;
+					sumOfReadsAcrossBarcodes += readCounts.get(barcodeId);
 				}
 				
 				readCountsPeptLevel.put(location.obsPeptide, unionReads);
@@ -263,7 +263,7 @@ public class WriteOutput {
 					locationsPeptLevel.put(location.obsPeptide, gLocationMap);
 				}
 				// location with strand
-				gLocationMap.put(location.location+"\t"+location.strand, sumOfReadsAcrossBarcodes);
+				gLocationMap.put(location.getKey(), sumOfReadsAcrossBarcodes);
 			}
 			
 		}
