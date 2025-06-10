@@ -195,7 +195,7 @@ public class WriteOutput {
 				"\t" + Constants.MATCHED_ABUNDANT_LOCATION +
 				"\t" + Constants.MATCHED_ABUNDANT_STRAND +
 				"\t" + Constants.MATCHED_PROPORTION +
-				Constants.MATCHED_NUM_LOCATION);
+				"\t" + Constants.MATCHED_NUM_LOCATION);
 		if(Parameters.isSingleCellMode) {
 			// append barcode ids in whitelist
 			// write a header for raw read count

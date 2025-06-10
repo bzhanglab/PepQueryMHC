@@ -5,7 +5,6 @@ import java.io.File;
 import htsjdk.samtools.SAMRecordIterator;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
-import htsjdk.samtools.fastq.FastqReader;
 import progistar.scan.data.Constants;
 import progistar.scan.data.Parameters;
 import progistar.scan.run.Task;
