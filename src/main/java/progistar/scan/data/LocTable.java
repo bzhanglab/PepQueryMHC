@@ -43,6 +43,8 @@ public class LocTable {
 		if(locations.size() == 0) {
 			LocationInformation nullLocation = new LocationInformation();
 			nullLocation.readCounts.put(Constants.DEFAULT_BARCODE_ID, 0L);
+			nullLocation.inputSequence = inputSequence;
+			nullLocation.obsPeptide = inputSequence;
 			locations.add(nullLocation);
 		}
 		

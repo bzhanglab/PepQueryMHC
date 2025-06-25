@@ -220,11 +220,6 @@ public class WriteOutput {
 			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
 			
 			for(LocationInformation location : locations) {
-				// if there is no observed peptide (e.g., for null location)
-				if(location.obsPeptide.equalsIgnoreCase(Constants.NULL)) {
-					continue;
-				}
-				
 				// full information (including genomic sequence)
 				if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
 					// the location is not matched
