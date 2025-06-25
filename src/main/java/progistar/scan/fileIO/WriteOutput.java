@@ -34,7 +34,6 @@ public class WriteOutput {
 	public static void writeMainOutput (ArrayList<SequenceRecord> records, String baseOutputPath, LocTable locTable) throws IOException {
 		writeLibSize(new File(baseOutputPath+".libsize.tsv"));
 		BufferedWriter BW = new BufferedWriter(new FileWriter(baseOutputPath+"."+Parameters.mode+".tsv"));
-		BufferedWriter BWMiss = new BufferedWriter(new FileWriter(baseOutputPath+".miss.tsv"));
 		
 		// write header
 		BW.append(SequenceRecord.header +
@@ -60,9 +59,6 @@ public class WriteOutput {
 		}
 		BW.newLine();
 		
-		BWMiss.append(SequenceRecord.header);
-		BWMiss.newLine();
-		
 		for(int i=0; i<records.size(); i++) {
 			SequenceRecord record = records.get(i);
 			String sequence = record.sequence;
@@ -70,24 +66,21 @@ public class WriteOutput {
 			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
 			
 			for(int j=0; j<record.records.size(); j++) {
-				if(locations.size() == 0) {
-					BWMiss.append(record.records.get(j));
-					BWMiss.newLine();
-				} else {
-					for(LocationInformation location : locations) {
-						// full information (including genomic sequence)
-						if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) && 
-							!record.location.equalsIgnoreCase(location.location)) {
+				for(LocationInformation location : locations) {
+					// full information (including genomic sequence)
+					if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+						// the location is not matched
+						if(!record.location.equalsIgnoreCase(location.location) && !location.location.equalsIgnoreCase(Constants.NULL)) {
 							continue;
 						}
-						BW.append(record.records.get(j)).append("\t"+location.getRes());
-						BW.newLine();
 					}
+					
+					BW.append(record.records.get(j)).append("\t"+location.getRes());
+					BW.newLine();
 				}
 			}
 		}
 		BW.close();
-		BWMiss.close();
 	}
 	
 	public static void writeLocationLevelOutput (ArrayList<SequenceRecord> records, String baseOutputPath, LocTable locTable) throws IOException {
@@ -124,10 +117,13 @@ public class WriteOutput {
 			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
 			
 			for(LocationInformation location : locations) {
-				if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) && 
-						!record.location.equalsIgnoreCase(location.location)) {
+				// full information (including genomic sequence)
+				if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+					// the location is not matched
+					if(!record.location.equalsIgnoreCase(location.location) && !location.location.equalsIgnoreCase(Constants.NULL)) {
 						continue;
 					}
+				}
 				
 				Hashtable<String, Long> readCounts = location.readCounts;
 				// it must be calculated once!
@@ -224,10 +220,18 @@ public class WriteOutput {
 			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
 			
 			for(LocationInformation location : locations) {
-				if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) && 
-						!record.location.equalsIgnoreCase(location.location)) {
+				// if there is no observed peptide (e.g., for null location)
+				if(location.obsPeptide.equalsIgnoreCase(Constants.NULL)) {
+					continue;
+				}
+				
+				// full information (including genomic sequence)
+				if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+					// the location is not matched
+					if(!record.location.equalsIgnoreCase(location.location) && !location.location.equalsIgnoreCase(Constants.NULL)) {
 						continue;
 					}
+				}
 				
 				Hashtable<String, Long> readCounts = location.readCounts;
 				// it must be calculated once!

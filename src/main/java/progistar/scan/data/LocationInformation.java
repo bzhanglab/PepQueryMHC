@@ -20,14 +20,14 @@ public class LocationInformation {
 	
 	public String inputSequence;
 	
-	public String location;
-	public String mutation;
-	public String obsNucleotide;
-	public String refNucleotide;
-	public String obsPeptide;
-	public String refPeptide;
+	public String location = Constants.NULL;
+	public String mutation = Constants.NULL;
+	public String obsNucleotide = Constants.NULL;
+	public String refNucleotide = Constants.NULL;
+	public String obsPeptide = Constants.NULL;
+	public String refPeptide = Constants.NULL;
 	public Hashtable<String, Long> readCounts = new Hashtable<String, Long>();
-	public char strand;
+	public char strand = Constants.NULL.charAt(0);
 	
 	public String getKey () {
 		return location+"\t"+strand+"\t"+obsNucleotide+"\t"+refNucleotide;
