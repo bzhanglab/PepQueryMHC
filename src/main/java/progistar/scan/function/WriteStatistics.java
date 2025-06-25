@@ -5,7 +5,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 
+import progistar.scan.data.BarcodeTable;
+import progistar.scan.data.Constants;
 import progistar.scan.data.Parameters;
 import progistar.scan.data.SequenceRecord;
 
@@ -54,12 +57,27 @@ public class WriteStatistics {
 		// input and random sequences share the hashtable, assuming that there are no overlaps between them.
 		Hashtable<String, Boolean> checkList2 = new Hashtable<String, Boolean>();
 		// count for input sequences
-		readCountsPeptLevel.forEach((sequence, cnt) -> {
+		readCountsPeptLevel.forEach((sequence, reads) -> {
 			if(Parameters.isILEqual) {
 				sequence = sequence.replace("I", "L");
 			}
 			
-			if(checkList2.get(sequence) == null) {
+			Long sum = 0L;
+			if(Parameters.isSingleCellMode) {
+				
+				// calculate sum of reads
+				for(String barcodeId : BarcodeTable.barcodeIds) {
+					Long read = reads.get(barcodeId);
+					if(read == null) {
+						read = 0L;
+					}
+					sum += read;
+				}
+			} else {
+				sum = reads.get(Constants.DEFAULT_BARCODE_ID);
+			}
+			
+			if(checkList2.get(sequence) == null && sum > 0L) {
 				int sequenceLen = sequence.length();
 				matchTable[sequenceLen]++;
 				matchTable[0]++;

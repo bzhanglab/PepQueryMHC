@@ -303,7 +303,14 @@ public class WriteOutput {
 					location = abundantLocation.split("\t")[0];
 					strand = abundantLocation.split("\t")[1];
 				}
-				BW.append(sequence+"\t"+location+"\t"+strand+"\t"+proportion+"\t"+locationsPeptLevel.get(sequence).size());
+				
+				// if there is no matched read
+				if(max == 0) {
+					BW.append(sequence+"\t"+location+"\t"+strand+"\t"+0.0+"\t"+0);
+				} else {
+					BW.append(sequence+"\t"+location+"\t"+strand+"\t"+proportion+"\t"+locationsPeptLevel.get(sequence).size());
+				}
+				
 				if(Parameters.isSingleCellMode) {
 					
 					// write raw read counts
