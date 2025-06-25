@@ -20,17 +20,17 @@ import progistar.scan.data.SequenceRecord;
 import progistar.scan.function.Utils;
 import progistar.scan.function.WriteStatistics;
 
+
+/**
+ * Proportion of reads is calculated by (num of reads / total num of reads for a record)
+ * 
+ * 
+ */
 public class WriteOutput {
 
 	private WriteOutput() {}
+
 	
-	/**
-	 * For target mode
-	 * 
-	 * @param records
-	 * @param file
-	 * @throws IOException
-	 */
 	public static void writeMainOutput (ArrayList<SequenceRecord> records, String baseOutputPath, LocTable locTable) throws IOException {
 		writeLibSize(new File(baseOutputPath+".libsize.tsv"));
 		BufferedWriter BW = new BufferedWriter(new FileWriter(baseOutputPath+"."+Parameters.mode+".tsv"));
@@ -278,7 +278,6 @@ public class WriteOutput {
 				
 				sum += location.getTotalReads();
 			}
-			readCountsRecordLevel.put(record.sequence, sum);
 			
 			
 			for(LocationInformation location : locations) {
@@ -290,6 +289,9 @@ public class WriteOutput {
 					}
 				}
 				
+				// put sum of reads (key is observed peptide)
+				// that mean, if observed peptide is same then all records associated it have the same total reads.
+				readCountsRecordLevel.put(location.obsPeptide, sum);
 				Hashtable<String, Long> readCounts = location.readCounts;
 				// it must be calculated once!
 				// peptide level count
