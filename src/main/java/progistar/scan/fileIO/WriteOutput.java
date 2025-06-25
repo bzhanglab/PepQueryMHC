@@ -57,6 +57,7 @@ public class WriteOutput {
 			BW.append("\t" + Constants.MATCHED_READ_COUNT +
 					"\t" + Constants.MATCHED_RPHM);
 		}
+		BW.append("\t"+Constants.MATCHED_PROPORTION);
 		BW.newLine();
 		
 		for(int i=0; i<records.size(); i++) {
@@ -66,6 +67,8 @@ public class WriteOutput {
 			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
 			
 			for(int j=0; j<record.records.size(); j++) {
+				// calculate sum
+				double sum = 0;
 				for(LocationInformation location : locations) {
 					// full information (including genomic sequence)
 					if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
@@ -75,7 +78,22 @@ public class WriteOutput {
 						}
 					}
 					
-					BW.append(record.records.get(j)).append("\t"+location.getRes());
+					sum += location.getTotalReads();
+				}
+				
+				
+				// print
+				for(LocationInformation location : locations) {
+					// full information (including genomic sequence)
+					if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+						// the location is not matched
+						if(!record.location.equalsIgnoreCase(location.location) && !location.location.equalsIgnoreCase(Constants.NULL)) {
+							continue;
+						}
+					}
+					
+					double proportion = sum == 0 ? 0 : location.getTotalReads()/sum;
+					BW.append(record.records.get(j)).append("\t"+location.getRes()+"\t"+proportion);
 					BW.newLine();
 				}
 			}
@@ -104,17 +122,33 @@ public class WriteOutput {
 			BW.append("\t" + Constants.MATCHED_READ_COUNT +
 					"\t" + Constants.MATCHED_RPHM);
 		}
+		BW.append("\t"+Constants.MATCHED_PROPORTION);
 		BW.newLine();
 		// end of header //
 		
 		// write records
 		// unique observed sequence.
 		Hashtable<String, Hashtable<String, Long>> readCountsTupleLevel = new Hashtable<String, Hashtable<String, Long>>();
+		Hashtable<String, Double> readCountsRecordLevel = new Hashtable<String, Double>();
 		
 		for(int i=0; i<records.size(); i++) {
 			SequenceRecord record = records.get(i);
 			String sequence = record.sequence;
 			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
+			
+			// calculate sum
+			double sum = 0;
+			for(LocationInformation location : locations) {
+				// full information (including genomic sequence)
+				if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+					// the location is not matched
+					if(!record.location.equalsIgnoreCase(location.location) && !location.location.equalsIgnoreCase(Constants.NULL)) {
+						continue;
+					}
+				}
+				
+				sum += location.getTotalReads();
+			}
 			
 			for(LocationInformation location : locations) {
 				// full information (including genomic sequence)
@@ -130,6 +164,10 @@ public class WriteOutput {
 				// peptide level count
 				
 				String tupleKey = location.obsPeptide+"\t"+location.location+"\t"+location.strand;
+				
+				// store record level sum
+				readCountsRecordLevel.put(tupleKey, sum);
+				
 				Hashtable<String, Long> sumReads = readCountsTupleLevel.get(tupleKey);
 				if(sumReads == null) {
 					sumReads = new Hashtable<String, Long>();
@@ -147,11 +185,11 @@ public class WriteOutput {
 				
 				readCountsTupleLevel.put(tupleKey, sumReads);
 			}
-			
 		}
 		
 		readCountsTupleLevel.forEach((tupleKey, reads)->{
 			try {
+				double proportion = 0;
 				if(Parameters.isSingleCellMode) {
 					BW.append(tupleKey);
 					// write raw read counts
@@ -161,6 +199,7 @@ public class WriteOutput {
 							read = 0L;
 						}
 						BW.append("\t"+read);
+						proportion += read;
 					}
 					// write RPHTs
 					for(String barcodeId : BarcodeTable.barcodeIds) {
@@ -172,9 +211,14 @@ public class WriteOutput {
 					}
 				} else {
 					Long read = reads.get(Constants.DEFAULT_BARCODE_ID);
+					proportion += read;
 					BW.append(tupleKey+"\t"+read+"\t"+Utils.getRPHM((double)read, Constants.DEFAULT_BARCODE_ID));
 				}
 				
+				// calculate proportion
+				Double sum = readCountsRecordLevel.get(tupleKey);
+				proportion = sum == 0 ? 0 : proportion / sum;
+				BW.append("\t"+proportion);
 				BW.newLine();
 			}catch(IOException ioe) {
 				
@@ -213,11 +257,29 @@ public class WriteOutput {
 		// unique observed sequence.
 		Hashtable<String, Hashtable<String, Long>> readCountsPeptLevel = new Hashtable<String, Hashtable<String, Long>>();
 		Hashtable<String, Hashtable<String, Long>> locationsPeptLevel = new Hashtable<String, Hashtable<String, Long>>();
+		Hashtable<String, Double> readCountsRecordLevel = new Hashtable<String, Double>();
 		
 		for(int i=0; i<records.size(); i++) {
 			SequenceRecord record = records.get(i);
 			String sequence = record.sequence;
 			ArrayList<LocationInformation> locations = locTable.getLocations(sequence);
+			
+			
+			// calculate sum of reads
+			double sum = 0;
+			for(LocationInformation location : locations) {
+				// full information (including genomic sequence)
+				if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+					// the location is not matched
+					if(!record.location.equalsIgnoreCase(location.location) && !location.location.equalsIgnoreCase(Constants.NULL)) {
+						continue;
+					}
+				}
+				
+				sum += location.getTotalReads();
+			}
+			readCountsRecordLevel.put(record.sequence, sum);
+			
 			
 			for(LocationInformation location : locations) {
 				// full information (including genomic sequence)
@@ -270,14 +332,13 @@ public class WriteOutput {
 				}
 				gLocationMap.put(key, sumOfReadsAcrossBarcodes + sumOfReads);
 			}
-			
 		}
 
 		readCountsPeptLevel.forEach((sequence, reads)->{
 			try {
 				Hashtable<String, Long> locations = locationsPeptLevel.get(sequence);
 				// find most abundant location and its proportion
-				double proportion = 0;
+				double proportion = readCountsRecordLevel.get(sequence);
 				long max = 0;
 				String abundantLocation = null;
 				
@@ -290,12 +351,10 @@ public class WriteOutput {
 						max = thisValue;
 						abundantLocation = key;
 					}
-					
-					proportion += thisValue;
 				}
 				
 				// calculate proportion
-				proportion = max/proportion;
+				proportion = proportion == 0 ? 0 : max / proportion;
 				
 				String location = Constants.NULL;
 				String strand = Constants.NULL;
@@ -306,7 +365,7 @@ public class WriteOutput {
 				
 				// if there is no matched read
 				if(max == 0) {
-					BW.append(sequence+"\t"+location+"\t"+strand+"\t"+0.0+"\t"+0);
+					BW.append(sequence+"\t"+location+"\t"+strand+"\t"+proportion+"\t"+0);
 				} else {
 					BW.append(sequence+"\t"+location+"\t"+strand+"\t"+proportion+"\t"+locationsPeptLevel.get(sequence).size());
 				}
@@ -365,7 +424,6 @@ public class WriteOutput {
 		}
 		BW.close();
 	}
-	
 	
 	public static void writeAnnotateOutput (ArrayList<SequenceRecord> records, 
 			Hashtable<String, LinkedList<Annotation>> allAnnotations) throws IOException {

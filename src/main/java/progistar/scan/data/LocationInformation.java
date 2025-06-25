@@ -59,6 +59,24 @@ public class LocationInformation {
 		}
 	}
 	
+	public long getTotalReads () {
+		long sum = 0;
+		if(Parameters.isSingleCellMode) {
+			for(String barcodeId : BarcodeTable.barcodeIds) {
+				Long read = readCounts.get(barcodeId);
+				if(read == null) {
+					read = 0L;
+				}
+				sum += read;
+			}
+		} else {
+			Long read = readCounts.get(Constants.DEFAULT_BARCODE_ID);
+			sum += read;
+		}
+		
+		return sum;
+	}
+	
 	public void calMetaInfo () {
 		this.calMutation();
 		assert this.obsNucleotide != null;
