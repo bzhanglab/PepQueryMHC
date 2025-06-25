@@ -83,7 +83,13 @@ public class MatchBAM {
 				Parameters.strandedness = Constants.RF_STRANDED;
 			} else if(R1F > R1R*10 && R2F*10 < R2R) {
 				Parameters.strandedness = Constants.FR_STRANDED;
-			} else {
+			}// for single end
+			else if( (R1F + R2F) > 10 * (R1R + R2R) ) {
+				Parameters.strandedness = Constants.F_STRANDED;
+			} else if( 10 * (R1F + R2F) < (R1R + R2R) ) {
+				Parameters.strandedness = Constants.R_STRANDED;
+			} 
+			else {
 				Parameters.strandedness = Constants.NON_STRANDED;
 			}
 			
