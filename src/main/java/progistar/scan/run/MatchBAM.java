@@ -26,6 +26,7 @@ import progistar.scan.data.Phred;
 import progistar.scan.data.SequenceRecord;
 import progistar.scan.fileIO.ParseRecord;
 import progistar.scan.fileIO.WriteOutput;
+import progistar.scan.function.BAMIndex;
 import progistar.scan.function.CheckMemory;
 
 public class MatchBAM {
@@ -38,6 +39,9 @@ public class MatchBAM {
 		if(Parameters.isSingleCellMode) {
 			BarcodeTable.load();
 		}
+		
+		// check BAM index
+		BAMIndex.index(Parameters.bamFile);
 		
 		// load library table
 		if(Parameters.libFile != null) {
