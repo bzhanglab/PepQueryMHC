@@ -146,7 +146,6 @@ public class WriteOutput {
 						continue;
 					}
 				}
-				
 				sum += location.getTotalReads();
 			}
 			

@@ -37,6 +37,9 @@ public class Constants {
 	public static final int MAPPED_READS		=	1;
 	public static final int UNMAPPED_READS		=	2;
 	
+	// PTM parser
+	// FINDA FOLLOWING PATTERNS: AGBD[UNIMOD:35]AMDK+358AMKS(+382)AMDK[+382]AADDK+358.3AMKS(+382.1)AMDK[+382.2]AAD
+	public static final String PTM_PARSER_REGEXR=	"(\\[\\w+:\\d+\\]|\\([+-]?\\d+\\.*\\d+\\)|[+-]?\\d+\\.*\\d+|\\[[+-]?\\d+\\.*\\d+\\])";
 	
 	public static final String NULL				=	".";
 	public static final byte NON_CODING_TRANSCRIPT	=	0;

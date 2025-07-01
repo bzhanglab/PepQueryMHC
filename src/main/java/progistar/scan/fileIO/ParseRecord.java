@@ -102,6 +102,8 @@ public class ParseRecord {
 				if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
 					// if the sequence is invalid
 					String sequence = fields[inputSeqIdx];
+					// parsing PTM annotation
+					sequence = sequence.replaceAll(Constants.PTM_PARSER_REGEXR, "");
 					if(Validation.checkValidSequence(sequence)) {
 						record.sequence = sequence;
 					} else {
