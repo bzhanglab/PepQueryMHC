@@ -203,6 +203,7 @@ public class MatchBAM {
 				args[i].equalsIgnoreCase("-w") || args[i].equalsIgnoreCase("--white_list") ||
 				args[i].equalsIgnoreCase("-p") || args[i].equalsIgnoreCase("--prob") ||
 				args[i].equalsIgnoreCase("-u") || args[i].equalsIgnoreCase("--union") ||
+				args[i].equalsIgnoreCase("-sc") || args[i].equalsIgnoreCase("--sequence_column_name") ||
 				args[i].equalsIgnoreCase("-s") || args[i].equalsIgnoreCase("--strand")) {
 				nArgs[nIdx++] = args[i++];
 				nArgs[nIdx++] = args[i];
@@ -309,6 +310,13 @@ public class MatchBAM {
 						+ "auto: auto-detection. Auto-detection is only available if there is XS tag in a given BAM file (default is auto).")
 				.build();
 		
+		Option optionSequenceColumnName = Option.builder("sc")
+				.longOpt("sequence_column_name").argName("string")
+				.hasArg()
+				.required(false)
+				.desc("specify sequence column name, case-insensitive (default is sequence).")
+				.build();
+		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
 		.addOption(optionStrandeness)
@@ -320,7 +328,8 @@ public class MatchBAM {
 		.addOption(optionVerbose)
 		.addOption(optionWhiteList)
 		.addOption(optionROIThreshold)
-		.addOption(optionUnionPeptide);
+		.addOption(optionUnionPeptide)
+		.addOption(optionSequenceColumnName);
 		
 		CommandLineParser parser = new DefaultParser();
 	    HelpFormatter helper = new HelpFormatter();
@@ -385,6 +394,10 @@ public class MatchBAM {
 		    	Parameters.libFile = new File(cmd.getOptionValue("l"));
 		    }
 		    
+		    if(cmd.hasOption("sc")) {
+		    	Parameters.sequenceColumnName = cmd.getOptionValue("sc");
+		    }
+		    
 		    if(cmd.hasOption("w")) {
 		    	Parameters.whitelistFile = new File(cmd.getOptionValue("w"));
 		    	Parameters.isSingleCellMode = true;
@@ -425,6 +438,7 @@ public class MatchBAM {
 				System.out.println("White-list file name: "+Parameters.whitelistFile.getName() +" (single-cell mode)");
 			}
 			
+			System.out.println("Sequence column name (case-insensitive): "+Parameters.sequence);
 			System.out.println("Strandedness: "+Constants.getFullNameOfStrandedness(Parameters.strandedness));
 			System.out.println("Mode: "+Parameters.mode);
 			System.out.println("Count: "+Parameters.count);
