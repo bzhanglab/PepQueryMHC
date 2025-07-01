@@ -169,6 +169,8 @@ public class ParseRecord {
 				String[] fields = line.split("\t");
 				String sequence = fields[inputSeqIdx];
 				
+				// parsing PTM annotation
+				sequence = sequence.replaceAll(Constants.PTM_PARSER_REGEXR, "");
 				// if the sequence is invalid
 				if(!Validation.checkValidSequence(sequence)) {
 					continue;
