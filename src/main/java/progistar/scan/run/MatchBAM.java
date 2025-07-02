@@ -438,7 +438,7 @@ public class MatchBAM {
 				System.out.println("White-list file name: "+Parameters.whitelistFile.getName() +" (single-cell mode)");
 			}
 			
-			System.out.println("Sequence column name (case-insensitive): "+Parameters.sequence);
+			System.out.println("Sequence column name (case-insensitive): "+Parameters.sequenceColumnName);
 			System.out.println("Strandedness: "+Constants.getFullNameOfStrandedness(Parameters.strandedness));
 			System.out.println("Mode: "+Parameters.mode);
 			System.out.println("Count: "+Parameters.count);

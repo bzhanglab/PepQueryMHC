@@ -131,6 +131,7 @@ public class MatchFASTQ {
 				args[i].equalsIgnoreCase("-w") || args[i].equalsIgnoreCase("--white_list") ||
 				args[i].equalsIgnoreCase("-p") || args[i].equalsIgnoreCase("--prob") ||
 				args[i].equalsIgnoreCase("-u") || args[i].equalsIgnoreCase("--union") ||
+				args[i].equalsIgnoreCase("-seq") || args[i].equalsIgnoreCase("--sequence_column_name") ||
 				args[i].equalsIgnoreCase("-s") || args[i].equalsIgnoreCase("--strand")) {
 				nArgs[nIdx++] = args[i++];
 				nArgs[nIdx++] = args[i];
@@ -237,6 +238,12 @@ public class MatchFASTQ {
 				.desc("ignore ROIs (region of interests) with greater than a given error probability (default is 0.05).")
 				.build();
 		
+		Option optionSequenceColumnName = Option.builder("seq")
+				.longOpt("sequence_column_name").argName("string")
+				.hasArg()
+				.required(false)
+				.desc("specify sequence column name, case-insensitive (default is sequence).")
+				.build();
 		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
@@ -249,6 +256,7 @@ public class MatchFASTQ {
 		.addOption(optionLibSize)
 		.addOption(optionVerbose)
 		.addOption(optionWhiteList)
+		.addOption(optionSequenceColumnName)
 		.addOption(optionROIThreshold);
 		
 		CommandLineParser parser = new DefaultParser();
@@ -347,6 +355,10 @@ public class MatchFASTQ {
 		    	}
 		    }
 		    
+		    if(cmd.hasOption("seq")) {
+		    	Parameters.sequenceColumnName = cmd.getOptionValue("seq");
+		    }
+		    
 		} catch (ParseException e) {
 			System.out.println(e.getMessage());
 			isFail = true;
@@ -377,6 +389,7 @@ public class MatchFASTQ {
 				System.out.println("White-list file name: "+Parameters.whitelistFile.getName() +" (single-cell mode)");
 			}
 			
+			System.out.println("Sequence column name (case-insensitive): "+Parameters.sequenceColumnName);
 			System.out.println("Strandedness: "+Constants.getFullNameOfStrandedness(Parameters.strandedness));
 			System.out.println("Mode: "+Parameters.mode);
 			System.out.println("Count: "+Parameters.count);
