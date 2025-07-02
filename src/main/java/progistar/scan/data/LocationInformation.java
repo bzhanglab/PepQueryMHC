@@ -242,11 +242,11 @@ public class LocationInformation {
 			lInfo.location = Constants.NULL;
 			lInfo.strand = Constants.NULL.charAt(0);
 			lInfo.obsNucleotide = nucleotide.substring(startPos, endPos);
-			lInfo.refNucleotide = reference.substring(startPos, endPos);
+			lInfo.refNucleotide = Constants.NULL;//reference.substring(startPos, endPos);
 			
 			if(strand == '-') {
 				lInfo.obsNucleotide = Translator.getReverseComplement(lInfo.obsNucleotide);
-				lInfo.refNucleotide = Translator.getReverseComplement(lInfo.refNucleotide);
+				lInfo.refNucleotide = Constants.NULL;//Translator.getReverseComplement(lInfo.refNucleotide);
 			}
 			
 			return lInfo;
@@ -394,7 +394,7 @@ public class LocationInformation {
 		
 		if(strand == '-') {
 			lInfo.obsNucleotide = Translator.getReverseComplement(lInfo.obsNucleotide);
-			lInfo.refNucleotide = Translator.getReverseComplement(lInfo.refNucleotide);
+			lInfo.refNucleotide = Constants.NULL;//Translator.getReverseComplement(lInfo.refNucleotide);
 		}
 		
 		return lInfo;
