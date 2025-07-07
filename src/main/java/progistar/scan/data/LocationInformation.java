@@ -339,13 +339,31 @@ public class LocationInformation {
 		}
 		
 		StringBuilder locations = new StringBuilder();
+		
+		/**
+		 * Out of range (e.g., ChrM:-3-15)<br>
+		 * Softclip at the end of sequence and positioned at the near start location in a chromosome.
+		 * 
+		 * 
+		 */
+		boolean isOutOfRange = false;
 		for(int i=0; i<startLocations.size(); i++) {
 			int start = startLocations.get(i);
 			int end = endLocations.get(i);
+			
+			if(start <= 0 || end <= 0) {
+				isOutOfRange = true;
+			}
+			
 			if(locations.length() != 0) {
 				locations.append("|");
 			}
 			locations.append(chr+":"+start+"-"+end);
+		}
+		
+		if(isOutOfRange) {
+			locations.setLength(0);
+			locations.append(Constants.NULL);
 		}
 		
 		lInfo.location = locations.toString();
