@@ -129,25 +129,31 @@ public class ParseRecord {
 				int start = -1;
 				int end = -1;
 				
-				if(!genomicLoci.equalsIgnoreCase(Constants.NULL)) {
-					String[] gLoc = genomicLoci.split("\\|");
-					for(String gLocus : gLoc) {
-						chr = gLocus.split("\\:")[0];
-						if(start == -1) {
-							start = Integer.parseInt(gLocus.split("\\:")[1].split("\\-")[0]);
+				// if the location is not a format of genomic location => discard the records.
+				try {
+					if(!genomicLoci.equalsIgnoreCase(Constants.NULL)) {
+						String[] gLoc = genomicLoci.split("\\|");
+						for(String gLocus : gLoc) {
+							chr = gLocus.split("\\:")[0];
+							if(start == -1) {
+								start = Integer.parseInt(gLocus.split("\\:")[1].split("\\-")[0]);
+							}
+							end = Integer.parseInt(gLocus.split("\\:")[1].split("\\-")[1]);
 						}
-						end = Integer.parseInt(gLocus.split("\\:")[1].split("\\-")[1]);
+						
+						if(chr.equalsIgnoreCase("chrx")) {
+							chr = "chrX";
+						} else if(chr.equalsIgnoreCase("chry")) {
+							chr = "chrY";
+						} else if(chr.equalsIgnoreCase("chrm")) {
+							chr = "chrM";
+						} else if(!chr.startsWith("chr")) {
+							chr = chr.toUpperCase();
+						}
 					}
-					
-					if(chr.equalsIgnoreCase("chrx")) {
-						chr = "chrX";
-					} else if(chr.equalsIgnoreCase("chry")) {
-						chr = "chrY";
-					} else if(chr.equalsIgnoreCase("chrm")) {
-						chr = "chrM";
-					} else if(!chr.startsWith("chr")) {
-						chr = chr.toUpperCase();
-					}
+				}catch(Exception e) {
+					System.out.println("Incorrect format, skip record: "+line);
+					continue;
 				}
 				
 				record.chr = chr;
