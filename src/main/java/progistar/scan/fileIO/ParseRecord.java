@@ -50,6 +50,7 @@ public class ParseRecord {
 		int inputSeqIdx = -1;
 		int genomicLociIdx = -1;
 		int strandIdx = -1;
+		int skippedRecords = 0;
 		
 		for(int i=0; i<headerSplit.length; i++) {
 			if(Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_NUCLEOTIDE) && 
@@ -152,7 +153,10 @@ public class ParseRecord {
 						}
 					}
 				}catch(Exception e) {
-					System.out.println("Incorrect format, skip record: "+line);
+					if(Parameters.verbose) {
+						System.out.println("Incorrect format, skip record: "+line);
+					}
+					skippedRecords++;
 					continue;
 				}
 				
@@ -211,7 +215,9 @@ public class ParseRecord {
 			
 		}
 		System.out.println("Records without duplication: "+records.size());
-		
+		if(skippedRecords != 0) {
+			System.out.println("Skipped records: "+skippedRecords);
+		}
 		
 		BR.close();
 		return records;
