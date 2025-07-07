@@ -217,11 +217,11 @@ public class Annotation implements Comparable<Annotation> {
 		}
 		// Class III: asRNA
 		if(this.classCode.contains(Parameters.MARK_ASRNA)) {
-			pClassIV = Constants.PENALTY_ASRNA;
+			pClassIII = Constants.PENALTY_ASRNA;
 		}
 		// Class IV: IGR
 		if(this.classCode.contains(Parameters.MARK_INTERGENIC)) {
-			pClassIII = Constants.PENALTY_IGR;
+			pClassIV = Constants.PENALTY_IGR;
 		}
 		
 		
