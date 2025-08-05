@@ -39,7 +39,7 @@ public class Constants {
 	
 	// PTM parser
 	// FINDA FOLLOWING PATTERNS: -AGBD[UNIMOD:35]AMDK+358AMKS(+382)AMDK[+382]AADDK+358.3AMKS(+382.1)AMDK[+382.2]AADM[Oxidation]DM(Oxidation)
-	public static final String PTM_PARSER_REGEXR=	"(\\[[^\\[^\\]]*\\]|\\([^\\(^\\)]*\\)|[^A-Z]+)";;
+	public static final String PTM_PARSER_REGEXR=	"(\\[[^\\[^\\]]*\\]|\\([^\\(^\\)]*\\)|[^A-Z]+)";
 	
 	public static final String NULL				=	".";
 	public static final byte NON_CODING_TRANSCRIPT	=	0;
