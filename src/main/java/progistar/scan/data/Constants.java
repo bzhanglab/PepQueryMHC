@@ -2,8 +2,8 @@ package progistar.scan.data;
 
 public class Constants {
 	public static final String NAME = "PepQueryMHC";
-	public static final String VERSION = "v1.0.4";
-	public static final String RELEASE = "Jul 2, 2025";
+	public static final String VERSION = "v1.0.5";
+	public static final String RELEASE = "Aug 5, 2025";
 	
 	public static final String MODE_TARGET = "target";
 	public static final String MODE_SCAN = "scan";
@@ -38,8 +38,8 @@ public class Constants {
 	public static final int UNMAPPED_READS		=	2;
 	
 	// PTM parser
-	// FINDA FOLLOWING PATTERNS: AGBD[UNIMOD:35]AMDK+358AMKS(+382)AMDK[+382]AADDK+358.3AMKS(+382.1)AMDK[+382.2]AAD
-	public static final String PTM_PARSER_REGEXR=	"(\\[\\w+:\\d+\\]|\\([+-]?\\d+\\.*\\d+\\)|[+-]?\\d+\\.*\\d+|\\[[+-]?\\d+\\.*\\d+\\])";
+	// FINDA FOLLOWING PATTERNS: AGBD[UNIMOD:35]AMDK+358AMKS(+382)AMDK[+382]AADDK+358.3AMKS(+382.1)AMDK[+382.2]AADM[Oxidation]DM(Oxidation)
+	public static final String PTM_PARSER_REGEXR=	"(\\[\\w+:\\d+\\]|\\([+-]?\\d+\\.*\\d+\\)|[+-]?\\d+\\.*\\d+|\\[[+-]?\\d+\\.*\\d+\\]|\\[\\w+\\]|\\(\\w+\\))";
 	
 	public static final String NULL				=	".";
 	public static final byte NON_CODING_TRANSCRIPT	=	0;

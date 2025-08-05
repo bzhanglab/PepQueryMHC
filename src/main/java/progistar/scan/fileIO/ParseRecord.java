@@ -1,25 +1,16 @@
 package progistar.scan.fileIO;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Iterator;
 
-import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Constants;
-import progistar.scan.data.LibraryTable;
-import progistar.scan.data.LocTable;
-import progistar.scan.data.LocationInformation;
 import progistar.scan.data.Parameters;
 import progistar.scan.data.SequenceRecord;
-import progistar.scan.function.Utils;
 import progistar.scan.function.Validation;
-import progistar.scan.function.WriteStatistics;
 
 public class ParseRecord {
 
