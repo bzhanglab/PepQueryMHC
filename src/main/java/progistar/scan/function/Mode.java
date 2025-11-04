@@ -14,7 +14,6 @@ import progistar.scan.data.Constants;
 import progistar.scan.data.LocTable;
 import progistar.scan.data.LocationInformation;
 import progistar.scan.data.Parameters;
-import progistar.scan.run.Main;
 import progistar.scan.run.Task;
 
 public abstract class Mode {
@@ -103,7 +102,7 @@ public abstract class Mode {
             // if the task is for mapped reads
             // only reads with below that genomic start are retrieved
             if(task.readType == Constants.MAPPED_READS) {
-            	if(Parameters.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
+            	if(Parameters.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryOrSupplementary()) {
             		isPass = true;
             	}
             	

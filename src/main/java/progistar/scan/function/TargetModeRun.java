@@ -116,6 +116,11 @@ public class TargetModeRun extends Mode {
             		isPass = true;
             	}
             	
+            	// check primary read
+            	if(Parameters.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryOrSupplementary()) {
+            		isPass = true;
+            	}
+            	
             } else if(task.readType == Constants.UNMAPPED_READS) {
             	if(count < task.start || count > task.end) {
         			isPass = true;
@@ -133,14 +138,12 @@ public class TargetModeRun extends Mode {
             	//continue;
             }
             
-        	if(!samRecord.isSecondaryAlignment()) {
-            	Double pReads = task.processedReads.get(barcodeId);
-            	if(pReads == null) {
-            		pReads = .0;
-            	}
-            	pReads++;
-            	task.processedReads.put(barcodeId, pReads);
+            Double pReads = task.processedReads.get(barcodeId);
+        	if(pReads == null) {
+        		pReads = .0;
         	}
+        	pReads++;
+        	task.processedReads.put(barcodeId, pReads);
             
         }
         iterator.close();
