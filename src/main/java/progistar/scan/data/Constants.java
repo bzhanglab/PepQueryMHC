@@ -57,7 +57,7 @@ public class Constants {
 	public static final String MARK_FULL_NCRNA = "Non-coding RNA";
 	public static final String MARK_FULL_UTR5 = "5`-untranslated-region";
 	public static final String MARK_FULL_UTR3 = "3`-untranslated-region";
-	public static final String MARK_FULL_INTRON = "intron-retention";
+	public static final String MARK_FULL_INTRON = "Intron-retention";
 	public static final String MARK_FULL_ASRNA = "Antisense RNA";
 	public static final String MARK_FULL_INTERGENIC = "Intergenic-region";
 	public static final String MARK_FULL_ES			=	"Exon-skipping"; // for exon-skipping
