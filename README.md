@@ -203,6 +203,7 @@ This format is generated in annotate mode.<br>
 | Class_code                        | It assigns events, detailed in below                                              | 5`-UTR                      |
 | Unique_class_code                 | It only reports unique class code by removing duplications                        | 5`-UTR                      |
 | Warning_tag                       | It reports a warning if the gene annotation is incomplete                         | .                           |
+
 Class_code<br>
 -- In-frame (IF) <br>
 -- Out-of-frame (OOF) <br>
