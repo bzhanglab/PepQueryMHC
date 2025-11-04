@@ -208,8 +208,8 @@ Class_code<br>
 -- In-frame (IF) <br>
 -- Out-of-frame (OOF) <br>
 -- Non-coding RNA (ncRNA) <br>
--- 5`-untranslated-region (5`-UTR) <br>
--- 3`-untranslated-region (3`-UTR) <br>
+-- 5\`-untranslated-region (5\`-UTR) <br>
+-- 3\`-untranslated-region (3\`-UTR) <br>
 -- Intron-retention (IR) <br>
 -- Antisense RNA (asRNA) <br>
 -- Intergenic-region (IGR) <br>
