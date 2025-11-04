@@ -33,7 +33,7 @@ public class StrandDetection {
 				SAMRecord samRecord = iterator.next();
 				
 				boolean isPass = false;
-				if(Parameters.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryAlignment()) {
+				if(Parameters.count.equalsIgnoreCase(Constants.COUNT_PRIMARY) && samRecord.isSecondaryOrSupplementary()) {
             		isPass = true;
             	}
 				

@@ -25,8 +25,6 @@ public class ScanModeRun extends Mode {
 		// to prevent racing
 		File file = new File(Parameters.bamFile.getAbsolutePath());
 		
-		
-		
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			SAMRecordIterator iterator = null;
 			if(task.readType == Constants.MAPPED_READS) {
