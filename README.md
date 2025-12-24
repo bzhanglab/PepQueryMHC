@@ -17,6 +17,7 @@
   - [peptide.tsv](#peptidetsv)
   - [annotate.tsv](#annotatetsv)
 - [Figures for the reviewers](#figures-for-the-reviewers)
+- [Cite](#cite)
 - [License]($license)
 ---
 
@@ -231,6 +232,9 @@ Class_code<br>
 
 ## Figures for the reviewers
 Figures in the paper can be generated using: 1) R code in figR folder, 2) Supplementary Tables 1,2,3, and 5, and 3) the meta dataset available at https://doi.org/10.5281/zenodo.17429717. 
+
+## Cite
+Seunghyuk Choi and Bing Zhang. <a href="https://link.springer.com/article/10.1186/s13059-025-03923-w">PepQueryMHC: rapid and comprehensive tumor antigen prioritization from immunopeptidomics data</a>. <i>Genome Biology 26, 434 (2025).
 
 ## License
 All code is available as under the <a href="https://www.gnu.org/licenses/gpl-3.0.html">GNU General Public License v3.0</a>.
