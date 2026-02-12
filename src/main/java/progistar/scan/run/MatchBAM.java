@@ -209,7 +209,8 @@ public class MatchBAM {
 				nArgs[nIdx++] = args[i];
 			} 
 			else if( args[i].equalsIgnoreCase("-v") || args[i].equalsIgnoreCase("--verbose") ||
-					 args[i].equalsIgnoreCase("-e") || args[i].equalsIgnoreCase("--equal")) {
+					 args[i].equalsIgnoreCase("-e") || args[i].equalsIgnoreCase("--equal") ||
+					 args[i].equalsIgnoreCase("-er") || args[i].equalsIgnoreCase("--extract_read")) {
 				nArgs[nIdx++] = args[i];
 			}
 		}
