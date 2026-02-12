@@ -30,7 +30,7 @@ import progistar.scan.data.Parameters;
 import progistar.scan.data.Phred;
 import progistar.scan.data.SequenceRecord;
 import progistar.scan.fileIO.ParseRecord;
-import progistar.scan.function.BAMIndex;
+import progistar.scan.function.BAMUtil;
 import progistar.scan.function.CheckMemory;
 
 public class Extract {
@@ -45,7 +45,7 @@ public class Extract {
 		}
 		
 		// check BAM index
-		BAMIndex.index(Parameters.bamFile);
+		BAMUtil.index(Parameters.bamFile);
 		
 		ArrayList<SequenceRecord> records = ParseRecord.parse(Parameters.inputFile);
 		
@@ -178,6 +178,9 @@ public class Extract {
 		}
 		
 		writer.close();
+		
+		// sort and index
+		BAMUtil.index(BAMUtil.sort(new File(outputExtractedBamPath)));
 	}
 	
 	public static void parseExtractModes (String[] args) {
