@@ -310,7 +310,7 @@ public class WriteOutput {
 					}
 					if(Parameters.union.equalsIgnoreCase(Constants.UNION_MAX)) {
 						unionReads.put(barcodeId, Math.max(readCounts.get(barcodeId), val));
-					} else if(Parameters.union.equalsIgnoreCase(Constants.UNION_SUM)){
+					} else if(Parameters.union.equalsIgnoreCase(Constants.UNION_SUM)) {
 						unionReads.put(barcodeId, (readCounts.get(barcodeId) + val));
 					}
 					
@@ -340,18 +340,46 @@ public class WriteOutput {
 				Hashtable<String, Long> locations = locationsPeptLevel.get(sequence);
 				// find most abundant location and its proportion
 				double proportion = readCountsRecordLevel.get(sequence);
-				long max = 0;
-				String abundantLocation = null;
+				
+
+				/**
+				 * Select the most abundant mapped location.
+				 * If there is no mapped location, then select the most abundant unmapped location, (maybe unique).
+				 */
+				long mappedMax = 0;
+				long unmappedMax = 0;
+				String mappedLocation = null;
+				String unmappedLocation = null;
 				
 				Iterator<String> keys = (Iterator<String>) locations.keys();
 				while(keys.hasNext()) {
 					String key = keys.next();
-					
+					String location = key.split("\t")[0];
 					long thisValue = locations.get(key);
-					if(thisValue > max) {
-						max = thisValue;
-						abundantLocation = key;
+					
+					// if this has unknown location
+					if(location.equalsIgnoreCase(Constants.NULL)) {
+						if(thisValue > unmappedMax) {
+							unmappedMax = thisValue;
+							unmappedLocation = key;
+						}
+					} else {
+						if(thisValue > mappedMax) {
+							mappedMax = thisValue;
+							mappedLocation = key;
+						}
 					}
+					
+				}
+				
+				long max = 0;
+				String maxLocation = null;
+				if(mappedMax > 0) {
+					max = mappedMax;
+					maxLocation = mappedLocation;
+				} else if(unmappedMax > 0) {
+					max = unmappedMax;
+					maxLocation = unmappedLocation;
 				}
 				
 				// calculate proportion
@@ -359,13 +387,13 @@ public class WriteOutput {
 				
 				String location = Constants.NULL;
 				String strand = Constants.NULL;
-				if(abundantLocation != null) {
-					location = abundantLocation.split("\t")[0];
-					strand = abundantLocation.split("\t")[1];
+				if(maxLocation != null) {
+					location = maxLocation.split("\t")[0];
+					strand = maxLocation.split("\t")[1];
 				}
 				
 				// if there is no matched read
-				if(max == 0) {
+				if(mappedMax == 0) {
 					BW.append(sequence+"\t"+location+"\t"+strand+"\t"+proportion+"\t"+0);
 				} else {
 					BW.append(sequence+"\t"+location+"\t"+strand+"\t"+proportion+"\t"+locationsPeptLevel.get(sequence).size());

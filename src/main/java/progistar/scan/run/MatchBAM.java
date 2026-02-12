@@ -317,6 +317,12 @@ public class MatchBAM {
 				.desc("specify sequence column name, case-insensitive (default is sequence).")
 				.build();
 		
+		Option optionExtractRead = Option.builder("er")
+				.longOpt("extract_read").argName("string")
+				.required(false)
+				.desc("extract matched reads for each queried sequence and output them as a BAM file.")
+				.build();
+		
 		options.addOption(optionInput)
 		.addOption(optionOutput)
 		.addOption(optionStrandeness)
@@ -329,7 +335,8 @@ public class MatchBAM {
 		.addOption(optionWhiteList)
 		.addOption(optionROIThreshold)
 		.addOption(optionUnionPeptide)
-		.addOption(optionSequenceColumnName);
+		.addOption(optionSequenceColumnName)
+		.addOption(optionExtractRead);
 		
 		CommandLineParser parser = new DefaultParser();
 	    HelpFormatter helper = new HelpFormatter();
@@ -419,6 +426,10 @@ public class MatchBAM {
 		    	if(cmd.getOptionValue("u").equalsIgnoreCase("sum")) {
 		    		Parameters.union = Constants.UNION_SUM;
 		    	}
+		    }
+		    
+		    if(cmd.hasOption("er")) {
+		    	Parameters.extractMatchedReads = true;
 		    }
 		    
 		} catch (ParseException e) {
