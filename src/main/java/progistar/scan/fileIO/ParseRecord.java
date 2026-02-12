@@ -33,7 +33,9 @@ public class ParseRecord {
 		
 		SequenceRecord.header = BR.readLine();
 		
-		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) || Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
+		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) || 
+				Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN) ||
+				Parameters.mode.equalsIgnoreCase(Constants.MODE_EXTRACT)) {
 			SequenceRecord.fileName = Parameters.bamFile.getName();
 		}
 		
@@ -78,10 +80,18 @@ public class ParseRecord {
 				System.out.println("Please specify exact column names in your input file.");
 				System.exit(1);
 			}
+		} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_EXTRACT)) {
+			if(inputSeqIdx == -1 || genomicLociIdx == -1 || strandIdx == -1) {
+				System.out.println("Fail to find column names: sequence, location, strand");
+				System.out.println("Please specify exact column names in your input file.");
+				System.exit(1);
+			}
 		}
 			
 		
-		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) || Parameters.mode.equalsIgnoreCase(Constants.MODE_ANNOTATE)) {
+		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) || 
+				Parameters.mode.equalsIgnoreCase(Constants.MODE_ANNOTATE) ||
+				Parameters.mode.equalsIgnoreCase(Constants.MODE_EXTRACT)) {
 
 			while((line = BR.readLine()) != null) {
 				String[] fields = line.split("\t");
@@ -91,7 +101,8 @@ public class ParseRecord {
 				
 				SequenceRecord record = new SequenceRecord();
 				
-				if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+				if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) ||
+						Parameters.mode.equalsIgnoreCase(Constants.MODE_EXTRACT)) {
 					// if the sequence is invalid
 					String sequence = fields[inputSeqIdx];
 					// parsing PTM annotation
@@ -165,7 +176,8 @@ public class ParseRecord {
 				}
 				indexedRecord.records.add(line);
 			}
-		} else if (Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN) || Parameters.mode.equalsIgnoreCase(Constants.MODE_FASTQ)){
+		} else if (Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN) || 
+				Parameters.mode.equalsIgnoreCase(Constants.MODE_FASTQ)){
 			while((line = BR.readLine()) != null) {
 				String[] fields = line.split("\t");
 				String sequence = fields[inputSeqIdx];
@@ -196,7 +208,8 @@ public class ParseRecord {
 		
 		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) || 
 			Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN) ||
-			Parameters.mode.equalsIgnoreCase(Constants.MODE_FASTQ)){
+			Parameters.mode.equalsIgnoreCase(Constants.MODE_FASTQ)||
+			Parameters.mode.equalsIgnoreCase(Constants.MODE_EXTRACT)){
 			// set longestLengthOfInputSequences
 			for(SequenceRecord record : records) {
 				Parameters.longestSequenceLen = Math.max(record.sequence.length(), Parameters.longestSequenceLen);

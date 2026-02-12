@@ -1,6 +1,12 @@
 package progistar.scan.run;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -10,11 +16,171 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import progistar.scan.data.BarcodeTable;
+import progistar.scan.data.Codon;
 import progistar.scan.data.Constants;
+import progistar.scan.data.LibraryTable;
+import progistar.scan.data.LocTable;
 import progistar.scan.data.Parameters;
+import progistar.scan.data.Phred;
+import progistar.scan.data.SequenceRecord;
+import progistar.scan.fileIO.ParseRecord;
+import progistar.scan.fileIO.WriteOutput;
+import progistar.scan.function.BAMIndex;
+import progistar.scan.function.CheckMemory;
 
 public class Extract {
 
+	public static void run(String[] args) throws IOException, InterruptedException {
+		parseExtractModes(args);
+		Codon.mapping();
+		Phred.loadTable(); // load phred table
+		// single cell barcode
+		if(Parameters.isSingleCellMode) {
+			BarcodeTable.load();
+		}
+		
+		// check BAM index
+		BAMIndex.index(Parameters.bamFile);
+		
+		ArrayList<SequenceRecord> records = ParseRecord.parse(Parameters.inputFile);
+		
+		//// Prepare tasks
+		ArrayList<Task> tasks = new ArrayList<Task>();
+		
+		// auto strand detection
+		if(Parameters.strandedness.equalsIgnoreCase(Constants.AUTO_STRANDED)) {
+			tasks.addAll(Task.getStrandDetectionTask());
+			ExecutorService executorService = Executors.newFixedThreadPool(Parameters.threadNum);
+			List<Worker> callableExList = new ArrayList<>();
+			for(int i=0; i<tasks.size(); i++) {
+				Task task = tasks.get(i);
+				callableExList.add(new Worker(task, tasks.size()));
+			}
+			
+			// check peak memory
+			Parameters.peakMemory = Math.max(Parameters.peakMemory, CheckMemory.checkUsedMemoryMB());
+			
+			// reset done count
+			Worker.resetDoneCount();
+			executorService.invokeAll(callableExList);
+			executorService.shutdown();
+			
+			int R1F = 0;
+			int R1R = 0;
+			int R2F = 0;
+			int R2R = 0;
+			
+			for(Task task :tasks) {
+				R1F += task.R1F;
+				R1R += task.R1R;
+				R2F += task.R2F;
+				R2R += task.R2R;
+			}
+			
+			if(R1F*10 < R1R && R2F > R2R*10) {
+				Parameters.strandedness = Constants.RF_STRANDED;
+			} else if(R1F > R1R*10 && R2F*10 < R2R) {
+				Parameters.strandedness = Constants.FR_STRANDED;
+			}// for single end
+			else if( (R1F + R2F) > 10 * (R1R + R2R) ) {
+				Parameters.strandedness = Constants.F_STRANDED;
+			} else if( 10 * (R1F + R2F) < (R1R + R2R) ) {
+				Parameters.strandedness = Constants.R_STRANDED;
+			} 
+			else {
+				Parameters.strandedness = Constants.NON_STRANDED;
+			}
+			
+			System.out.println("Estimate strandedness");
+			System.out.println("1F\t1R\t2F\t2R");
+			System.out.println(R1F+"\t"+R1R+"\t"+R2F+"\t"+R2R);
+			
+			if(R1F+R1R+R2F+R2R == 0) {
+				System.out.println("Fail to estimate stradedness!");
+				System.out.println("It looks single-end RNA-seq experiement. Please specify strandedness.");
+				System.exit(1);
+			} else {
+				System.out.println("Strandedness: "+Parameters.strandedness+"-stranded");
+			}
+			
+			tasks.clear();
+		}
+		/////////////////////////////////////////////////////////////////
+		
+		// core algorithm
+		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
+			// estimate library size
+			if(LibraryTable.isEmpty()) {
+				tasks.addAll(Task.getLibSizeTask());
+			}
+			// target mode
+			Parameters.chunkSize = (records.size() / (10 * Parameters.threadNum) ) +1;
+			tasks.addAll(Task.getTargetModeTasks(records, Parameters.chunkSize));
+		} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
+			tasks.addAll(Task.getScanModeTasks(records));
+		}
+		//// sort tasks by descending order
+		// Priority: Library > Unmapped > Mapped
+		Collections.sort(tasks);
+		
+		//// Enroll tasks on a thread pool
+		ExecutorService executorService = Executors.newFixedThreadPool(Parameters.threadNum);
+		List<Worker> callableExList = new ArrayList<>();
+		for(int i=0; i<tasks.size(); i++) {
+			Task task = tasks.get(i);
+			callableExList.add(new Worker(task, tasks.size()));
+		}
+		
+		// check peak memory
+		Parameters.peakMemory = Math.max(Parameters.peakMemory, CheckMemory.checkUsedMemoryMB());
+		
+		// reset done count
+		Worker.resetDoneCount();
+		executorService.invokeAll(callableExList);
+		executorService.shutdown();
+		//// End of tasks
+		
+		System.out.println("Done all tasks!");
+		// check peak memory
+		Parameters.peakMemory = Math.max(Parameters.peakMemory, CheckMemory.checkUsedMemoryMB());
+
+		// update peak memory from the tasks.
+		for(Task task : tasks) {
+			Parameters.peakMemory = Math.max(Parameters.peakMemory, task.peakMemory);
+		}
+		
+		// calculate library size
+		if(LibraryTable.isEmpty()) {
+			for(Task task : tasks) {
+				task.processedReads.forEach((barcode, count)->{
+					Double libSize = LibraryTable.table.get(barcode);
+					if(libSize == null) {
+						libSize = .0;
+					}
+					libSize += count;
+					LibraryTable.table.put(barcode, libSize);
+				});
+			}
+		}
+		
+		// make location table
+		LocTable locTable = new LocTable();
+		
+		// union information
+		for(Task task : tasks) {
+			task.locTable.table.forEach((sequence, lInfos) -> {
+				lInfos.forEach((key, lInfo)->{
+					locTable.putLocation(lInfo);
+				});
+			});
+		}
+		
+		WriteOutput.writeMainOutput(records, Parameters.outputBaseFilePath, locTable);
+		WriteOutput.writeLocationLevelOutput(records, Parameters.outputBaseFilePath, locTable);
+		WriteOutput.writePeptideLevelOutput(records, Parameters.outputBaseFilePath, locTable);
+		
+	}
 	
 	public static void parseExtractModes (String[] args) {
 		
