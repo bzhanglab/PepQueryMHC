@@ -37,6 +37,9 @@ public class Main {
 			Annotate.run(args);
 		} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_FASTQ)) {
 			MatchFASTQ.run(args);
+		} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_EXTRACT)) {
+			// TODO
+			
 		}
 		
 		// check peak memory
@@ -67,13 +70,14 @@ public class Main {
 		}
 		
 		Option optionMode = Option.builder("m")
-				.longOpt("mode").argName("scan|target|fastq|annotate")
+				.longOpt("mode").argName("scan|target|fastq|annotate|extract")
 				.hasArg()
 				.required(true)
 				.desc("\"scan-mode\" counts all reads matching a given sequence by traversing all reads and annotates their genomic information. "
 						+ "\n\"target-mode\" counts all reads matching a given sequence in a given genomic region."
 						+ "\n\"fastq-mode\" counts all reads matching a given sequence by traversing all reads. "
 						+ "\n\"annotate-mode\" annotates the best class code for a given genomic region (it requires GTF file)."
+						+ "\n\"extract-mode\" extracts matched reads for each queried sequence and output them as a BAM file."
 						+ "\n\"scan and target modes\" require .bai in advance.")
 				.build();
 		
@@ -92,7 +96,8 @@ public class Main {
 		    	if( !(  Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN) || 
 		    			Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET) ||
 		    			Parameters.mode.equalsIgnoreCase(Constants.MODE_FASTQ) ||
-		    			Parameters.mode.equalsIgnoreCase(Constants.MODE_ANNOTATE)) ) {
+		    			Parameters.mode.equalsIgnoreCase(Constants.MODE_ANNOTATE) ||
+		    			Parameters.mode.equalsIgnoreCase(Constants.MODE_EXTRACT)) ) {
 		    		isFail = true;
 		    	}
 		    }

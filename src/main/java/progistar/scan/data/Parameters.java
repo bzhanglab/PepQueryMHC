@@ -97,8 +97,5 @@ public class Parameters {
 	public static String sequenceColumnName = "sequence";
 	public static String locationColumnName = "location";
 	public static String strandColumnName = "strand";
-	
-	// extract matched reads
-	public static boolean extractMatchedReads = false;
 			
 }

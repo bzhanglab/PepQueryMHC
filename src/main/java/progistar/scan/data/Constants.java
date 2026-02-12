@@ -9,6 +9,7 @@ public class Constants {
 	public static final String MODE_SCAN = "scan";
 	public static final String MODE_FASTQ = "fastq";
 	public static final String MODE_ANNOTATE = "annotate";
+	public static final String MODE_EXTRACT = "extract";
 	
 	public static final String SEQUENCE_PEPTIDE = "peptide";
 	/**
