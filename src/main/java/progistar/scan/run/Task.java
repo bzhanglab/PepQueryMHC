@@ -385,4 +385,84 @@ public class Task implements Comparable<Task> {
 		
 		return 0;
 	}
+	
+	public static ArrayList<Task> getExtractModeTasks (ArrayList<SequenceRecord> records, int chunkSize) {
+		System.out.println("Prepare tasks with chunk size = "+chunkSize);
+		
+		ArrayList<Task> tasks = new ArrayList<Task>();
+		
+		ArrayList<SequenceRecord> mappedRecords = new ArrayList<SequenceRecord>();
+		ArrayList<SequenceRecord> unmappedRecords = new ArrayList<SequenceRecord>();
+		records.forEach(BAMSRecord -> {
+			if(BAMSRecord.chr.equalsIgnoreCase(Constants.NULL)) {
+				// unmapped classes
+				unmappedRecords.add(BAMSRecord);
+			} else {
+				// mapped classes
+				mappedRecords.add(BAMSRecord);
+			}
+		});
+		
+		int mappedSize = mappedRecords.size();
+		int unmappedSize = unmappedRecords.size();
+		
+		System.out.println("Mapped records: "+mappedSize);
+		System.out.println("Unmapped records: "+unmappedSize);
+		
+		// generate unmapped tasks
+		File file = new File(Parameters.bamFile.getAbsolutePath());
+		if(unmappedSize != 0) {
+			try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
+				// for unmapped reads
+				SAMRecordIterator unmappedIter = samReader.queryUnmapped();
+				int size = 0;
+				while(unmappedIter.hasNext()) {
+					SAMRecord samRecord = unmappedIter.next();
+					if(Parameters.unmmapedMarker == null) {
+						Parameters.unmmapedMarker = samRecord.getReferenceName();
+					}
+					size ++;
+				}
+				if(Parameters.unmmapedMarker != null) {
+					// System.out.println("@SQ\t"+Scan.unmmapedMarker+"\tLN:"+size);
+					tasks.addAll(getChromosomeLevelTasks(unmappedRecords, Constants.NULL, 1, size, Constants.TYPE_EXTRACT_MODE_TASK));
+				}
+				
+				// assign idx
+				for(int i=0; i<tasks.size(); i++) {
+					tasks.get(i).taskIdx = (i+1);
+				}
+				
+				unmappedIter.close();
+			} catch(Exception e) {
+				e.printStackTrace();
+				System.exit(1);
+			}
+		}
+		
+		
+		// generate mapped tasks
+		int sIdx = 0;
+		while(sIdx < mappedSize) {
+			int eIdx = sIdx + chunkSize > mappedSize ? mappedSize : sIdx + chunkSize;
+			Task task = new Task(Constants.TYPE_EXTRACT_MODE_TASK);
+			task.readType = Constants.MAPPED_READS;
+			
+			for(int i=sIdx; i<eIdx; i++) {
+				task.records.add(mappedRecords.get(i));
+			}
+			tasks.add(task);
+			task.taskIdx = tasks.size();
+			sIdx = eIdx;
+		}
+		
+		if(Parameters.verbose) {
+			System.out.println("Task list");
+			for(Task task : tasks) {
+				System.out.println(task.getTaskInfo());
+			}
+		}
+		
+		return tasks;
+	}
 }

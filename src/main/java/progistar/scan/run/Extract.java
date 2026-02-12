@@ -109,17 +109,9 @@ public class Extract {
 		/////////////////////////////////////////////////////////////////
 		
 		// core algorithm
-		if(Parameters.mode.equalsIgnoreCase(Constants.MODE_TARGET)) {
-			// estimate library size
-			if(LibraryTable.isEmpty()) {
-				tasks.addAll(Task.getLibSizeTask());
-			}
-			// target mode
-			Parameters.chunkSize = (records.size() / (10 * Parameters.threadNum) ) +1;
-			tasks.addAll(Task.getTargetModeTasks(records, Parameters.chunkSize));
-		} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_SCAN)) {
-			tasks.addAll(Task.getScanModeTasks(records));
-		}
+		// target mode
+		Parameters.chunkSize = (records.size() / (10 * Parameters.threadNum) ) +1;
+		tasks.addAll(Task.getExtractModeTasks(records, Parameters.chunkSize));
 		//// sort tasks by descending order
 		// Priority: Library > Unmapped > Mapped
 		Collections.sort(tasks);

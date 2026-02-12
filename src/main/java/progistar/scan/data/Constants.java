@@ -23,6 +23,7 @@ public class Constants {
 	public static final String UNION_MAX = "max";
 	public static final String UNION_SUM = "sum";
 	
+	public static final int	TYPE_EXTRACT_MODE_TASK						= 0;
 	public static final int	TYPE_TARGET_MODE_TASK						= 1;
 	public static final int TYPE_TARGET_MODE_LIBRARY_ESTIMATION_TASK 	= 2;
 	public static final int TYPE_SCAN_MODE_TASK							= 3;
