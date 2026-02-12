@@ -39,16 +39,13 @@ public class BAMUtil {
 		File outputFile = new File(file.getAbsolutePath().replace(".bam", ".sorted.bam"));
 		
 		System.out.println("Sort BAM file...");
-		// 1. 입력 파일 열기
         try (SamReader reader = SamReaderFactory.makeDefault().open(file)) {
             SAMFileHeader header = reader.getFileHeader();
             
-            // 2. 정렬 순서를 'coordinate'로 설정 (인덱싱 필수 조건)
             header.setSortOrder(SAMFileHeader.SortOrder.coordinate);
 
-            // 3. 최적화된 Writer 설정
             SAMFileWriterFactory factory = new SAMFileWriterFactory()
-                .setMaxRecordsInRam(500000);          // 메모리 내 보유 레코드 수 조절
+                .setMaxRecordsInRam(500000);
 
             try (SAMFileWriter writer = factory.makeBAMWriter(header, false, outputFile)) {
                 for (SAMRecord record : reader) {
