@@ -3,18 +3,18 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>progistar</groupId>
-  <artifactId>BAMScanner</artifactId>
+  <artifactId>PepQueryHLA</artifactId>
   <version>0.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>BAMScanner</name>
+  <name>PepQueryHLA</name>
   <url>http://maven.apache.org</url>
 
   <properties>
    <native.maven.plugin.version>0.9.12</native.maven.plugin.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <imageName>bamscanner</imageName>
-     <mainClass>progistar.scan.run.Scan</mainClass>
+    <imageName>pepqueryhla</imageName>
+     <mainClass>progistar.scan.run.Main></mainClass>
   </properties>
 
   <dependencies>
@@ -22,6 +22,12 @@
 	  <groupId>com.github.samtools</groupId>
 	  <artifactId>htsjdk</artifactId>
 	  <version>4.1.0</version>
+	</dependency>
+
+	<dependency>
+	    <groupId>com.github.broadinstitute</groupId>
+	    <artifactId>picard</artifactId>
+	    <version>3.0.0</version>
 	</dependency>
 
 	<!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
