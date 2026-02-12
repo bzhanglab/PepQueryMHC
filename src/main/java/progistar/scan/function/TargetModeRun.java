@@ -36,7 +36,7 @@ public class TargetModeRun extends Mode {
 			// for unmapped reads
 			Trie trie = SequenceRecord.getTrie(task.records);
 			SAMRecordIterator iterator = samReader.queryUnmapped();
-			find(iterator, trie, task);
+			find(iterator, trie, task, false);
 		} catch(Exception e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -62,7 +62,7 @@ public class TargetModeRun extends Mode {
 				
 	            // in case of soft-clip, it can be zero because of unstable record range.
 				SAMRecordIterator iterator = samReader.queryOverlapping(record.chr, record.start-100, record.end+100);
-				find(iterator, trie, task);
+				find(iterator, trie, task, false);
 			}
             
 		} catch(Exception e) {

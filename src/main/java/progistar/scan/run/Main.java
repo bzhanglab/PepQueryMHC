@@ -38,8 +38,7 @@ public class Main {
 		} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_FASTQ)) {
 			MatchFASTQ.run(args);
 		} else if(Parameters.mode.equalsIgnoreCase(Constants.MODE_EXTRACT)) {
-			// TODO
-			
+			Extract.run(args);
 		}
 		
 		// check peak memory

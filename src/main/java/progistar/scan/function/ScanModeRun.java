@@ -32,7 +32,7 @@ public class ScanModeRun extends Mode {
 			} else {
 				iterator = samReader.queryUnmapped();
 			}
-			find(iterator, Task.allTrie, task);
+			find(iterator, Task.allTrie, task, false);
 		} catch(Exception e) {
 			e.printStackTrace();
 			System.exit(1);

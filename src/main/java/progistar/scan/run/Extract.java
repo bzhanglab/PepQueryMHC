@@ -1,6 +1,7 @@
 package progistar.scan.run;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -16,16 +17,19 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import htsjdk.samtools.SAMFileHeader;
+import htsjdk.samtools.SAMFileWriter;
+import htsjdk.samtools.SAMFileWriterFactory;
+import htsjdk.samtools.SAMRecord;
+import htsjdk.samtools.SamReader;
+import htsjdk.samtools.SamReaderFactory;
 import progistar.scan.data.BarcodeTable;
 import progistar.scan.data.Codon;
 import progistar.scan.data.Constants;
-import progistar.scan.data.LibraryTable;
-import progistar.scan.data.LocTable;
 import progistar.scan.data.Parameters;
 import progistar.scan.data.Phred;
 import progistar.scan.data.SequenceRecord;
 import progistar.scan.fileIO.ParseRecord;
-import progistar.scan.fileIO.WriteOutput;
 import progistar.scan.function.BAMIndex;
 import progistar.scan.function.CheckMemory;
 
@@ -113,7 +117,7 @@ public class Extract {
 		Parameters.chunkSize = (records.size() / (10 * Parameters.threadNum) ) +1;
 		tasks.addAll(Task.getExtractModeTasks(records, Parameters.chunkSize));
 		//// sort tasks by descending order
-		// Priority: Library > Unmapped > Mapped
+		// Priority: Unmapped > Mapped
 		Collections.sort(tasks);
 		
 		//// Enroll tasks on a thread pool
@@ -140,38 +144,40 @@ public class Extract {
 		// update peak memory from the tasks.
 		for(Task task : tasks) {
 			Parameters.peakMemory = Math.max(Parameters.peakMemory, task.peakMemory);
+			
 		}
 		
-		// calculate library size
-		if(LibraryTable.isEmpty()) {
-			for(Task task : tasks) {
-				task.processedReads.forEach((barcode, count)->{
-					Double libSize = LibraryTable.table.get(barcode);
-					if(libSize == null) {
-						libSize = .0;
+		// write and delete bam files
+		SamReader reader = SamReaderFactory.makeDefault().open(new File(Parameters.bamFile.getAbsolutePath()));
+		SAMFileHeader samHeader = reader.getFileHeader();
+		reader.close();
+		
+		// create BAM writer
+		String outputExtractedBamPath = Parameters.outputBaseFilePath+"."+Parameters.mode+".bam";
+        SAMFileWriter writer =
+                new SAMFileWriterFactory()
+                        .makeBAMWriter(samHeader, false, 
+                        		new File(outputExtractedBamPath));
+		
+		for(Task task : tasks) {
+			// for unmapped
+			String[] filePaths = {task.getExtractedBamFileNameForMapped(),
+					task.getExtractedBamFileNameForUnmapped()};
+			for(String filePath : filePaths) {
+				File tmpFile = new File(filePath);
+				
+				if(tmpFile.exists()) {
+					reader = SamReaderFactory.makeDefault().open(tmpFile);
+					for (SAMRecord record : reader) {
+						writer.addAlignment(record);
 					}
-					libSize += count;
-					LibraryTable.table.put(barcode, libSize);
-				});
+					reader.close();
+					tmpFile.delete();
+				}
 			}
 		}
 		
-		// make location table
-		LocTable locTable = new LocTable();
-		
-		// union information
-		for(Task task : tasks) {
-			task.locTable.table.forEach((sequence, lInfos) -> {
-				lInfos.forEach((key, lInfo)->{
-					locTable.putLocation(lInfo);
-				});
-			});
-		}
-		
-		WriteOutput.writeMainOutput(records, Parameters.outputBaseFilePath, locTable);
-		WriteOutput.writeLocationLevelOutput(records, Parameters.outputBaseFilePath, locTable);
-		WriteOutput.writePeptideLevelOutput(records, Parameters.outputBaseFilePath, locTable);
-		
+		writer.close();
 	}
 	
 	public static void parseExtractModes (String[] args) {
@@ -183,6 +189,7 @@ public class Extract {
 			if( args[i].equalsIgnoreCase("-i") || args[i].equalsIgnoreCase("--input") ||
 				args[i].equalsIgnoreCase("-b") || args[i].equalsIgnoreCase("--bam") ||
 				args[i].equalsIgnoreCase("-o") || args[i].equalsIgnoreCase("--output") ||
+				args[i].equalsIgnoreCase("-@") || args[i].equalsIgnoreCase("--thread") ||
 				args[i].equalsIgnoreCase("-c") || args[i].equalsIgnoreCase("--count") ||
 				args[i].equalsIgnoreCase("-w") || args[i].equalsIgnoreCase("--white_list") ||
 				args[i].equalsIgnoreCase("-p") || args[i].equalsIgnoreCase("--prob") ||
@@ -229,6 +236,13 @@ public class Extract {
 				.hasArg()
 				.required(true)
 				.desc("output prefix path.")
+				.build();
+		
+		Option optionThread = Option.builder("@")
+				.longOpt("thread").argName("int")
+				.hasArg()
+				.required(false)
+				.desc("the number of threads.")
 				.build();
 		
 		Option optionPrimary = Option.builder("c")
@@ -290,6 +304,7 @@ public class Extract {
 		.addOption(optionOutput)
 		.addOption(optionStrandeness)
 		.addOption(optionBam)
+		.addOption(optionThread)
 		.addOption(optionPrimary)
 		.addOption(optionIL)
 		.addOption(optionVerbose)
@@ -337,6 +352,10 @@ public class Extract {
 		    
 		    if(cmd.hasOption("e")) {
 		    	Parameters.isILEqual = true;
+		    }
+		    
+		    if(cmd.hasOption("@")) {
+		    	Parameters.threadNum = Integer.parseInt(cmd.getOptionValue("@"));
 		    }
 		    
 		    if(cmd.hasOption("c")) {
@@ -404,6 +423,7 @@ public class Extract {
 			System.out.println("Mode: "+Parameters.mode);
 			System.out.println("Count: "+Parameters.count);
 			System.out.println("ROI cutoff: "+Parameters.ROIErrorThreshold);
+			System.out.println("Threads: "+Parameters.threadNum);
 			if(Parameters.verbose) {
 				System.out.println("Verbose messages");
 			}

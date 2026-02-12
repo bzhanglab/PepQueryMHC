@@ -92,8 +92,12 @@ public abstract class Mode {
 	 * @param trie
 	 * @param task
 	 */
-	public static void find (SAMRecordIterator iterator, Trie trie, Task task) {
+	public static ArrayList<SAMRecord> find (SAMRecordIterator iterator, Trie trie, Task task, boolean isReturnSAMRecord) {
 		int count = 0;
+		ArrayList<SAMRecord> matchedSAMRecords = null;
+		if(isReturnSAMRecord) {
+			matchedSAMRecords = new ArrayList<SAMRecord>();
+		}
 		while (iterator.hasNext()) {
             SAMRecord samRecord = iterator.next();
             count ++;
@@ -139,7 +143,7 @@ public abstract class Mode {
             // increase processed reads if and only if
             // a read is primary.
             // In case of target mode, we do not count the reads in this routine.
-            if(!samRecord.isSecondaryAlignment() && task.type == Constants.TYPE_SCAN_MODE_TASK) {
+            if(!samRecord.isSecondaryOrSupplementary() && task.type == Constants.TYPE_SCAN_MODE_TASK) {
             	Double pReads = task.processedReads.get(barcodeId);
             	if(pReads == null) {
             		pReads = .0;
@@ -152,6 +156,7 @@ public abstract class Mode {
             // determine strand
             int flags = samRecord.getFlags();
             ArrayList<Character> strands = getStrandedness(flags);
+            boolean isMatched = false;
             
             for(Character strand : strands) {
             	String sequence = null;
@@ -168,7 +173,8 @@ public abstract class Mode {
         				LocationInformation matchedLocation = LocationInformation.getMatchedLocation(samRecord, emit, 0, strand);
         				if(matchedLocation != null) {
         					matchedLocation.inputSequence = emit.getKeyword();
-        					if(task.type == Constants.TYPE_TARGET_MODE_TASK) {
+        					if(task.type == Constants.TYPE_TARGET_MODE_TASK ||
+        							task.type == Constants.TYPE_EXTRACT_MODE_TASK) {
         						
         						// discard if the location is not matched
         						int targetMappedTaskCurrentIdx = task.currentRecordIdx;
@@ -182,6 +188,8 @@ public abstract class Mode {
         					if(task.locTable.putLocation(matchedLocation)) {
         						matchedLocation.calMetaInfo();
         					}
+        					
+        					isMatched = true;
         				}
         			}
             	} else if(Parameters.sequence.equalsIgnoreCase(Constants.SEQUENCE_PEPTIDE)) {
@@ -200,7 +208,8 @@ public abstract class Mode {
             					matchedLocation.inputSequence = emit.getKeyword();
             					
             					// we are only interested in the given region in case of target mode.
-            					if(task.type == Constants.TYPE_TARGET_MODE_TASK) {
+            					if(task.type == Constants.TYPE_TARGET_MODE_TASK ||
+            							task.type == Constants.TYPE_EXTRACT_MODE_TASK) {
             						
             						// discard if the location is not matched
             						int targetMappedTaskCurrentIdx = task.currentRecordIdx;
@@ -213,14 +222,22 @@ public abstract class Mode {
             					if(task.locTable.putLocation(matchedLocation)) {
             						matchedLocation.calMetaInfo();
             					}
+            					
+            					isMatched = true;
             				}
             			}
             		}
             	}
             }
             
+            
+            if(isMatched && isReturnSAMRecord) {
+            	matchedSAMRecords.add(samRecord);
+            }
         }
         iterator.close();
+        
+        return matchedSAMRecords;
 	}
 	
 	/**

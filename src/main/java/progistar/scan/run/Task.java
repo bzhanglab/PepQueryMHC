@@ -58,7 +58,10 @@ public class Task implements Comparable<Task> {
 			typeStr = "target mode (libary estimation)";
 		} else if(type == Constants.TYPE_STRAND_DETECTION_TASK) {
 			typeStr = "strand detection";
+		} else if(type == Constants.TYPE_EXTRACT_MODE_TASK) {
+			typeStr = "extract mode";
 		}
+		
 		return typeStr+": Task"+taskIdx;
 	}
 	
@@ -464,5 +467,13 @@ public class Task implements Comparable<Task> {
 		}
 		
 		return tasks;
+	}
+	
+	public String getExtractedBamFileNameForUnmapped () {
+		return "u.tmp."+this.taskIdx+".bam";
+	}
+	
+	public String getExtractedBamFileNameForMapped () {
+		return "m.tmp."+this.taskIdx+".bam";
 	}
 }
