@@ -24,6 +24,6 @@ if [[ ! -f "$BUILT_JAR" ]]; then
 fi
 
 OUTPUT_JAR="target/PepQueryMHC.${VERSION}.jar"
-cp "$BUILT_JAR" "$OUTPUT_JAR"
+mv "$BUILT_JAR" "$OUTPUT_JAR"
 
 echo "Built: $OUTPUT_JAR"
