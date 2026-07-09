@@ -10,6 +10,7 @@ import htsjdk.samtools.SAMFileWriterFactory;
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SamReader;
 import htsjdk.samtools.SamReaderFactory;
+import htsjdk.samtools.ValidationStringency;
 
 public class BAMUtil {
 
@@ -20,7 +21,11 @@ public class BAMUtil {
 			return;
 		}
 		
-		try (SamReader reader = SamReaderFactory.makeDefault().enable(SamReaderFactory.Option.INCLUDE_SOURCE_IN_RECORDS).open(file)) {
+		try (SamReader reader = SamReaderFactory.makeDefault()
+				.enable(SamReaderFactory.Option.INCLUDE_SOURCE_IN_RECORDS)
+				.validationStringency(ValidationStringency.SILENT)
+				.setUseAsyncIo(true)
+				.open(file)) {
             if (!reader.type().equals(SamReader.Type.BAM_TYPE)) {
                 throw new IllegalArgumentException("Input file is not a BAM file");
             }
@@ -39,12 +44,16 @@ public class BAMUtil {
 		File outputFile = new File(file.getAbsolutePath().replace(".bam", ".sorted.bam"));
 		
 		System.out.println("Sort BAM file...");
-        try (SamReader reader = SamReaderFactory.makeDefault().open(file)) {
+        try (SamReader reader = SamReaderFactory.makeDefault()
+        		.validationStringency(ValidationStringency.SILENT)
+        		.setUseAsyncIo(true)
+        		.open(file)) {
             SAMFileHeader header = reader.getFileHeader();
-            
+
             header.setSortOrder(SAMFileHeader.SortOrder.coordinate);
 
             SAMFileWriterFactory factory = new SAMFileWriterFactory()
+                .setUseAsyncIo(true)
                 .setMaxRecordsInRam(500000);
 
             try (SAMFileWriter writer = factory.makeBAMWriter(header, false, outputFile)) {
