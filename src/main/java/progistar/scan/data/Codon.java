@@ -67,8 +67,16 @@ public class Codon {
 	
 	
 	public static Character nuclToAmino (String nucleotides){
-		if(!setOkay) mapping();
 		if(nucleotides.length() != 3) return 'X';
-		return NuclToAminoArray[nucleotides.charAt(0) & 7][nucleotides.charAt(1) & 7][nucleotides.charAt(2) & 7];
+		return nuclToAmino(nucleotides.charAt(0), nucleotides.charAt(1), nucleotides.charAt(2));
+	}
+
+	/**
+	 * Case-insensitive: bit 5 (upper/lower case) is masked out by "&amp; 7", so
+	 * callers do not need to upper-case the nucleotides beforehand.
+	 */
+	public static char nuclToAmino (char nt0, char nt1, char nt2){
+		if(!setOkay) mapping();
+		return NuclToAminoArray[nt0 & 7][nt1 & 7][nt2 & 7];
 	}
 }

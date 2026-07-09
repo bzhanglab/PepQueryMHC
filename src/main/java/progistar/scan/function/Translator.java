@@ -8,22 +8,26 @@ public class Translator {
 	public static String translation (String nucleotides, int frame) {
 		StringBuilder peptides = new StringBuilder();
 		int length = nucleotides.length();
-		StringBuilder codon = new StringBuilder();
+		char nt0 = 0, nt1 = 0;
+		int codonPos = 0;
 		for(int pos=frame; pos<length; pos++) {
-			
+
 			char nt = nucleotides.charAt(pos);
-			
+
 			// skip deletion
 			if(nt == Constants.NULL.charAt(0)) {
 				continue;
 			}
-			
-			codon.append(nt);
-			if(codon.length() == 3) {
-				String codonStr = codon.toString();
-				char aa = Codon.nuclToAmino(codonStr.toUpperCase());
-				peptides.append(aa);
-				codon.setLength(0);
+
+			if(codonPos == 0) {
+				nt0 = nt;
+				codonPos = 1;
+			} else if(codonPos == 1) {
+				nt1 = nt;
+				codonPos = 2;
+			} else {
+				peptides.append(Codon.nuclToAmino(nt0, nt1, nt));
+				codonPos = 0;
 			}
 		}
 		return peptides.toString();
