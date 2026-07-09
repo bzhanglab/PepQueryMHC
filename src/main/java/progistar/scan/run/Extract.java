@@ -1,10 +1,10 @@
 package progistar.scan.run;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -154,13 +154,10 @@ public class Extract {
 		
 		// create BAM writer
 		String outputExtractedBamPath = Parameters.outputBaseFilePath+"."+Parameters.mode+".bam";
-        SAMFileWriter writer =
-                new SAMFileWriterFactory()
-                        .makeBAMWriter(samHeader, false, 
-                        		new File(outputExtractedBamPath));
+        SAMFileWriter writer = new SAMFileWriterFactory().makeBAMWriter(samHeader, false, new File(outputExtractedBamPath));
 		
+        Hashtable<String, Boolean> inclusionList = new Hashtable<String, Boolean>();
 		for(Task task : tasks) {
-			// for unmapped
 			String[] filePaths = {task.getExtractedBamFileNameForMapped(),
 					task.getExtractedBamFileNameForUnmapped()};
 			for(String filePath : filePaths) {
@@ -169,7 +166,18 @@ public class Extract {
 				if(tmpFile.exists()) {
 					reader = SamReaderFactory.makeDefault().open(tmpFile);
 					for (SAMRecord record : reader) {
-						writer.addAlignment(record);
+						
+						// save a unique read.
+						String uniqueKey = String.format("%s-%d-%d-%d-%s-%s", 
+								record.getReadName(), 
+								record.getFlags(), record.getAlignmentStart(), record.getAlignmentEnd(), 
+								record.getReadString(), record.getCigarString());
+						
+						if(inclusionList.get(uniqueKey) == null) {
+							writer.addAlignment(record);
+							inclusionList.put(uniqueKey, true);
+						}
+						
 					}
 					reader.close();
 					tmpFile.delete();
