@@ -2,8 +2,8 @@ package progistar.scan.data;
 
 public class Constants {
 	public static final String NAME = "PepQueryMHC";
-	public static final String VERSION = "v1.0.6";
-	public static final String RELEASE = "Nov 4, 2025";
+	public static final String VERSION = "v1.0.7";
+	public static final String RELEASE = "Jul 9, 2026";
 	
 	public static final String MODE_TARGET = "target";
 	public static final String MODE_SCAN = "scan";
