@@ -93,35 +93,37 @@ public class LocationInformation {
 	}
 	
 	public void calMutation () {
-		String[] locations = location.split("\\|");
 		int mPos =0;
 		ArrayList<Mutation> mutations = new ArrayList<Mutation>();
-		for(int i=0; i<locations.length; i++) {
-			String location = locations[i];
-			
-			
+		int len = location.length();
+		int segStart = 0;
+		while(segStart <= len) {
+			int segEnd = location.indexOf('|', segStart);
+			if(segEnd < 0) segEnd = len;
+
 			try {
 				// unmapped location
-				if(location.equalsIgnoreCase(Constants.NULL)) {
+				if(segEnd - segStart == 1 && location.charAt(segStart) == Constants.NULL.charAt(0)) {
 					this.mutation = Constants.NULL;
 				} else {
-					String chr = location.split("\\:")[0];
-					String[] fields = location.split("\\:")[1].split("\\-");
-					int start = Integer.parseInt(fields[0]);
-					int end = Integer.parseInt(fields[1]);
-					
+					int colonIdx = location.indexOf(':', segStart);
+					int dashIdx = location.indexOf('-', colonIdx+1);
+					String chr = location.substring(segStart, colonIdx);
+					int start = Integer.parseInt(location.substring(colonIdx+1, dashIdx));
+					int end = Integer.parseInt(location.substring(dashIdx+1, segEnd));
+
 					for(int j=start; j<=end; j++) {
 						// mutation
 						if(this.obsNucleotide.charAt(mPos) != this.refNucleotide.charAt(mPos)) {
 							Mutation mutation = new Mutation();
-							mutation.altSeq = this.obsNucleotide.charAt(mPos)+"";
+							mutation.altSeq = String.valueOf(this.obsNucleotide.charAt(mPos));
 							mutation.chrName = chr;
-							mutation.refSeq = this.refNucleotide.charAt(mPos)+"";
+							mutation.refSeq = String.valueOf(this.refNucleotide.charAt(mPos));
 							mutation.genomicPosition = j;
 							// softclip
 							if(this.refNucleotide.charAt(mPos) == '*') {
 								mutation.type = Constants.CLP;
-							} 
+							}
 							// insertion
 							else if(this.refNucleotide.charAt(mPos) == '.') {
 								j--;
@@ -143,10 +145,11 @@ public class LocationInformation {
 				}
 			}catch(Exception e) {
 				e.printStackTrace();
-				
-				System.out.println(location);
+
+				System.out.println(location.substring(segStart, segEnd));
 			}
-			
+
+			segStart = segEnd + 1;
 		}
 		
 		if(mutations.size() == 0) {
