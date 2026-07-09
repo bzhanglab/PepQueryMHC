@@ -1,6 +1,6 @@
 package progistar.scan.data;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public class Annotation implements Comparable<Annotation> {
@@ -21,7 +21,7 @@ public class Annotation implements Comparable<Annotation> {
 	public Gene gene;
 	
 	public static LinkedList<Annotation> removeRedundancy (LinkedList<Annotation> annotations) {
-		Hashtable<String, Annotation> saveUnique = new Hashtable<String, Annotation>();
+		HashMap<String, Annotation> saveUnique = new HashMap<String, Annotation>();
 		LinkedList<Annotation> newAnnotations = new LinkedList<Annotation> ();
 		annotations.forEach((a)->{
 			saveUnique.put(a.key(), a);

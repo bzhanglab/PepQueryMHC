@@ -2,7 +2,7 @@ package progistar.scan.data;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 public class GeneArray {
@@ -20,7 +20,7 @@ public class GeneArray {
 			gene.max = gene.end;
 			
 			// drop cds_end_NF and cds_start_NF
-			Hashtable<String, Boolean> dropList = new Hashtable<String, Boolean>();
+			HashMap<String, Boolean> dropList = new HashMap<String, Boolean>();
 			gene.transcripts.forEach((id, t)->{
 				for(String tag : Parameters.drop_tag_list) {
 					for(String tag_ : t.tags) {

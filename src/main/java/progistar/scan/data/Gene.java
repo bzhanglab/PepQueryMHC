@@ -1,6 +1,6 @@
 package progistar.scan.data;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import progistar.scan.function.IndexConvertor;
@@ -19,7 +19,7 @@ public class Gene implements Comparable<Gene> {
 	public String name;
 	public String type;
 	
-	public Hashtable<String, Transcript> transcripts = new Hashtable<String, Transcript>();
+	public HashMap<String, Transcript> transcripts = new HashMap<String, Transcript>();
 	
 	// this value represents a visit status of gene.
 	// it is automatically increased by "GeneArray"
@@ -44,7 +44,7 @@ public class Gene implements Comparable<Gene> {
 		int size = transcripts.size();
 		Annotation[] annotates = new Annotation[size];
 		
-		Iterator<String> iterators = (Iterator<String>) transcripts.keys();
+		Iterator<String> iterators = transcripts.keySet().iterator();
 		
 		int idx = 0;
 		while(iterators.hasNext()) {

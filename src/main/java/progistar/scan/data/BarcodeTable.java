@@ -4,7 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import htsjdk.samtools.SAMRecord;
 import htsjdk.samtools.SAMTag;
@@ -12,7 +12,7 @@ import htsjdk.samtools.fastq.FastqRecord;
 
 public class BarcodeTable {
 
-	public static Hashtable<String, Boolean> hasBarcode = new Hashtable<String, Boolean>();
+	public static HashMap<String, Boolean> hasBarcode = new HashMap<String, Boolean>();
 	public static ArrayList<String> barcodeIds = new ArrayList<String>();
 	
 	public static void load() {

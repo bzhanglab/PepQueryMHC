@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -156,7 +156,7 @@ public class Extract {
 		String outputExtractedBamPath = Parameters.outputBaseFilePath+"."+Parameters.mode+".bam";
         SAMFileWriter writer = new SAMFileWriterFactory().makeBAMWriter(samHeader, false, new File(outputExtractedBamPath));
 		
-        Hashtable<String, Boolean> inclusionList = new Hashtable<String, Boolean>();
+        HashMap<String, Boolean> inclusionList = new HashMap<String, Boolean>();
 		for(Task task : tasks) {
 			String[] filePaths = {task.getExtractedBamFileNameForMapped(),
 					task.getExtractedBamFileNameForUnmapped()};

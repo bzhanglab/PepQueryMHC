@@ -1,7 +1,7 @@
 package progistar.scan.data;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +26,7 @@ public class LocationInformation {
 	public String refNucleotide = Constants.NULL;
 	public String obsPeptide = Constants.NULL;
 	public String refPeptide = Constants.NULL;
-	public Hashtable<String, Long> readCounts = new Hashtable<String, Long>();
+	public HashMap<String, Long> readCounts = new HashMap<String, Long>();
 	public char strand = Constants.NULL.charAt(0);
 	
 	public String getKey () {

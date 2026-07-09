@@ -4,11 +4,11 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 public class LibraryTable {
 
-	public static Hashtable<String, Double> table = new Hashtable<String, Double>();
+	public static HashMap<String, Double> table = new HashMap<String, Double>();
 	
 	public static void loadTable (File file) throws IOException {
 		System.out.println("Load library table...");

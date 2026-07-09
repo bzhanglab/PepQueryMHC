@@ -1,11 +1,11 @@
 package progistar.scan.function;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 
 public class IndexConvertor {
 
-	private static Hashtable<String, Integer> strToIndex = new Hashtable<String, Integer>();
-	private static Hashtable<Integer, String> indexToStr = new Hashtable<Integer, String>();
+	private static HashMap<String, Integer> strToIndex = new HashMap<String, Integer>();
+	private static HashMap<Integer, String> indexToStr = new HashMap<Integer, String>();
 	
 	/**
 	 * Supported index: chr1, chr2, ..., chr22, chrX, chrY, chrMT. <br>

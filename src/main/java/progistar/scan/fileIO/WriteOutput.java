@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 
@@ -128,8 +128,8 @@ public class WriteOutput {
 		
 		// write records
 		// unique observed sequence.
-		Hashtable<String, Hashtable<String, Long>> readCountsTupleLevel = new Hashtable<String, Hashtable<String, Long>>();
-		Hashtable<String, Double> readCountsRecordLevel = new Hashtable<String, Double>();
+		HashMap<String, HashMap<String, Long>> readCountsTupleLevel = new HashMap<String, HashMap<String, Long>>();
+		HashMap<String, Double> readCountsRecordLevel = new HashMap<String, Double>();
 		
 		for(int i=0; i<records.size(); i++) {
 			SequenceRecord record = records.get(i);
@@ -158,7 +158,7 @@ public class WriteOutput {
 					}
 				}
 				
-				Hashtable<String, Long> readCounts = location.readCounts;
+				HashMap<String, Long> readCounts = location.readCounts;
 				// it must be calculated once!
 				// peptide level count
 				
@@ -167,12 +167,12 @@ public class WriteOutput {
 				// store record level sum
 				readCountsRecordLevel.put(tupleKey, sum);
 				
-				Hashtable<String, Long> sumReads = readCountsTupleLevel.get(tupleKey);
+				HashMap<String, Long> sumReads = readCountsTupleLevel.get(tupleKey);
 				if(sumReads == null) {
-					sumReads = new Hashtable<String, Long>();
+					sumReads = new HashMap<String, Long>();
 				}
 				
-				Iterator<String> keys = (Iterator<String>) readCounts.keys();
+				Iterator<String> keys = readCounts.keySet().iterator();
 				while(keys.hasNext()) {
 					String barcodeId = keys.next();
 					Long val = sumReads.get(barcodeId);
@@ -254,9 +254,9 @@ public class WriteOutput {
 		
 		// write records
 		// unique observed sequence.
-		Hashtable<String, Hashtable<String, Long>> readCountsPeptLevel = new Hashtable<String, Hashtable<String, Long>>();
-		Hashtable<String, Hashtable<String, Long>> locationsPeptLevel = new Hashtable<String, Hashtable<String, Long>>();
-		Hashtable<String, Double> readCountsRecordLevel = new Hashtable<String, Double>();
+		HashMap<String, HashMap<String, Long>> readCountsPeptLevel = new HashMap<String, HashMap<String, Long>>();
+		HashMap<String, HashMap<String, Long>> locationsPeptLevel = new HashMap<String, HashMap<String, Long>>();
+		HashMap<String, Double> readCountsRecordLevel = new HashMap<String, Double>();
 		
 		for(int i=0; i<records.size(); i++) {
 			SequenceRecord record = records.get(i);
@@ -291,16 +291,16 @@ public class WriteOutput {
 				// put sum of reads (key is observed peptide)
 				// that mean, if observed peptide is same then all records associated it have the same total reads.
 				readCountsRecordLevel.put(location.obsPeptide, sum);
-				Hashtable<String, Long> readCounts = location.readCounts;
+				HashMap<String, Long> readCounts = location.readCounts;
 				// it must be calculated once!
 				// peptide level count
 				
-				Hashtable<String, Long> unionReads = readCountsPeptLevel.get(location.obsPeptide);
+				HashMap<String, Long> unionReads = readCountsPeptLevel.get(location.obsPeptide);
 				if(unionReads == null) {
-					unionReads = new Hashtable<String, Long>();
+					unionReads = new HashMap<String, Long>();
 				}
 				
-				Iterator<String> keys = (Iterator<String>) readCounts.keys();
+				Iterator<String> keys = readCounts.keySet().iterator();
 				long sumOfReadsAcrossBarcodes = 0;
 				while(keys.hasNext()) {
 					String barcodeId = keys.next();
@@ -319,9 +319,9 @@ public class WriteOutput {
 				
 				readCountsPeptLevel.put(location.obsPeptide, unionReads);
 				
-				Hashtable<String, Long> gLocationMap = locationsPeptLevel.get(location.obsPeptide);
+				HashMap<String, Long> gLocationMap = locationsPeptLevel.get(location.obsPeptide);
 				if(gLocationMap == null) {
-					gLocationMap = new Hashtable<String, Long>();
+					gLocationMap = new HashMap<String, Long>();
 					locationsPeptLevel.put(location.obsPeptide, gLocationMap);
 				}
 				// location with strand
@@ -337,7 +337,7 @@ public class WriteOutput {
 
 		readCountsPeptLevel.forEach((sequence, reads)->{
 			try {
-				Hashtable<String, Long> locations = locationsPeptLevel.get(sequence);
+				HashMap<String, Long> locations = locationsPeptLevel.get(sequence);
 				// find most abundant location and its proportion
 				double proportion = readCountsRecordLevel.get(sequence);
 				
@@ -351,7 +351,7 @@ public class WriteOutput {
 				String mappedLocation = null;
 				String unmappedLocation = null;
 				
-				Iterator<String> keys = (Iterator<String>) locations.keys();
+				Iterator<String> keys = locations.keySet().iterator();
 				while(keys.hasNext()) {
 					String key = keys.next();
 					String location = key.split("\t")[0];
@@ -455,7 +455,7 @@ public class WriteOutput {
 	}
 	
 	public static void writeAnnotateOutput (ArrayList<SequenceRecord> records, 
-			Hashtable<String, LinkedList<Annotation>> allAnnotations) throws IOException {
+			HashMap<String, LinkedList<Annotation>> allAnnotations) throws IOException {
 		
 		// write a result
 		BufferedWriter BW = new BufferedWriter(new FileWriter(Parameters.outputBaseFilePath+".annotate.tsv"));
@@ -499,8 +499,8 @@ public class WriteOutput {
 						BW.newLine();
 					}
 				} else {
-					Hashtable<String, Boolean> uniqueClassCode = new Hashtable<String, Boolean>();
-					Hashtable<String, Boolean> uniqueWarningCode = new Hashtable<String, Boolean>();
+					HashMap<String, Boolean> uniqueClassCode = new HashMap<String, Boolean>();
+					HashMap<String, Boolean> uniqueWarningCode = new HashMap<String, Boolean>();
 					
 					for(Annotation annotation : annotations) {
 						// build gene ids

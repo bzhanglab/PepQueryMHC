@@ -1,13 +1,13 @@
 package progistar.scan.function;
 
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import progistar.scan.data.Constants;
 
 public class ENSTMapper {
 
-	private static Hashtable<String, String> ENSTtoENSG = new Hashtable<String, String>();
-	private static Hashtable<String, String> ENSTtoGENENAME = new Hashtable<String, String>();
+	private static HashMap<String, String> ENSTtoENSG = new HashMap<String, String>();
+	private static HashMap<String, String> ENSTtoGENENAME = new HashMap<String, String>();
 	
 	public static void putENST (String enstID, String ensgID, String geneName) {
 		ENSTtoENSG.put(enstID, ensgID);

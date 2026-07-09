@@ -2,7 +2,7 @@ package progistar.scan.run;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.List;
 
 import org.ahocorasick.trie.Trie;
@@ -22,7 +22,7 @@ public class Task implements Comparable<Task> {
 	public int taskIdx = -1;
 	public int type = Constants.TYPE_TARGET_MODE_TASK;
 	public int readType = Constants.MAPPED_READS;
-	public Hashtable<String, Double> processedReads = new Hashtable<String, Double>();
+	public HashMap<String, Double> processedReads = new HashMap<String, Double>();
 	// only available for TargetMode
 	public ArrayList<SequenceRecord> records = new ArrayList<SequenceRecord>();
 	public int currentRecordIdx = 0;

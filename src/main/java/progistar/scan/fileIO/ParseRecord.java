@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import progistar.scan.data.Constants;
 import progistar.scan.data.Parameters;
@@ -28,7 +28,7 @@ public class ParseRecord {
 	public static ArrayList<SequenceRecord> parse (File file) throws IOException {
 		ArrayList<SequenceRecord> records = new ArrayList<SequenceRecord>();
 		BufferedReader BR = new BufferedReader(new FileReader(file));
-		Hashtable<String, SequenceRecord> indexedRecords = new Hashtable<String, SequenceRecord>();
+		HashMap<String, SequenceRecord> indexedRecords = new HashMap<String, SequenceRecord>();
 		String line = null;
 		
 		SequenceRecord.header = BR.readLine();

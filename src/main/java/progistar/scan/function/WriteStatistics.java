@@ -4,7 +4,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.Iterator;
 
 import progistar.scan.data.BarcodeTable;
@@ -25,7 +25,7 @@ public class WriteStatistics {
 	 */
 	public static void write (String fileName,
 							  ArrayList<SequenceRecord> records,
-							  Hashtable<String, Hashtable<String, Long>> readCountsPeptLevel) 
+							  HashMap<String, HashMap<String, Long>> readCountsPeptLevel) 
 							  throws IOException {
 		BufferedWriter BW = new BufferedWriter(new FileWriter(fileName));
 		
@@ -35,7 +35,7 @@ public class WriteStatistics {
 		int minLen = Integer.MAX_VALUE;
 		
 		// count input and decoy sequences
-		Hashtable<String, Boolean> checkList1 = new Hashtable<String, Boolean>();
+		HashMap<String, Boolean> checkList1 = new HashMap<String, Boolean>();
 		for(SequenceRecord record : records) {
 			String sequence = record.sequence;
 			if(Parameters.isILEqual) {
@@ -55,7 +55,7 @@ public class WriteStatistics {
 		
 		// check list to deal with I/L equal option
 		// input and random sequences share the hashtable, assuming that there are no overlaps between them.
-		Hashtable<String, Boolean> checkList2 = new Hashtable<String, Boolean>();
+		HashMap<String, Boolean> checkList2 = new HashMap<String, Boolean>();
 		// count for input sequences
 		readCountsPeptLevel.forEach((sequence, reads) -> {
 			if(Parameters.isILEqual) {

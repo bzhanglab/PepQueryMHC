@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Hashtable;
+import java.util.HashMap;
 import java.util.LinkedList;
 
 import org.apache.commons.cli.CommandLine;
@@ -42,7 +42,7 @@ public class Annotate {
 		
 		Parameters.peakMemory = Math.max(Parameters.peakMemory, CheckMemory.checkUsedMemoryMB());
 		
-		Hashtable<String, LinkedList<Annotation>> allAnnotations = new Hashtable<String, LinkedList<Annotation>>();
+		HashMap<String, LinkedList<Annotation>> allAnnotations = new HashMap<String, LinkedList<Annotation>>();
 		for(SequenceRecord sRecord : records) {
 			LinkedList<Annotation> annotations = new LinkedList<Annotation>();
 			int chrIdx = IndexConvertor.chrToIndex(sRecord.chr);

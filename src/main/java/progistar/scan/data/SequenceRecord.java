@@ -1,7 +1,7 @@
 package progistar.scan.data;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import org.ahocorasick.trie.Trie;
 
@@ -22,7 +22,7 @@ public class SequenceRecord {
 	public int end = 0;
 	public String chr = null;
 	
-	public Hashtable<String, Long> readCounts = new Hashtable<String, Long>();
+	public HashMap<String, Long> readCounts = new HashMap<String, Long>();
 	
 	public String getKey () {
 		return (sequence+"_"+location+"_"+strand);
@@ -43,7 +43,7 @@ public class SequenceRecord {
 	 */
 	public static Trie getTrie (ArrayList<SequenceRecord> records) {
 		ArrayList<String> sequences = new ArrayList<String>();
-		Hashtable<String, String> rmDups = new Hashtable<String, String>();
+		HashMap<String, String> rmDups = new HashMap<String, String>();
 		
 		for(SequenceRecord record : records) {
 			String sequence = record.sequence;

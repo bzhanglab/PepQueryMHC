@@ -1,15 +1,15 @@
 package progistar.scan.data;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 public class LocTable {
-	public Hashtable<String, Hashtable<String, LocationInformation>> table = new Hashtable<String, Hashtable<String, LocationInformation>>(); 
+	public HashMap<String, HashMap<String, LocationInformation>> table = new HashMap<String, HashMap<String, LocationInformation>>(); 
 
 	public boolean putLocation (LocationInformation lInfo) {
-		Hashtable<String, LocationInformation> gTable = table.get(lInfo.inputSequence);
+		HashMap<String, LocationInformation> gTable = table.get(lInfo.inputSequence);
 		if(gTable == null) {
-			gTable = new Hashtable<String, LocationInformation>();
+			gTable = new HashMap<String, LocationInformation>();
 			table.put(lInfo.inputSequence, gTable);
 		}
 		
@@ -32,7 +32,7 @@ public class LocTable {
 	
 	public ArrayList<LocationInformation> getLocations (String inputSequence) {
 		ArrayList<LocationInformation> locations = new ArrayList<LocationInformation>();
-		Hashtable<String, LocationInformation> gTable = table.get(inputSequence);
+		HashMap<String, LocationInformation> gTable = table.get(inputSequence);
 		if(gTable != null) {
 			gTable.forEach((key, info)->{
 				locations.add(info);

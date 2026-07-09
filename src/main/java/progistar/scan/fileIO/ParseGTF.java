@@ -5,7 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Hashtable;
+import java.util.HashMap;
 
 import progistar.scan.data.Constants;
 import progistar.scan.data.Exon;
@@ -58,8 +58,8 @@ public class ParseGTF {
 	public static GeneArray[] parseGTF (File gtfFile) {
 		System.out.println("Build an interval tree: "+gtfFile.getAbsolutePath());
 		long startTime = System.currentTimeMillis();
-		Hashtable<String, Gene> geneTable = new Hashtable<String, Gene>();
-		Hashtable<String, Transcript> transcriptTable = new Hashtable<String, Transcript>();
+		HashMap<String, Gene> geneTable = new HashMap<String, Gene>();
+		HashMap<String, Transcript> transcriptTable = new HashMap<String, Transcript>();
 		try {
 			BufferedReader BR = new BufferedReader(new FileReader(gtfFile));
 			
