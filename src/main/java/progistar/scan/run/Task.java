@@ -306,7 +306,7 @@ public class Task implements Comparable<Task> {
 			for(SAMSequenceRecord chromosome : chromosomes) {
 				// System.out.println(chromosome.getSAMString());
 				String chrName = chromosome.getSequenceName();
-				tasks.addAll(getStrandDectectionTasks(chrName, 1000000, Constants.TYPE_STRAND_DETECTION_TASK));
+				tasks.addAll(getStrandDectectionTasks(chrName, 100000, Constants.TYPE_STRAND_DETECTION_TASK));
 			}
 			
 			// assign idx
