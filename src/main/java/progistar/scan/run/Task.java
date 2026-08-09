@@ -303,12 +303,23 @@ public class Task implements Comparable<Task> {
 		try (SamReader samReader = SamReaderFactory.makeDefault().open(file)) {
 			// System.out.println(samReader.getFileHeader().getSequenceDictionary().getSequences().get(0).getSequenceLength());
 			List<SAMSequenceRecord> chromosomes = samReader.getFileHeader().getSequenceDictionary().getSequences();
+
+			// alt contig/scaffold까지 모두 순회하면 시간이 오래 걸리므로,
+			// 가장 긴 시퀀스의 10% 이상 길이를 가진 시퀀스만 대표 chromosome으로 간주한다.
+			int maxLength = 0;
+			for(SAMSequenceRecord chromosome : chromosomes) {
+				maxLength = Math.max(maxLength, chromosome.getSequenceLength());
+			}
+
 			for(SAMSequenceRecord chromosome : chromosomes) {
 				// System.out.println(chromosome.getSAMString());
+				if(chromosome.getSequenceLength() < maxLength * 0.1) {
+					continue;
+				}
 				String chrName = chromosome.getSequenceName();
 				tasks.addAll(getStrandDectectionTasks(chrName, 100000, Constants.TYPE_STRAND_DETECTION_TASK));
 			}
-			
+
 			// assign idx
 			for(int i=0; i<tasks.size(); i++) {
 				tasks.get(i).taskIdx = (i+1);
