@@ -304,8 +304,8 @@ public class Task implements Comparable<Task> {
 			// System.out.println(samReader.getFileHeader().getSequenceDictionary().getSequences().get(0).getSequenceLength());
 			List<SAMSequenceRecord> chromosomes = samReader.getFileHeader().getSequenceDictionary().getSequences();
 
-			// alt contig/scaffold까지 모두 순회하면 시간이 오래 걸리므로,
-			// 가장 긴 시퀀스의 10% 이상 길이를 가진 시퀀스만 대표 chromosome으로 간주한다.
+			// Iterating over all alt contigs/scaffolds is slow,
+			// so only sequences at least 10% as long as the longest sequence are treated as representative chromosomes.
 			int maxLength = 0;
 			for(SAMSequenceRecord chromosome : chromosomes) {
 				maxLength = Math.max(maxLength, chromosome.getSequenceLength());
