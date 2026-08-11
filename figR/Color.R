@@ -26,7 +26,8 @@ sample_color <- c("C3L-01632" = mypal[1],
                   "C3N-01416" = mypal[9],
                   "C3N-02145" = mypal[10],
                   "GTEx" = "grey",
-                  "mTEC" = "black")
+                  "mTEC" = "black",
+                  "Others" = "grey")
 
 category_color <- c("Canonical" = mypal[1], "Non-canonical" = mypal[3])
 

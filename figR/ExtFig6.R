@@ -110,19 +110,6 @@ draw_cutoff_figure <- function(data, y_label = "y_label") {
   return(plot)
 }
 
-########## ExtFig. 6b: RPHM thresholds for class I ##########
-## load data
-MHC_I <- read.csv(
-  "meta/LUAD_MHC_I_GTEX.tsv",
-  header = T,
-  check.names = FALSE,
-  sep="\t"
-)
-
-MHC_I_mean <- cal_mean(MHC_I)
-MHC_I_plot <- draw_cutoff_figure(MHC_I_mean, "Number of MHC-I-bound peptides")
-ggsave("ExtFig6b.png", MHC_I_plot, width = 12, height = 5, dpi = 600)
-
 ########## ExtFig. 6c: RPHM thresholds for class II ##########
 MHC_II <- read.csv(
   "meta/LUAD_MHC_II_GTEX.tsv",

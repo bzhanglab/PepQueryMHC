@@ -91,68 +91,6 @@ plotTracks(list(idxTrack, axTrack, aTrack1, sTrack, maTrack, gene_track), sizes 
 dev.off()
 
 
-
-########## ExtFig. 5b: Synonymous mutations ##########
-from <- 39435857 - 10
-to <-   39435883 + 10
-
-maTrack <- GeneRegionTrack(rstarts = c(39435857), 
-                           rends = c(39435883), 
-                           strand = c("-"),
-                           id = c("1"), group = c("1"),
-                           genome="hg38", name = "GPLQSVQVF", chromosome = "chr19", transcript = " ")
-maTrack@dp@pars$fill <- mypal[1]
-maTrack@dp@pars$fontsize <- 0
-
-aTrack1 <- AlignmentsTrack(range = bam_file1, genome = "hg38",
-                           name = " ",
-                           chromosome = "chr19", start = from, end = to, 
-                           showMismatches = T, mismatchSummary=T)
-
-aTrack1@dp@pars$yTicksAt <- c(1, 2, 3)
-aTrack1@dp@pars$fontsize.title <- 15
-aTrack1@dp@pars$col.axis <- "black"
-aTrack1@dp@pars$background.panel <- "white"
-aTrack1@dp@pars$background.title <- "white"
-aTrack1@dp@pars$col <- mypal[4]
-
-
-aTrack2 <- AlignmentsTrack(range = bam_file2, genome = "hg38",
-                           name = " ",
-                           chromosome = "chr19", start = from, end = to, 
-                           showMismatches = T, mismatchSummary=T)
-
-aTrack2@dp@pars$yTicksAt <- c(1, 2, 3)
-aTrack2@dp@pars$fontsize.title <- 15
-aTrack2@dp@pars$col.axis <- "black"
-aTrack2@dp@pars$background.panel <- "white"
-aTrack2@dp@pars$background.title <- "white"
-aTrack2@dp@pars$col <- mypal[4]
-
-idxTrack <- IdeogramTrack(genome="hg38", chromosome="chr19")
-idxTrack@dp@pars$fontcolor <- "black"
-idxTrack@dp@pars$fontsize <- 15
-
-axTrack <- GenomeAxisTrack()
-axTrack@dp@pars$fontcolor <- "black"
-axTrack@dp@pars$fontsize <- 15
-
-rps16 <- gene_models[gene_models$symbol == "RPS16" & gene_models$type == "exon", ]
-gene_track <- GeneRegionTrack(range = rps16, 
-                              genome = "hg38", chromosome = "chr19", 
-                              from = from, to = to,
-                              transcriptAnnotation = "symbol", collapseTranscripts = "longest")
-gene_track@dp@pars$fontcolor.group <- "white"
-sTrack <- SequenceTrack(BSgenome.Hsapiens.UCSC.hg38, chromosome = "chr19")
-
-png("ExtFig5b.png", width = 7.5, height = 6, res = 600, units = "in")
-plotTracks(list(idxTrack, axTrack, aTrack1, aTrack2, sTrack, maTrack, gene_track), sizes = c(1,2,6,6,1,1,1), 
-           from = from, to = to, showTitle = T, stacking = "squish", title.width = 1, 
-           type = c("coverage", "pileup"))
-dev.off()
-
-
-
 ########## ExtFig. 5c: Matched read types ##########
 percentMapping <- read_excel("SupplementaryTable2.xlsx", sheet = "40k 9mers read type")
 
